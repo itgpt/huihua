@@ -4,6 +4,14 @@ import { showSuccess, showError } from '../ui/components/toast.js';
 export class Logger {
     constructor(domElement) {
         this.domElement = domElement;
+        this.userScrolled = false;
+
+        if (this.domElement) {
+            this.domElement.addEventListener('scroll', () => {
+                const isAtBottom = this.domElement.scrollHeight - this.domElement.scrollTop <= this.domElement.clientHeight + 5;
+                this.userScrolled = !isAtBottom;
+            });
+        }
     }
 
     clear() {
@@ -122,7 +130,7 @@ export class Logger {
             line.className = `log-line log-${level}`;
             line.textContent = `[${time}] ${text}`;
             this.domElement.appendChild(line);
-            
+
             if (data !== undefined) {
                 const pre = document.createElement('pre');
                 pre.className = `log-data log-${level}`;
@@ -130,8 +138,10 @@ export class Logger {
                 this.domElement.appendChild(pre);
             }
         }
-        
-        this.domElement.scrollTop = this.domElement.scrollHeight;
+
+        if (!this.userScrolled) {
+            this.domElement.scrollTop = this.domElement.scrollHeight;
+        }
     }
 
     copy() {

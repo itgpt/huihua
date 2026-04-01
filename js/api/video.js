@@ -119,12 +119,19 @@ export async function createVideoTask(client, params, imageFiles, log) {
 
     if (isGrokVideo) {
         if (imageFiles && imageFiles.length > 0) {
-            const file = imageFiles[0];
-            if (file.isFromUrl) {
-                requestBody.image = file.originalUrl;
-            } else {
-                imageBase64 = await fileToBase64(file);
-                requestBody.image = imageBase64;
+            const imageUrls = [];
+            for (const file of imageFiles.slice(0, 7)) {
+                if (file.isFromUrl) {
+                    imageUrls.push(file.originalUrl);
+                } else {
+                    const base64 = await fileToBase64(file);
+                    imageUrls.push(base64);
+                    if (!imageBase64) imageBase64 = base64;
+                }
+            }
+            if (imageUrls.length > 0) {
+                if (!requestBody.metadata) requestBody.metadata = {};
+                requestBody.metadata.image_urls = imageUrls;
             }
         }
         log.add('info', `POST ${fullUrl}`, { 'Content-Type': 'application/json', 'Body': requestBody });
