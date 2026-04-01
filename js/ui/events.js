@@ -243,15 +243,8 @@ export class EventManager {
             });
         });
 
-        const grokSecondsRadios = document.querySelectorAll('input[name="grokSeconds"]');
-        grokSecondsRadios.forEach(radio => {
-            radio.addEventListener('change', () => {
-                if (this.handlers.onGrokSelectionChange) this.handlers.onGrokSelectionChange();
-            });
-        });
-
-        const grokResolutionRadios = document.querySelectorAll('input[name="grokResolution"]');
-        grokResolutionRadios.forEach(radio => {
+        const grokDurationRadios = document.querySelectorAll('input[name="grokDuration"]');
+        grokDurationRadios.forEach(radio => {
             radio.addEventListener('change', () => {
                 if (this.handlers.onGrokSelectionChange) this.handlers.onGrokSelectionChange();
             });

@@ -157,7 +157,12 @@ export class VideoTaskManager {
             const apiKey = this.dom.get('apiKey').value.trim();
             const rawUrl = this.dom.get('apiBaseUrl').value.trim() || 'https://api.wanwuhuanxin.cn';
             const baseUrl = normalizeUrl(rawUrl);
-            const endpoint = `${baseUrl}/v1/videos/${taskId}`;
+
+            // 根据模型类型选择正确的端点
+            const isGrokVideo = task.model === 'grok-video';
+            const endpoint = isGrokVideo
+                ? `${baseUrl}/v1/video/generations/${taskId}`
+                : `${baseUrl}/v1/videos/${taskId}`;
 
             // POSTMAN风格日志 - 请求
             this.logger.append('info', `GET ${endpoint}`);
@@ -181,28 +186,28 @@ export class VideoTaskManager {
             // POSTMAN风格日志 - 响应
             this.logger.append('info', `Response ${response.status}`, result);
 
+            // Grok视频API返回的是包装结构 {code, data: {data: {status, url, ...}}}
+            const taskData = task.model === 'grok-video' && result.data?.data ? result.data.data : result;
+
             // 更新任务信息
             const extractedVideoUrl = extractVideoUrlFromResult(result);
             const updateData = {
-                status: result.status,
-                progress: result.progress || task.progress,
+                status: taskData.status,
+                progress: taskData.progress || task.progress,
                 video_url: extractedVideoUrl || task.video_url,
-                share_id: result.share_id || task.share_id,
+                share_id: taskData.share_id || task.share_id,
                 updated_at: Date.now(),
-                retryCount: 0  // 成功后重置重试计数
+                retryCount: 0
             };
 
             this.updateTask(taskId, updateData);
 
             // 根据状态决定下一步
-            if (result.status === 'completed') {
-                // 完成
+            if (taskData.status === 'completed') {
                 this.handleTaskCompleted(taskId, result);
-            } else if (result.status === 'failed') {
-                // 失败
+            } else if (taskData.status === 'failed') {
                 this.handleTaskFailed(taskId, result);
             } else {
-                // 继续轮询
                 this.scheduleNextPoll(taskId);
             }
 
@@ -297,7 +302,7 @@ export class VideoTaskManager {
         const task = this.tasks.get(taskId);
         if (!task || !task.isPolling) return;
 
-        const interval = this.getPollingInterval(task.progress);
+        const interval = task.model === 'grok-video' ? 5000 : this.getPollingInterval(task.progress);
 
         const timer = setTimeout(() => {
             if (task.isPolling) {

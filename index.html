@@ -515,139 +515,94 @@
 
                             <!-- Grok 模型列表 -->
                             <div id="grokModels" class="platform-models" style="display:none;">
-                                <!-- 第一级：模型版本选择 -->
+                                <!-- 模型选择 -->
                                 <div class="input-group" style="margin-bottom:16px;">
                                     <label
                                         style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">①</span> 选择模型版本
+                                        <span style="color:#667eea;">①</span> 模型版本
                                     </label>
-                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                                    <div style="display:grid; grid-template-columns:1fr; gap:10px;">
                                         <label class="radio-button"
                                             style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokModel" value="grok-imagine-0.9" checked
+                                            <input type="radio" name="grokModel" value="grok-video" checked
                                                 style="display:none;">
-                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🎬
-                                                grok-imagine-0.9</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">标准版</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokModel" value="grok-imagine-1.0"
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">✨
-                                                grok-imagine-1.0</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">升级版</div>
+                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🎬 grok-video</div>
+                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">视频生成模型</div>
                                         </label>
                                     </div>
                                 </div>
 
-                                <!-- 第二级：视频时长选择 -->
+                                <!-- 视频时长选择 -->
                                 <div class="input-group" style="margin-bottom:16px;">
                                     <label
                                         style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">②</span> 选择视频时长 (seconds)
+                                        <span style="color:#667eea;">②</span> 视频时长 (duration)
+                                    </label>
+                                    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px;">
+                                        <label class="radio-button"
+                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                                            <input type="radio" name="grokDuration" value="10" checked style="display:none;">
+                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">10秒</div>
+                                        </label>
+                                        <label class="radio-button"
+                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                                            <input type="radio" name="grokDuration" value="15" style="display:none;">
+                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">15秒</div>
+                                        </label>
+                                        <label class="radio-button"
+                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                                            <input type="radio" name="grokDuration" value="20" style="display:none;">
+                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">20秒</div>
+                                        </label>
+                                        <label class="radio-button"
+                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                                            <input type="radio" name="grokDuration" value="25" style="display:none;">
+                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">25秒</div>
+                                        </label>
+                                        <label class="radio-button"
+                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                                            <input type="radio" name="grokDuration" value="30" style="display:none;">
+                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">30秒</div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- 画面比例选择 -->
+                                <div class="input-group" style="margin-bottom:16px;">
+                                    <label
+                                        style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                                        <span style="color:#667eea;">③</span> 画面比例 (aspect_ratio)
                                     </label>
                                     <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;">
                                         <label class="radio-button"
                                             style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokSeconds" value="6" checked
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">6秒</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokSeconds" value="12" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">12秒</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokSeconds" value="18" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">18秒</div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 第三级：分辨率选择 -->
-                                <div class="input-group" style="margin-bottom:16px;">
-                                    <label
-                                        style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">③</span> 选择分辨率
-                                    </label>
-                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                                        <label class="radio-button"
-                                            style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokResolution" value="480p" checked
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">📺 480p
-                                            </div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">标清</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokResolution" value="720p"
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">🖥️ 720p
-                                            </div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">高清</div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 第四级：画面比例选择 -->
-                                <div class="input-group" style="margin-bottom:16px;">
-                                    <label
-                                        style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">④</span> 选择画面比例
-                                    </label>
-                                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="16:9" checked
-                                                style="display:none;">
+                                            <input type="radio" name="grokAspectRatio" value="16:9" checked style="display:none;">
                                             <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">16:9</div>
                                             <div style="font-size:0.7rem; color:#718096; margin-top:2px;">横屏</div>
                                         </label>
                                         <label class="radio-button"
                                             style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="9:16"
-                                                style="display:none;">
+                                            <input type="radio" name="grokAspectRatio" value="9:16" style="display:none;">
                                             <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">9:16</div>
                                             <div style="font-size:0.7rem; color:#718096; margin-top:2px;">竖屏</div>
                                         </label>
                                         <label class="radio-button"
                                             style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="4:3"
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">4:3</div>
-                                            <div style="font-size:0.7rem; color:#718096; margin-top:2px;">横向</div>
+                                            <input type="radio" name="grokAspectRatio" value="1:1" style="display:none;">
+                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">1:1</div>
+                                            <div style="font-size:0.7rem; color:#718096; margin-top:2px;">方形</div>
                                         </label>
                                         <label class="radio-button"
                                             style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="3:4"
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">3:4</div>
-                                            <div style="font-size:0.7rem; color:#718096; margin-top:2px;">纵向</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="3:2"
-                                                style="display:none;">
+                                            <input type="radio" name="grokAspectRatio" value="3:2" style="display:none;">
                                             <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">3:2</div>
                                             <div style="font-size:0.7rem; color:#718096; margin-top:2px;">横向</div>
                                         </label>
                                         <label class="radio-button"
                                             style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="2:3"
-                                                style="display:none;">
+                                            <input type="radio" name="grokAspectRatio" value="2:3" style="display:none;">
                                             <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">2:3</div>
                                             <div style="font-size:0.7rem; color:#718096; margin-top:2px;">纵向</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="1:1"
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">1:1</div>
-                                            <div style="font-size:0.7rem; color:#718096; margin-top:2px;">方形</div>
                                         </label>
                                     </div>
                                 </div>
@@ -660,13 +615,10 @@
                                         <span style="font-size:0.8rem; color:#718096;">模型:</span>
                                         <span
                                             style="font-weight:700; font-size:0.95rem; color:#667eea; font-family:monospace;"
-                                            id="grokModelDisplay">grok-imagine-0.9</span>
+                                            id="grokModelDisplay">grok-video</span>
                                         <span style="font-size:0.8rem; color:#718096;">时长:</span>
                                         <span style="font-weight:600; font-size:0.9rem; color:#4a5568;"
-                                            id="grokSecondsDisplay">6秒</span>
-                                        <span style="font-size:0.8rem; color:#718096;">分辨率:</span>
-                                        <span style="font-weight:600; font-size:0.9rem; color:#4a5568;"
-                                            id="grokResolutionDisplay">480p</span>
+                                            id="grokDurationDisplay">10秒</span>
                                         <span style="font-size:0.8rem; color:#718096;">比例:</span>
                                         <span style="font-weight:600; font-size:0.9rem; color:#4a5568;"
                                             id="grokAspectRatioDisplay">16:9</span>
@@ -674,9 +626,8 @@
                                 </div>
 
                                 <!-- 隐藏的input用于存储最终选择的模型 -->
-                                <input type="hidden" id="grokModelSelect" value="grok-imagine-0.9">
-                                <input type="hidden" id="grokSecondsSelect" value="6">
-                                <input type="hidden" id="grokResolutionSelect" value="480p">
+                                <input type="hidden" id="grokModelSelect" value="grok-video">
+                                <input type="hidden" id="grokDurationSelect" value="10">
                                 <input type="hidden" id="grokAspectRatioSelect" value="16:9">
                             </div>
 

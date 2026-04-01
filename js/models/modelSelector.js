@@ -279,23 +279,18 @@ export class ModelSelector {
     // 更新 Grok 模型选择
     updateGrokModelSelection() {
         const grokModelRadios = document.querySelectorAll('input[name="grokModel"]');
-        const grokSecondsRadios = document.querySelectorAll('input[name="grokSeconds"]');
-        const grokResolutionRadios = document.querySelectorAll('input[name="grokResolution"]');
+        const grokDurationRadios = document.querySelectorAll('input[name="grokDuration"]');
         const grokAspectRatioRadios = document.querySelectorAll('input[name="grokAspectRatio"]');
 
-        let selectedModel = 'grok-imagine-0.9';
-        let selectedSeconds = '6';
-        let selectedResolution = '480p';
+        let selectedModel = 'grok-video';
+        let selectedDuration = '10';
         let selectedAspectRatio = '16:9';
 
         grokModelRadios.forEach(radio => {
             if (radio.checked) selectedModel = radio.value;
         });
-        grokSecondsRadios.forEach(radio => {
-            if (radio.checked) selectedSeconds = radio.value;
-        });
-        grokResolutionRadios.forEach(radio => {
-            if (radio.checked) selectedResolution = radio.value;
+        grokDurationRadios.forEach(radio => {
+            if (radio.checked) selectedDuration = radio.value;
         });
         grokAspectRatioRadios.forEach(radio => {
             if (radio.checked) selectedAspectRatio = radio.value;
@@ -303,21 +298,17 @@ export class ModelSelector {
 
         // 更新显示元素
         const displayElement = document.getElementById('grokModelDisplay');
-        const secondsDisplay = document.getElementById('grokSecondsDisplay');
-        const resolutionDisplay = document.getElementById('grokResolutionDisplay');
+        const durationDisplay = document.getElementById('grokDurationDisplay');
         const aspectRatioDisplay = document.getElementById('grokAspectRatioDisplay');
         const selectElement = document.getElementById('grokModelSelect');
-        const secondsSelectElement = document.getElementById('grokSecondsSelect');
-        const resolutionSelectElement = document.getElementById('grokResolutionSelect');
+        const durationSelectElement = document.getElementById('grokDurationSelect');
         const aspectRatioSelectElement = document.getElementById('grokAspectRatioSelect');
 
         if (displayElement) displayElement.textContent = selectedModel;
-        if (secondsDisplay) secondsDisplay.textContent = selectedSeconds + '秒';
-        if (resolutionDisplay) resolutionDisplay.textContent = selectedResolution;
+        if (durationDisplay) durationDisplay.textContent = selectedDuration + '秒';
         if (aspectRatioDisplay) aspectRatioDisplay.textContent = selectedAspectRatio;
         if (selectElement) selectElement.value = selectedModel;
-        if (secondsSelectElement) secondsSelectElement.value = selectedSeconds;
-        if (resolutionSelectElement) resolutionSelectElement.value = selectedResolution;
+        if (durationSelectElement) durationSelectElement.value = selectedDuration;
         if (aspectRatioSelectElement) aspectRatioSelectElement.value = selectedAspectRatio;
 
         // 保存选择状态

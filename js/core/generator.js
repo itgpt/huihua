@@ -209,14 +209,27 @@ export class Generator {
 
                 // 收集 Grok 视频专用参数
                 const grokParams = {};
-                if (modelName === 'grok-imagine-0.9' || modelName === 'grok-imagine-1.0') {
-                    const grokSecondsEl = document.getElementById('grokSecondsSelect');
-                    const grokResolutionEl = document.getElementById('grokResolutionSelect');
+                if (modelName === 'grok-video') {
+                    const grokDurationEl = document.getElementById('grokDurationSelect');
                     const grokAspectRatioEl = document.getElementById('grokAspectRatioSelect');
-                    grokParams.seconds = grokSecondsEl ? grokSecondsEl.value : '6';
-                    grokParams.resolution = grokResolutionEl ? grokResolutionEl.value : '480p';
+                    grokParams.duration = grokDurationEl ? parseInt(grokDurationEl.value) : 10;
                     grokParams.aspect_ratio = grokAspectRatioEl ? grokAspectRatioEl.value : '16:9';
-                    log.add('info', `Grok 视频参数: seconds=${grokParams.seconds}, resolution=${grokParams.resolution}, aspect_ratio=${grokParams.aspect_ratio}`);
+                    grokParams.quality = '720p'; // 固定720p
+
+                    // 根据宽高比计算宽度和高度（720p固定）
+                    const aspectRatioMap = {
+                        '16:9': { width: 1280, height: 720 },
+                        '9:16': { width: 720, height: 1280 },
+                        '1:1': { width: 720, height: 720 },
+                        '2:3': { width: 720, height: 1080 },
+                        '3:2': { width: 1080, height: 720 }
+                    };
+
+                    const dimensions = aspectRatioMap[grokParams.aspect_ratio] || { width: 1280, height: 720 };
+                    grokParams.width = dimensions.width;
+                    grokParams.height = dimensions.height;
+
+                    log.add('info', `Grok 视频参数: duration=${grokParams.duration}s, quality=${grokParams.quality}, aspect_ratio=${grokParams.aspect_ratio}, size=${grokParams.width}x${grokParams.height}`);
                 }
 
                 const result = await createVideoTask(this.apiClient, {
