@@ -398,6 +398,21 @@ class App {
                 if (this.dom.jimengWatermark) this.storage.set('aiPaintingJimengWatermark', this.dom.jimengWatermark.value);
                 if (this.dom.jimengCameraFixed) this.storage.set('aiPaintingJimengCameraFixed', this.dom.jimengCameraFixed.value);
             },
+            onDoubao20ParamChange: () => {
+                // 保存豆包2.0参数到本地存储
+                if (this.dom.doubao20Seconds) this.storage.set('doubao20Seconds', this.dom.doubao20Seconds.value);
+                if (this.dom.doubao20Ratio) this.storage.set('doubao20Ratio', this.dom.doubao20Ratio.value);
+                if (this.dom.doubao20Resolution) this.storage.set('doubao20Resolution', this.dom.doubao20Resolution.value);
+                if (this.dom.doubao20GenerateAudio) this.storage.set('doubao20GenerateAudio', this.dom.doubao20GenerateAudio.value);
+                if (this.dom.doubao20Watermark) this.storage.set('doubao20Watermark', this.dom.doubao20Watermark.value);
+                if (this.dom.doubao20CameraFixed) this.storage.set('doubao20CameraFixed', this.dom.doubao20CameraFixed.value);
+                if (this.dom.doubao20WebSearch) this.storage.set('doubao20WebSearch', this.dom.doubao20WebSearch.value);
+                if (this.dom.doubao20Mode) this.storage.set('doubao20Mode', this.dom.doubao20Mode.value);
+                if (this.dom.doubao20ReferenceType) this.storage.set('doubao20ReferenceType', this.dom.doubao20ReferenceType.value);
+                
+                // 更新参数可见性
+                this.updateDoubao20ParamVisibility();
+            },
             
             onVeoSelectionChange: () => {
                 this.modelSelector.updateVeoModelSelection();
@@ -448,13 +463,90 @@ class App {
         });
         
         this.eventManager.bindAll();
+        
+        // 绑定调试按钮
+        const debugRecheckBtn = document.getElementById('debugRecheckBtn');
+        if (debugRecheckBtn) {
+            debugRecheckBtn.addEventListener('click', () => {
+                console.log('[调试] 点击调试视频任务按钮');
+                
+                // 1. 直接从LocalStorage读取任务
+                console.log('[调试] === 方法1: 直接从LocalStorage读取 ===');
+                const localStorageTasks = this.videoTaskManager.debugLocalStorageTasks();
+                
+                // 2. 通过管理器列出任务
+                console.log('[调试] === 方法2: 通过管理器列出 ===');
+                const taskList = this.videoTaskManager.listAllTasks();
+                
+                // 3. 重新查询已完成但未显示视频的任务
+                console.log('[调试] === 方法3: 重新查询任务 ===');
+                const recheckedCount = this.videoTaskManager.recheckCompletedTasks();
+                
+                const totalTasks = Math.max(localStorageTasks.length, taskList.length);
+                
+                if (totalTasks === 0) {
+                    console.log('[调试] 没有找到任何视频任务');
+                    alert('没有找到任何视频任务。请先生成一个视频。');
+                } else if (recheckedCount > 0) {
+                    console.log(`[调试] 已重新查询 ${recheckedCount} 个任务`);
+                    alert(`找到 ${totalTasks} 个任务，已重新查询 ${recheckedCount} 个已完成但未显示视频的任务，请查看控制台日志。`);
+                } else {
+                    console.log(`[调试] 找到 ${totalTasks} 个任务，但没有需要重新查询的任务`);
+                    alert(`找到 ${totalTasks} 个任务，但没有需要重新查询的任务。`);
+                }
+            });
+        }
     }
     
+    updateDoubao20ParamVisibility() {
+        // 根据功能模式显示/隐藏相关参数
+        if (!this.dom.doubao20Mode) return;
+        
+        const mode = this.dom.doubao20Mode.value;
+        const referenceType = this.dom.doubao20ReferenceType ? this.dom.doubao20ReferenceType.value : 'none';
+        
+        // 显示提示信息
+        let hintText = '';
+        switch (mode) {
+            case 'text2video':
+                hintText = '📝 纯文本生成视频'; break;
+            case 'image2video':
+                hintText = '🖼️ 基于图片生成视频（需要上传参考图片）'; break;
+            case 'video_edit':
+                hintText = '✏️ 编辑现有视频（需要上传参考视频）'; break;
+            case 'video_extend':
+                hintText = '⏱️ 延长视频时长（需要上传参考视频）'; break;
+            case 'multimodal':
+                hintText = '🎨 多模态参考（图片+视频+音频组合）'; break;
+        }
+        
+        // 更新提示信息
+        const hintElement = document.getElementById('doubao20Hint');
+        if (!hintElement) {
+            // 创建提示元素
+            const hint = document.createElement('div');
+            hint.id = 'doubao20Hint';
+            hint.style.cssText = 'font-size: 0.85rem; color: #718096; margin-top: 8px; padding: 8px; background: #f7fafc; border-radius: 6px;';
+            hint.textContent = hintText;
+            
+            // 插入到参数面板中
+            const paramsGroup = document.getElementById('doubao20VideoParamsGroup');
+            if (paramsGroup) {
+                paramsGroup.insertBefore(hint, paramsGroup.querySelector('.param-grid'));
+            }
+        } else {
+            hintElement.textContent = hintText;
+        }
+    }
+
     updateAllStatus() {
         updateApiKeyStatus(this.dom);
         updateApiBaseUrlStatus(this.dom);
         updatePromptStatus(this.dom);
         updateModeIndicator(this.dom, this.imagePreviewManager.getFiles().length > 0, this.modelSelector.getSelectedModels());
+        
+        // 更新豆包2.0参数可见性
+        this.updateDoubao20ParamVisibility();
     }
 }
 
@@ -466,3 +558,326 @@ if (document.readyState === 'loading') {
 } else {
     app.init();
 }
+
+// 添加全局调试函数
+window.debugVideoTasks = function() {
+    if (app && app.videoTaskManager) {
+        console.log('[全局调试] 调用 debugVideoTasks()');
+        app.videoTaskManager.listAllTasks();
+        app.videoTaskManager.recheckCompletedTasks();
+    } else {
+        console.error('[全局调试] app 或 videoTaskManager 未初始化');
+    }
+};
+
+// 手动修复已缓存的任务
+window.fixCachedTasks = function() {
+    console.log('[修复任务] 开始修复已缓存的任务');
+    
+    // 获取所有任务
+    const data = localStorage.getItem('sora_video_tasks');
+    if (!data) {
+        console.log('[修复任务] 没有找到任务数据');
+        return;
+    }
+    
+    try {
+        const parsed = JSON.parse(data);
+        const tasks = parsed.tasks || [];
+        
+        console.log(`[修复任务] 找到 ${tasks.length} 个任务`);
+        
+        // 查找需要修复的任务（已完成但没有视频URL）
+        const tasksToFix = tasks.filter(t => t.status === 'completed' && !t.video_url);
+        
+        if (tasksToFix.length === 0) {
+            console.log('[修复任务] 没有需要修复的任务');
+            return;
+        }
+        
+        console.log(`[修复任务] 需要修复 ${tasksToFix.length} 个任务:`);
+        tasksToFix.forEach((task, index) => {
+            console.log(`[修复任务] ${index + 1}. ${task.id} (${task.model})`);
+        });
+        
+        // 提示用户重新查询
+        if (confirm(`发现 ${tasksToFix.length} 个已完成但无视频URL的任务。\n是否重新查询这些任务？`)) {
+            tasksToFix.forEach(task => {
+                if (window.app && window.app.videoTaskManager) {
+                    console.log(`[修复任务] 重新查询任务: ${task.id}`);
+                    window.app.videoTaskManager.recheckTaskWithDetails(task.id);
+                }
+            });
+        }
+        
+    } catch (error) {
+        console.error('[修复任务] 修复失败:', error);
+    }
+};
+
+// 手动测试豆包API响应格式
+window.testDoubaoResponseFormat = function() {
+    console.log('[豆包格式测试] 测试豆包API响应格式');
+    
+    // 豆包2.0可能的响应格式示例
+    const testResponses = [
+        // 格式1: 直接包含video_url
+        {
+            "id": "task_123",
+            "status": "completed",
+            "video_url": "https://example.com/video.mp4"
+        },
+        // 格式2: 嵌套在data中
+        {
+            "data": {
+                "id": "task_123",
+                "status": "completed",
+                "video_url": "https://example.com/video.mp4"
+            }
+        },
+        // 格式3: 嵌套在data.data中
+        {
+            "data": {
+                "data": {
+                    "id": "task_123",
+                    "status": "completed",
+                    "video_url": "https://example.com/video.mp4"
+                }
+            }
+        },
+        // 格式4: 使用result_url
+        {
+            "data": {
+                "id": "task_123",
+                "status": "completed",
+                "result_url": "https://example.com/video.mp4"
+            }
+        },
+        // 格式5: 在content中
+        {
+            "data": {
+                "data": {
+                    "content": {
+                        "video_url": "https://example.com/video.mp4"
+                    }
+                }
+            }
+        }
+    ];
+    
+    // 导入视频URL提取函数
+    import('./js/api/video.js').then(module => {
+        testResponses.forEach((response, index) => {
+            console.log(`\n[豆包格式测试] 测试格式 ${index + 1}:`);
+            console.log('[豆包格式测试] 测试响应:', response);
+            const videoUrl = module.extractVideoUrlFromResult(response);
+            console.log(`[豆包格式测试] 提取的视频URL: ${videoUrl || 'null'}`);
+        });
+    }).catch(error => {
+        console.error('[豆包格式测试] 导入失败:', error);
+    });
+};
+
+// 重新查询豆包2.0任务
+window.recheckDoubao20Task = function() {
+    console.log('[豆包2.0调试] 重新查询豆包2.0任务');
+    
+    // 获取所有任务
+    const data = localStorage.getItem('sora_video_tasks');
+    if (!data) {
+        console.log('[豆包2.0调试] 没有找到任务数据');
+        return;
+    }
+    
+    try {
+        const parsed = JSON.parse(data);
+        const tasks = parsed.tasks || [];
+        
+        // 查找豆包2.0任务
+        const doubao20Tasks = tasks.filter(t => t.model === 'doubao-seedance-2-0-260128');
+        
+        if (doubao20Tasks.length === 0) {
+            console.log('[豆包2.0调试] 没有找到豆包2.0任务');
+            return;
+        }
+        
+        console.log(`[豆包2.0调试] 找到 ${doubao20Tasks.length} 个豆包2.0任务`);
+        
+        // 重新查询第一个豆包2.0任务
+        const task = doubao20Tasks[0];
+        console.log(`[豆包2.0调试] 重新查询任务: ${task.id}`);
+        
+        if (window.app && window.app.videoTaskManager) {
+            return window.app.videoTaskManager.recheckTaskWithDetails(task.id);
+        } else {
+            console.error('[豆包2.0调试] app 或 videoTaskManager 未初始化');
+        }
+        
+    } catch (error) {
+        console.error('[豆包2.0调试] 解析数据失败:', error);
+    }
+};
+
+// 添加详细的任务调试函数
+window.debugVideoTasksDetailed = function() {
+    console.log('[详细调试] ========== 视频任务详细调试 ==========');
+    
+    // 1. 检查LocalStorage
+    const data = localStorage.getItem('sora_video_tasks');
+    if (!data) {
+        console.log('[详细调试] LocalStorage中没有找到任务数据');
+        return;
+    }
+    
+    try {
+        const parsed = JSON.parse(data);
+        console.log('[详细调试] 完整数据结构:', parsed);
+        
+        // 2. 提取任务列表
+        const tasks = parsed.tasks || [];
+        console.log(`[详细调试] 总共 ${tasks.length} 个任务`);
+        
+        // 3. 分析每个任务
+        tasks.forEach((task, index) => {
+            console.log(`\n[详细调试] === 任务 ${index + 1}/${tasks.length} ===`);
+            console.log(`[详细调试] 任务ID: ${task.id}`);
+            console.log(`[详细调试] 状态: ${task.status}`);
+            console.log(`[详细调试] 模型: ${task.model}`);
+            console.log(`[详细调试] 进度: ${task.progress}%`);
+            console.log(`[详细调试] 视频URL: ${task.video_url || '无'}`);
+            console.log(`[详细调试] 提示词: ${task.prompt || '无'}`);
+            console.log(`[详细调试] 创建时间: ${task.created_at ? new Date(task.created_at).toLocaleString() : '未知'}`);
+            console.log(`[详细调试] 更新时间: ${task.updated_at ? new Date(task.updated_at).toLocaleString() : '未知'}`);
+            
+            // 检查是否为豆包2.0任务
+            if (task.model && task.model.includes('doubao')) {
+                console.log(`[详细调试] ✅ 这是豆包模型任务`);
+                
+                // 检查是否有错误信息
+                if (task.error) {
+                    console.log(`[详细调试] ❌ 任务有错误:`, task.error);
+                }
+                
+                // 检查是否完成但没有视频URL
+                if (task.status === 'completed' && !task.video_url) {
+                    console.log(`[详细调试] ⚠️ 任务已完成但没有视频URL，需要重新查询`);
+                }
+            }
+        });
+        
+        // 4. 统计信息
+        const completedTasks = tasks.filter(t => t.status === 'completed');
+        const doubaoTasks = tasks.filter(t => t.model && t.model.includes('doubao'));
+        const tasksWithoutVideo = tasks.filter(t => t.status === 'completed' && !t.video_url);
+        
+        console.log(`\n[详细调试] === 统计信息 ===`);
+        console.log(`[详细调试] 已完成任务: ${completedTasks.length}/${tasks.length}`);
+        console.log(`[详细调试] 豆包任务: ${doubaoTasks.length}/${tasks.length}`);
+        console.log(`[详细调试] 已完成但无视频URL: ${tasksWithoutVideo.length}/${tasks.length}`);
+        
+        if (tasksWithoutVideo.length > 0) {
+            console.log(`[详细调试] ⚠️ 发现 ${tasksWithoutVideo.length} 个需要重新查询的任务`);
+            tasksWithoutVideo.forEach(task => {
+                console.log(`[详细调试] 需要重新查询: ${task.id} (${task.model})`);
+            });
+        }
+        
+    } catch (error) {
+        console.error('[详细调试] 解析数据失败:', error);
+    }
+};
+
+// 添加直接检查LocalStorage的函数
+window.debugLocalStorage = function() {
+    console.log('[全局调试] 直接检查LocalStorage');
+    
+    // 检查所有可能的任务存储键
+    const storageKeys = [
+        'sora_video_tasks',
+        'video_tasks',
+        'doubao_tasks',
+        'ai_video_tasks'
+    ];
+    
+    storageKeys.forEach(key => {
+        const data = localStorage.getItem(key);
+        if (data) {
+            console.log(`[全局调试] 找到键: ${key}`);
+            try {
+                const parsed = JSON.parse(data);
+                console.log(`[全局调试] ${key} 内容:`, parsed);
+                
+                // 处理不同的数据结构
+                if (Array.isArray(parsed)) {
+                    // 直接是数组
+                    console.log(`[全局调试] ${key} 中有 ${parsed.length} 个任务（直接数组）:`);
+                    parsed.forEach((task, index) => {
+                        console.log(`[全局调试] 任务 ${index + 1}:`, {
+                            id: task.id,
+                            status: task.status,
+                            model: task.model,
+                            video_url: task.video_url,
+                            prompt: task.prompt
+                        });
+                    });
+                } else if (parsed.tasks && Array.isArray(parsed.tasks)) {
+                    // 嵌套在 tasks 字段中
+                    console.log(`[全局调试] ${key} 中有 ${parsed.tasks.length} 个任务（嵌套在tasks字段）:`);
+                    parsed.tasks.forEach((task, index) => {
+                        console.log(`[全局调试] 任务 ${index + 1}:`, {
+                            id: task.id,
+                            status: task.status,
+                            model: task.model,
+                            video_url: task.video_url,
+                            prompt: task.prompt
+                        });
+                    });
+                    
+                    // 显示配置信息
+                    if (parsed.config) {
+                        console.log(`[全局调试] ${key} 配置:`, parsed.config);
+                    }
+                } else {
+                    console.log(`[全局调试] ${key} 未知数据结构:`, parsed);
+                }
+            } catch (error) {
+                console.error(`[全局调试] 解析 ${key} 失败:`, error);
+            }
+        } else {
+            console.log(`[全局调试] 键 ${key} 不存在或为空`);
+        }
+    });
+};
+
+// 添加测试豆包2.0响应的函数
+window.testDoubaoResponse = function(responseJson) {
+    console.log('[测试] 测试豆包2.0响应解析');
+    try {
+        const result = typeof responseJson === 'string' ? JSON.parse(responseJson) : responseJson;
+        console.log('[测试] 解析后的响应:', result);
+        
+        // 导入并测试视频URL提取
+        import('./js/api/video.js').then(module => {
+            const videoUrl = module.extractVideoUrlFromResult(result);
+            console.log('[测试] 提取的视频URL:', videoUrl);
+            
+            if (videoUrl) {
+                console.log('[测试] ✅ 成功提取视频URL');
+                // 尝试创建视频元素预览
+                const video = document.createElement('video');
+                video.src = videoUrl;
+                video.controls = true;
+                video.style.width = '300px';
+                video.style.margin = '10px';
+                document.body.appendChild(video);
+                console.log('[测试] 已添加视频预览到页面');
+            } else {
+                console.log('[测试] ❌ 未能提取视频URL');
+            }
+        }).catch(error => {
+            console.error('[测试] 导入video.js失败:', error);
+        });
+    } catch (error) {
+        console.error('[测试] JSON解析失败:', error);
+    }
+};

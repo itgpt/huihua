@@ -209,16 +209,46 @@ export function displayVideoResults(dom, dataArr, originalPrompt, optimizedPromp
             max-width: 600px;
         `;
         
-        const video = document.createElement('video');
-        video.src = videoUrl;
-        video.controls = true;
-        video.style.cssText = `
-            width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 15px;
-        `;
-        video.setAttribute('controlsList', 'nodownload');
+        // 检查是否为豆包视频URL（有CORS限制）
+        const isDoubaoVideo = videoUrl.includes('volces.com') || videoUrl.includes('doubao-seedance');
+        
+        let video = null;
+        if (!isDoubaoVideo) {
+            // 普通视频，可以直接嵌入
+            video = document.createElement('video');
+            video.src = videoUrl;
+            video.controls = true;
+            video.style.cssText = `
+                width: 100%;
+                border-radius: 10px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                margin-bottom: 15px;
+            `;
+            video.setAttribute('controlsList', 'nodownload');
+            videoCell.appendChild(video);
+        } else {
+            // 豆包视频，显示预览图+提示
+            const preview = document.createElement('div');
+            preview.style.cssText = `
+                width: 100%;
+                height: 300px;
+                border-radius: 10px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                color: white;
+                margin-bottom: 15px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            `;
+            preview.innerHTML = `
+                <div style="font-size: 48px; margin-bottom: 15px;">🎬</div>
+                <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">豆包2.0视频已生成</div>
+                <div style="font-size: 14px; opacity: 0.9;">点击下方按钮查看视频</div>
+            `;
+            videoCell.appendChild(preview);
+        }
         
         const btnBar = document.createElement('div');
         btnBar.style.display = 'flex';

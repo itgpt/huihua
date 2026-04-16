@@ -205,6 +205,44 @@ export class EventManager {
         if (this.dom.jimengCameraFixed) {
             this.dom.jimengCameraFixed.addEventListener('change', () => { if (this.handlers.onJimengParamChange) this.handlers.onJimengParamChange(); });
         }
+        if (this.dom.jimengWebSearch) {
+            this.dom.jimengWebSearch.addEventListener('change', () => { if (this.handlers.onJimengParamChange) this.handlers.onJimengParamChange(); });
+        }
+        if (this.dom.jimengVideoMode) {
+            this.dom.jimengVideoMode.addEventListener('change', () => { if (this.handlers.onJimengParamChange) this.handlers.onJimengParamChange(); });
+        }
+        if (this.dom.jimengReferenceType) {
+            this.dom.jimengReferenceType.addEventListener('change', () => { if (this.handlers.onJimengParamChange) this.handlers.onJimengParamChange(); });
+        }
+        
+        // 豆包2.0参数事件绑定
+        if (this.dom.doubao20Mode) {
+            this.dom.doubao20Mode.addEventListener('change', () => { if (this.handlers.onDoubao20ParamChange) this.handlers.onDoubao20ParamChange(); });
+        }
+        if (this.dom.doubao20Seconds) {
+            this.dom.doubao20Seconds.addEventListener('change', () => { if (this.handlers.onDoubao20ParamChange) this.handlers.onDoubao20ParamChange(); });
+        }
+        if (this.dom.doubao20Ratio) {
+            this.dom.doubao20Ratio.addEventListener('change', () => { if (this.handlers.onDoubao20ParamChange) this.handlers.onDoubao20ParamChange(); });
+        }
+        if (this.dom.doubao20Resolution) {
+            this.dom.doubao20Resolution.addEventListener('change', () => { if (this.handlers.onDoubao20ParamChange) this.handlers.onDoubao20ParamChange(); });
+        }
+        if (this.dom.doubao20GenerateAudio) {
+            this.dom.doubao20GenerateAudio.addEventListener('change', () => { if (this.handlers.onDoubao20ParamChange) this.handlers.onDoubao20ParamChange(); });
+        }
+        if (this.dom.doubao20WebSearch) {
+            this.dom.doubao20WebSearch.addEventListener('change', () => { if (this.handlers.onDoubao20ParamChange) this.handlers.onDoubao20ParamChange(); });
+        }
+        if (this.dom.doubao20Watermark) {
+            this.dom.doubao20Watermark.addEventListener('change', () => { if (this.handlers.onDoubao20ParamChange) this.handlers.onDoubao20ParamChange(); });
+        }
+        if (this.dom.doubao20CameraFixed) {
+            this.dom.doubao20CameraFixed.addEventListener('change', () => { if (this.handlers.onDoubao20ParamChange) this.handlers.onDoubao20ParamChange(); });
+        }
+        if (this.dom.doubao20ReferenceType) {
+            this.dom.doubao20ReferenceType.addEventListener('change', () => { if (this.handlers.onDoubao20ParamChange) this.handlers.onDoubao20ParamChange(); });
+        }
 
         // Veo 模型选择事件监听
         const veoTypeRadios = document.querySelectorAll('input[name="veoType"]');

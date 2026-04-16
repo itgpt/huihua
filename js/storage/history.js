@@ -50,13 +50,22 @@ export class HistoryManager {
                 }
             } else if (imageSrc && imageSrc.startsWith('http')) {
                 storageKey = imageSrc;
-                // 注意：这里可能需要处理跨域问题，或者假设图片服务器支持 CORS
-                try {
-                    const response = await fetch(imageSrc);
-                    const blob = await response.blob();
-                    await this.db.saveImage(storageKey, blob);
-                } catch (e) {
-                    console.warn('Failed to cache image to IndexedDB:', e);
+                
+                // 检查是否为豆包视频URL（有CORS限制）
+                const isDoubaoVideo = imageSrc.includes('volces.com') || imageSrc.includes('doubao-seedance');
+                
+                if (!isDoubaoVideo) {
+                    // 普通图片URL，尝试缓存
+                    try {
+                        const response = await fetch(imageSrc);
+                        const blob = await response.blob();
+                        await this.db.saveImage(storageKey, blob);
+                    } catch (e) {
+                        console.warn('Failed to cache image to IndexedDB:', e);
+                    }
+                } else {
+                    // 豆包视频URL，不尝试缓存（有CORS限制）
+                    console.log('[历史记录] 跳过缓存豆包视频URL（CORS限制）:', imageSrc);
                 }
             }
         } catch (error) {

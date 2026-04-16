@@ -199,7 +199,7 @@
                                     </div>
                                 </label>
                                 <label class="model-type-option">
-                                    <input type="radio" name="modelType" value="video">
+                                    <input type="radio" name="modelType" value="video" checked>
                                     <div class="option-content">
                                         <span class="option-icon">🎬</span>
                                         <span class="option-title">视频模型</span>
@@ -328,7 +328,7 @@
                                         <span>Grok</span>
                                     </label>
                                     <label class="platform-option">
-                                        <input type="radio" name="videoPlatform" value="doubao">
+                                        <input type="radio" name="videoPlatform" value="doubao" checked>
                                         <span>Doubao</span>
                                     </label>
                                     <label class="platform-option">
@@ -632,9 +632,11 @@
                             </div>
 
                             <!-- Doubao 模型列表 -->
-                            <div id="doubaoModels" class="platform-models" style="display:none;">
-                                <select id="doubaoModelSelect" size="2"
+                            <div id="doubaoModels" class="platform-models" style="display:block;">
+                                <select id="doubaoModelSelect" size="4"
                                     style="width:100%; padding:8px; border:2px solid #e9ecef; border-radius:8px; background:#fff;">
+                                    <option value="doubao-seedance-2-0-260128" selected>doubao-seedance-2-0-260128（豆包 2.0 标准版）</option>
+                                    <option value="doubao-seedance-2-0-fast-260128">doubao-seedance-2-0-fast-260128（豆包 2.0 极速版）</option>
                                     <option value="doubao-seedance-1-5-pro-251215">doubao-seedance-1-5-pro-251215（豆包 1.5
                                         Pro 12s）</option>
                                     <option value="doubao-seedance-1-0-pro-250528">doubao-seedance-1-0-pro-250528（豆包 1.0
@@ -841,67 +843,112 @@
 
                         </div>
 
-                        <!-- 即梦视频模型专用参数 -->
-                        <div id="jimengVideoParamsGroup"
-                            style="display:none; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
+                        <!-- 豆包2.0专用参数面板 -->
+                        <div id="doubao20VideoParamsGroup"
+                            style="display:block; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
                             <div style="margin-bottom: 12px;">
-                                <span style="font-weight: 600; color: #667eea; font-size: 0.9rem;">🎬 豆包视频参数</span>
+                                <span style="font-weight: 600; color: #667eea; font-size: 0.9rem;">🎬 豆包2.0 高级参数</span>
+                                <span style="font-size: 0.8rem; color: #718096; margin-left: 10px;">(支持多模态、视频编辑、联网搜索等)</span>
                             </div>
+                            <!-- 功能模式选择 -->
+                            <div class="input-group" style="grid-column: 1 / -1; margin-bottom: 16px;">
+                                <label for="doubao20Mode">🎯 功能模式</label>
+                                <select id="doubao20Mode" class="glass-select" style="width: 100%;">
+                                    <option value="text2video" selected>📝 文生视频 (Text to Video)</option>
+                                    <option value="image2video">🖼️ 图生视频 (Image to Video)</option>
+                                    <option value="video_edit">✏️ 视频编辑 (Video Edit)</option>
+                                    <option value="video_extend">⏱️ 视频延长 (Video Extend)</option>
+                                    <option value="multimodal">🎨 多模态参考 (Multi-modal)</option>
+                                </select>
+                            </div>
+
                             <div class="param-grid">
+                                <!-- 基础参数 -->
                                 <div class="input-group">
-                                    <label for="jimengSeconds">视频秒数</label>
-                                    <select id="jimengSeconds" class="glass-select">
+                                    <label for="doubao20Seconds">⏱️ 视频秒数</label>
+                                    <select id="doubao20Seconds" class="glass-select">
                                         <option value="4">4秒</option>
                                         <option value="5">5秒</option>
                                         <option value="6">6秒</option>
+                                        <option value="7">7秒</option>
                                         <option value="8">8秒</option>
+                                        <option value="9">9秒</option>
                                         <option value="10">10秒</option>
+                                        <option value="11">11秒</option>
                                         <option value="12" selected>12秒（默认）</option>
+                                        <option value="13">13秒</option>
+                                        <option value="14">14秒</option>
+                                        <option value="15">15秒</option>
                                     </select>
                                 </div>
 
+                                <!-- 基础参数 -->
                                 <div class="input-group">
-                                    <label for="jimengRatio">视频比例</label>
-                                    <select id="jimengRatio" class="glass-select">
+                                    <label for="doubao20Ratio">📐 视频比例</label>
+                                    <select id="doubao20Ratio" class="glass-select">
                                         <option value="16:9" selected>16:9 横屏</option>
                                         <option value="9:16">9:16 竖屏</option>
                                         <option value="1:1">1:1 方形</option>
                                         <option value="4:3">4:3 横向</option>
                                         <option value="3:4">3:4 纵向</option>
                                         <option value="21:9">21:9 超宽</option>
+                                        <option value="adaptive">adaptive 自适应</option>
                                     </select>
                                 </div>
 
                                 <div class="input-group">
-                                    <label for="jimengResolution">分辨率</label>
-                                    <select id="jimengResolution" class="glass-select">
+                                    <label for="doubao20Resolution">🖥️ 分辨率</label>
+                                    <select id="doubao20Resolution" class="glass-select">
                                         <option value="480p">480p 标清</option>
-                                        <option value="720p">720p 高清</option>
-                                        <option value="1080p" selected>1080p 全高清</option>
+                                        <option value="720p" selected>720p 高清</option>
                                     </select>
                                 </div>
 
                                 <div class="input-group">
-                                    <label for="jimengGenerateAudio">生成音频</label>
-                                    <select id="jimengGenerateAudio" class="glass-select">
-                                        <option value="false" selected>否</option>
-                                        <option value="true">是（仅1.5 Pro）</option>
+                                    <label for="doubao20GenerateAudio">🔊 生成音频</label>
+                                    <select id="doubao20GenerateAudio" class="glass-select">
+                                        <option value="true" selected>是（默认开启）</option>
+                                        <option value="false">否</option>
+                                    </select>
+                                </div>
+
+                                <!-- 高级功能 -->
+                                <div class="input-group">
+                                    <label for="doubao20WebSearch">🌐 联网搜索</label>
+                                    <select id="doubao20WebSearch" class="glass-select">
+                                        <option value="false" selected>关闭</option>
+                                        <option value="true">开启（实时信息增强）</option>
                                     </select>
                                 </div>
 
                                 <div class="input-group">
-                                    <label for="jimengWatermark">水印</label>
-                                    <select id="jimengWatermark" class="glass-select">
+                                    <label for="doubao20Watermark">🏷️ 水印</label>
+                                    <select id="doubao20Watermark" class="glass-select">
                                         <option value="false" selected>无水印</option>
                                         <option value="true">有水印</option>
                                     </select>
                                 </div>
 
                                 <div class="input-group">
-                                    <label for="jimengCameraFixed">相机固定</label>
-                                    <select id="jimengCameraFixed" class="glass-select">
-                                        <option value="false" selected>否（默认）</option>
-                                        <option value="true">是</option>
+                                    <label for="doubao20CameraFixed">🎥 相机固定</label>
+                                    <select id="doubao20CameraFixed" class="glass-select">
+                                        <option value="false" selected>否（动态运镜）</option>
+                                        <option value="true">是（固定镜头）</option>
+                                    </select>
+                                </div>
+
+                                <!-- 多模态参考设置 -->
+                                <div class="input-group" style="grid-column: 1 / -1; margin-top: 10px;">
+                                    <label for="doubao20ReferenceType">🎨 参考类型</label>
+                                    <select id="doubao20ReferenceType" class="glass-select" style="width: 100%;">
+                                        <option value="none" selected>无参考（纯文本生成）</option>
+                                        <option value="reference_image">图片参考 (Image Reference)</option>
+                                        <option value="reference_video">视频参考 (Video Reference)</option>
+                                        <option value="reference_audio">音频参考 (Audio Reference)</option>
+                                        <option value="first_frame">首帧控制 (First Frame)</option>
+                                        <option value="last_frame">尾帧控制 (Last Frame)</option>
+                                        <option value="first_last_frame">首尾帧控制 (First & Last Frame)</option>
+                                        <option value="multimodal">多模态组合 (Multi-modal)</option>
                                     </select>
                                 </div>
                             </div>
@@ -945,6 +992,9 @@
                     <div id="modeIndicator" class="mode-badge">
                         当前模式: <span id="currentMode">图片生成</span>
                     </div>
+                    <button id="debugRecheckBtn" class="btn btn-secondary btn-sm" style="margin-left: 10px;">
+                        🔍 调试视频任务
+                    </button>
                 </div>
 
             </div> <!-- End of Left Panel -->

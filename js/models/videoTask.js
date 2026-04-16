@@ -23,12 +23,12 @@ export class VideoTaskManager {
         // 配置参数
         this.config = {
             maxTasks: 50,              // 最多缓存50个任务
-            pollIntervalSlow: 5000,    // 初始阶段：5秒
-            pollIntervalMedium: 3000,  // 处理阶段：3秒
-            pollIntervalFast: 2000,    // 完成阶段：2秒
+            pollIntervalSlow: 10000,   // 初始阶段：10秒
+            pollIntervalMedium: 10000, // 处理阶段：10秒
+            pollIntervalFast: 10000,   // 完成阶段：10秒
             maxRetries: 3,             // 最大重试次数
             timeout: 1200000,          // 超时时间：20分钟
-            retryDelay: 5000           // 重试延迟：5秒
+            retryDelay: 10000          // 重试延迟：10秒
         };
 
         // LocalStorage键名
@@ -185,12 +185,38 @@ export class VideoTaskManager {
 
             // POSTMAN风格日志 - 响应
             this.logger.append('info', `Response ${response.status}`, result);
-
+            
+            // 调试：打印完整的API响应
+            console.log(`[视频任务调试] ========== 任务 ${taskId} API响应 ==========`);
+            console.log(`[视频任务调试] 模型: ${task.model}`);
+            console.log(`[视频任务调试] 完整响应:`, JSON.stringify(result, null, 2));
+            console.log(`[视频任务调试] 响应状态码: ${response.status}`);
+            
+            // 检查常见的视频任务状态字段
+            const statusPaths = ['status', 'data.status', 'data.data.status'];
+            statusPaths.forEach(path => {
+                const value = getValueByPath(result, path);
+                if (value) {
+                    console.log(`[视频任务调试] 状态字段 ${path}: ${value}`);
+                }
+            });
+            
             // Grok视频API返回的是包装结构 {code, data: {data: {status, url, ...}}}
             const taskData = task.model === 'grok-video' && result.data?.data ? result.data.data : result;
+            
+            // 辅助函数：通过路径获取对象值
+            function getValueByPath(obj, path) {
+                return path.split('.').reduce((current, key) => {
+                    return current && current[key] !== undefined ? current[key] : undefined;
+                }, obj);
+            }
 
             // 更新任务信息
             const extractedVideoUrl = extractVideoUrlFromResult(result);
+            console.log('[视频任务调试] 提取的视频URL:', extractedVideoUrl);
+            console.log('[视频任务调试] 任务数据状态:', taskData.status);
+            console.log('[视频任务调试] 完整返回结果:', result);
+            
             const updateData = {
                 status: taskData.status,
                 progress: taskData.progress || task.progress,
@@ -243,6 +269,160 @@ export class VideoTaskManager {
         }
 
         showSuccess(`视频生成完成！任务ID: ${taskId.substring(0, 16)}...`);
+    }
+
+    /**
+     * 直接从LocalStorage读取并显示所有任务（用于调试）
+     */
+    debugLocalStorageTasks() {
+        console.log('[视频任务调试] ========== 直接从LocalStorage读取任务 ==========');
+        
+        try {
+            const rawData = localStorage.getItem(this.storageKey);
+            console.log('[视频任务调试] LocalStorage原始数据:', rawData);
+            
+            if (!rawData) {
+                console.log('[视频任务调试] LocalStorage中没有找到任务数据');
+                return [];
+            }
+            
+            const data = JSON.parse(rawData);
+            console.log('[视频任务调试] 解析后的数据:', data);
+            
+            // 处理不同的数据结构
+            if (Array.isArray(data)) {
+                // 直接是数组
+                console.log(`[视频任务调试] 找到 ${data.length} 个任务（直接数组）:`);
+                data.forEach((task, index) => {
+                    console.log(`[视频任务调试] 任务 ${index + 1}:`, {
+                        id: task.id,
+                        status: task.status,
+                        model: task.model,
+                        progress: task.progress,
+                        video_url: task.video_url,
+                        prompt: task.prompt ? task.prompt.substring(0, 50) + '...' : '无',
+                        created_at: task.created_at ? new Date(task.created_at).toLocaleString() : '未知'
+                    });
+                });
+                return data;
+            } else if (data.tasks && Array.isArray(data.tasks)) {
+                // 嵌套在 tasks 字段中
+                console.log(`[视频任务调试] 找到 ${data.tasks.length} 个任务（嵌套在tasks字段）:`);
+                data.tasks.forEach((task, index) => {
+                    console.log(`[视频任务调试] 任务 ${index + 1}:`, {
+                        id: task.id,
+                        status: task.status,
+                        model: task.model,
+                        progress: task.progress,
+                        video_url: task.video_url,
+                        prompt: task.prompt ? task.prompt.substring(0, 50) + '...' : '无',
+                        created_at: task.created_at ? new Date(task.created_at).toLocaleString() : '未知'
+                    });
+                });
+                
+                // 显示配置信息
+                if (data.config) {
+                    console.log(`[视频任务调试] 配置信息:`, data.config);
+                }
+                
+                return data.tasks;
+            } else {
+                console.log('[视频任务调试] 未知数据结构:', typeof data, data);
+                return [];
+            }
+        } catch (error) {
+            console.error('[视频任务调试] 读取LocalStorage失败:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 列出所有视频任务（用于调试）
+     */
+    listAllTasks() {
+        console.log('[视频任务调试] ========== 所有视频任务列表 ==========');
+        
+        if (this.tasks.size === 0) {
+            console.log('[视频任务调试] 没有找到任何视频任务');
+            return [];
+        }
+        
+        const taskList = [];
+        for (const [taskId, task] of this.tasks) {
+            console.log(`[视频任务调试] 任务ID: ${taskId}`, {
+                状态: task.status,
+                模型: task.model,
+                进度: task.progress + '%',
+                视频URL: task.video_url || '无',
+                提示词: task.prompt.substring(0, 50) + '...',
+                创建时间: new Date(task.created_at).toLocaleString(),
+                更新时间: new Date(task.updated_at).toLocaleString()
+            });
+            taskList.push(task);
+        }
+        
+        console.log(`[视频任务调试] 总共 ${taskList.length} 个任务`);
+        return taskList;
+    }
+
+    /**
+     * 重新查询特定任务并显示原始API响应
+     * @param {string} taskId - 任务ID
+     */
+    recheckTaskWithDetails(taskId) {
+        console.log(`[详细调试] 重新查询任务: ${taskId}`);
+        
+        const task = this.tasks.get(taskId);
+        if (!task) {
+            console.log(`[详细调试] 任务 ${taskId} 不存在`);
+            return;
+        }
+        
+        console.log(`[详细调试] 任务信息:`, {
+            id: task.id,
+            model: task.model,
+            status: task.status,
+            video_url: task.video_url,
+            prompt: task.prompt
+        });
+        
+        // 重新查询任务状态
+        return this.pollTaskStatus(taskId).then(result => {
+            console.log(`[详细调试] 任务 ${taskId} 重新查询结果:`, result);
+            return result;
+        }).catch(error => {
+            console.error(`[详细调试] 重新查询失败:`, error);
+            throw error;
+        });
+    }
+
+    /**
+     * 重新查询所有已完成但未显示视频的任务
+     * 用于调试视频URL提取问题
+     */
+    recheckCompletedTasks() {
+        console.log('[视频任务调试] 开始重新查询已完成任务');
+        
+        let recheckedCount = 0;
+        for (const [taskId, task] of this.tasks) {
+            if (task.status === 'completed' && !task.video_url) {
+                console.log(`[视频任务调试] 重新查询任务: ${taskId}`, {
+                    model: task.model,
+                    prompt: task.prompt,
+                    created: new Date(task.created_at).toLocaleString()
+                });
+                
+                // 重新查询任务状态
+                this.pollTaskStatus(taskId).catch(error => {
+                    console.error(`[视频任务调试] 重新查询失败: ${taskId}`, error);
+                });
+                
+                recheckedCount++;
+            }
+        }
+        
+        console.log(`[视频任务调试] 总共重新查询了 ${recheckedCount} 个任务`);
+        return recheckedCount;
     }
 
     /**
@@ -302,7 +482,8 @@ export class VideoTaskManager {
         const task = this.tasks.get(taskId);
         if (!task || !task.isPolling) return;
 
-        const interval = task.model === 'grok-video' ? 5000 : this.getPollingInterval(task.progress);
+        // 所有模型都使用统一的10秒轮询间隔
+        const interval = this.getPollingInterval(task.progress);
 
         const timer = setTimeout(() => {
             if (task.isPolling) {

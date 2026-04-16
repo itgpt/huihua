@@ -132,7 +132,7 @@ export class Generator {
             // ========== 处理 Gemini 原生接口模型 ==========
             if (isGeminiModel(modelName)) {
                 const geminiImageSize = this.dom.geminiImageSize ? this.dom.geminiImageSize.value : '1K';
-                const result = await callGeminiNativeAPI(
+                const geminiResult = await callGeminiNativeAPI(
                     this.apiClient,
                     modelName,
                     optimizedPrompt,
@@ -143,7 +143,7 @@ export class Generator {
                 );
                 
                 // 解析为统一格式
-                const parsedResult = parseGeminiResponse(result, modelName, log);
+                const parsedResult = parseGeminiResponse(geminiResult, modelName, log);
                 
                 const params = {
                     model: modelName,
@@ -195,6 +195,9 @@ export class Generator {
                     jimengParams.generate_audio = this.dom.jimengGenerateAudio ? this.dom.jimengGenerateAudio.value : null;
                     jimengParams.watermark = this.dom.jimengWatermark ? this.dom.jimengWatermark.value : null;
                     jimengParams.camera_fixed = this.dom.jimengCameraFixed ? this.dom.jimengCameraFixed.value : null;
+                    jimengParams.web_search = this.dom.jimengWebSearch ? this.dom.jimengWebSearch.value === 'true' : false;
+                    jimengParams.video_mode = this.dom.jimengVideoMode ? this.dom.jimengVideoMode.value : 'text2video';
+                    jimengParams.reference_type = this.dom.jimengReferenceType ? this.dom.jimengReferenceType.value : 'none';
                 }
 
                 // 收集 Sora2 专用参数
@@ -232,54 +235,98 @@ export class Generator {
                     log.add('info', `Grok 视频参数: duration=${grokParams.duration}s, quality=${grokParams.quality}, aspect_ratio=${grokParams.aspect_ratio}, size=${grokParams.width}x${grokParams.height}`);
                 }
 
-                const result = await createVideoTask(this.apiClient, {
+                // 收集豆包2.0参数（仅当选择豆包2.0模型时）
+                const doubao20Params = {};
+                const isDoubao20Model = modelName === 'doubao-seedance-2-0-260128' || modelName === 'doubao-seedance-2-0-fast-260128';
+                
+                if (isDoubao20Model) {
+                    console.log('[调试] === 开始收集豆包2.0参数 ===');
+                    console.log('[调试] 模型名称:', modelName);
+                    console.log('[调试] this.dom对象:', Object.keys(this.dom).filter(key => key.includes('doubao20')));
+                    
+                    // 检查豆包2.0参数面板是否显示
+                    const doubao20Panel = document.getElementById('doubao20VideoParamsGroup');
+                    console.log('[调试] 豆包2.0参数面板:', doubao20Panel);
+                    
+                    // 直接通过ID获取元素
+                    const secondsEl = document.getElementById('doubao20Seconds');
+                    console.log('[调试] 通过ID获取doubao20Seconds:', secondsEl, '值:', secondsEl ? secondsEl.value : 'undefined');
+                    
+                    if (secondsEl) {
+                        doubao20Params.seconds = secondsEl.value;
+                        console.log('[调试] 设置seconds:', doubao20Params.seconds);
+                    }
+                    // 通过ID获取其他参数
+                    const ratioEl = document.getElementById('doubao20Ratio');
+                    const resolutionEl = document.getElementById('doubao20Resolution');
+                    const generateAudioEl = document.getElementById('doubao20GenerateAudio');
+                    const watermarkEl = document.getElementById('doubao20Watermark');
+                    const cameraFixedEl = document.getElementById('doubao20CameraFixed');
+                    const webSearchEl = document.getElementById('doubao20WebSearch');
+                    const modeEl = document.getElementById('doubao20Mode');
+                    const referenceTypeEl = document.getElementById('doubao20ReferenceType');
+                    
+                    if (ratioEl) doubao20Params.ratio = ratioEl.value;
+                    if (resolutionEl) doubao20Params.resolution = resolutionEl.value;
+                    if (generateAudioEl) doubao20Params.generate_audio = generateAudioEl.value === 'true';
+                    if (watermarkEl) doubao20Params.watermark = watermarkEl.value === 'true';
+                    if (cameraFixedEl) doubao20Params.camera_fixed = cameraFixedEl.value === 'true';
+                    if (webSearchEl) doubao20Params.web_search = webSearchEl.value === 'true';
+                    if (modeEl) doubao20Params.mode = modeEl.value;
+                    if (referenceTypeEl) doubao20Params.reference_type = referenceTypeEl.value;
+                    
+                    console.log('[调试] 最终豆包2.0参数:', doubao20Params);
+                }
+                
+                const videoResult = await createVideoTask(this.apiClient, {
                     model: modelName,
                     prompt: optimizedPrompt,
                     jimeng: jimengParams,
                     sora2: sora2Params,
-                    grok: grokParams
+                    grok: grokParams,
+                    doubao20: Object.keys(doubao20Params).length > 0 ? doubao20Params : undefined
                 }, imageFiles, log);
                 
                 log.add('info', `🔍 [诊断] createVideoTask返回结果`, {
-                    hasId: !!result.id,
-                    status: result.status,
-                    progress: result.progress,
-                    hasImageBase64: !!result._imageBase64
+                    hasId: !!videoResult.id,
+                    status: videoResult.status,
+                    progress: videoResult.progress,
+                    hasImageBase64: !!videoResult._imageBase64
                 });
                 
-                if (result.id) {
-                    log.add('info', `🔍 [诊断] 创建任务到TaskManager: ${result.id}`);
-                    this.videoTaskManager.createTask(result.id, {
-                        status: result.status || 'queued',
-                        progress: result.progress || 0,
+                if (videoResult.id) {
+                    log.add('info', `🔍 [诊断] 创建任务到TaskManager: ${videoResult.id}`);
+                    this.videoTaskManager.createTask(videoResult.id, {
+                        status: videoResult.status || 'queued',
+                        progress: videoResult.progress || 0,
                         model: modelName,
                         prompt: originalPrompt,
                         optimizedPrompt: optimizedPrompt,
-                        imageBase64: result._imageBase64 || null,
-                        share_id: result.share_id,
-                        seconds: result.seconds || '15',
-                        size: result.size || '1920x1080'
+                        imageBase64: videoResult._imageBase64 || null,
+                        share_id: videoResult.share_id,
+                        seconds: videoResult.seconds || '15',
+                        size: videoResult.size || '1920x1080'
                     });
                     
                     log.add('info', `🔍 [诊断] 任务已创建，准备启动轮询`);
-                    this.videoTaskManager.startPolling(result.id);
+                    this.videoTaskManager.startPolling(videoResult.id);
                     log.add('info', `🔍 [诊断] 轮询已启动`);
                     
-                    showVideoSuccessToast(result.id);
+                    showVideoSuccessToast(videoResult.id);
                     this.logger.append('success', `✅ [诊断] 视频任务创建成功，开始异步生成`, {
-                        taskId: result.id,
-                        status: result.status,
-                        hasImage: !!result._imageBase64
+                        taskId: videoResult.id,
+                        status: videoResult.status,
+                        hasImage: !!videoResult._imageBase64
                     });
                 } else {
-                    log.add('error', `❌ [诊断] result.id不存在`);
+                    log.add('error', `❌ [诊断] videoResult.id不存在`);
                 }
                 
                 return true;
             }
             
             // ========== 处理普通绘画模型 ==========
-            let result;
+            let imageResult;
             
             // 为 GPT 和 Grok 模型添加比例参数到提示词末尾
             let finalPrompt = optimizedPrompt;
@@ -300,18 +347,18 @@ export class Generator {
             if (modeTag === 'edit') {
                 params.prompt = finalPrompt;
                 params.n = 1; // 强制为 1
-                result = await editImage(this.apiClient, params, imageFiles, log);
+                imageResult = await editImage(this.apiClient, params, imageFiles, log);
             } else {
                 params.prompt = finalPrompt;
                 params.n = 1; // 单次调用生成一张，因为外层循环控制数量
-                result = await generateImage(this.apiClient, params, log);
+                imageResult = await generateImage(this.apiClient, params, log);
             }
 
             // 展示结果
-            displayImageResults(this.dom, result, originalPrompt, optimizedPrompt, params);
+            displayImageResults(this.dom, imageResult, originalPrompt, optimizedPrompt, params);
 
             // 保存历史记录
-            const dataArr = Array.isArray(result?.data) ? result.data : [];
+            const dataArr = Array.isArray(imageResult?.data) ? imageResult.data : [];
             if (dataArr.length > 0) {
                 for (const item of dataArr) {
                     let imageSrc = '';
@@ -339,6 +386,8 @@ export class Generator {
 
         } catch (err) {
             removeImageGeneratingPlaceholder(taskId);
+            console.error('[错误详情] 模型失败:', modelName, '错误:', err);
+            console.error('[错误堆栈]', err.stack);
             this.logger.append('error', `模型失败: ${modelName}`, String(err));
             showError(`模型 ${modelName} 生成失败`, err.message);
             return false;
