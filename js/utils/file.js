@@ -1,3 +1,18 @@
+export async function uploadToCatbox(file) {
+    const formData = new FormData();
+    formData.append('reqtype', 'fileupload');
+    formData.append('time', '12h');
+    formData.append('fileToUpload', file, file.name);
+    const response = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', {
+        method: 'POST',
+        body: formData
+    });
+    if (!response.ok) throw new Error(`Catbox upload failed: ${response.status}`);
+    const url = (await response.text()).trim();
+    if (!url.startsWith('http')) throw new Error(`Catbox returned invalid URL: ${url}`);
+    return url;
+}
+
 export function dataURIToBlob(dataURI) {
     const splitDataURI = dataURI.split(',');
     const byteString = splitDataURI[0].indexOf('base64') >= 0 ? atob(splitDataURI[1]) : decodeURI(splitDataURI[1]);

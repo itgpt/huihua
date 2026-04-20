@@ -1,3 +1,4 @@
+import { uploadToCatbox } from '../utils/file.js';
 import { createCallLogger } from '../utils/logger.js';
 import { maskApiKey } from '../utils/format.js';
 import { showSuccess, showError, showVideoSuccessToast } from '../ui/components/toast.js';
@@ -37,7 +38,7 @@ export class Generator {
             n = parseInt(this.dom.n.value, 10);
         }
 
-        const imageFiles = this.imagePreviewManager.getFiles();
+        const rawImageFiles = this.imagePreviewManager.getFiles();
         const models = this.modelSelector.getSelectedModels();
 
         // 验证逻辑已经在 validator.js 中处理，这里假设调用前已验证，或者再次验证
@@ -51,6 +52,21 @@ export class Generator {
 
         const baseLog = createCallLogger(this.logger);
         baseLog.add('info', `任务开始，Base URL: ${this.apiClient.baseUrl}`);
+
+        // 将本地文件上传到 catbox.moe，获取公网 URL 作为模型输入
+        this.dom.generateBtnText.textContent = '上传参考素材...';
+        const imageFiles = await Promise.all(rawImageFiles.map(async (file) => {
+            if (file.isFromUrl) return file;
+            try {
+                const url = await uploadToCatbox(file);
+                baseLog.add('info', `参考素材已上传: ${file.name} → ${url}`);
+                return { name: file.name, size: file.size, type: file.type, isFromUrl: true, originalUrl: url };
+            } catch (err) {
+                baseLog.add('error', `参考素材上传失败: ${file.name}`, err.message);
+                throw err;
+            }
+        }));
+
         baseLog.add('info', `选择模型 (${models.length}): ${models.join(', ')}`);
         baseLog.add('info', `API Key: ${maskApiKey(apiKey)}`);
 

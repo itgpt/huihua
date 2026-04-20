@@ -34,7 +34,11 @@ export async function editImage(client, params, imageFiles, log) {
     // ** 修正: 根据API中转逻辑，动态选择 'image' 或 'image[]' **
     const fieldName = imageFiles.length > 1 ? 'image[]' : 'image';
     imageFiles.forEach(file => {
-        formData.append(fieldName, file);
+        if (file.isFromUrl) {
+            formData.append(fieldName, file.originalUrl);
+        } else {
+            formData.append(fieldName, file);
+        }
     });
 
     for (const [key, value] of Object.entries(params)) {
