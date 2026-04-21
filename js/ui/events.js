@@ -101,7 +101,7 @@ export class EventManager {
             });
         });
 
-        const platformSelects = ['sora2ModelSelect', 'grokModelSelect', 'doubaoModelSelect', 'veoModelSelect'];
+        const platformSelects = ['grokModelSelect', 'doubaoModelSelect', 'veoModelSelect'];
         platformSelects.forEach(id => {
             const select = document.getElementById(id);
             if (select) {
@@ -257,27 +257,6 @@ export class EventManager {
             });
         });
 
-        // Sora2 模型选择事件监听
-        const sora2ModelRadios = document.querySelectorAll('input[name="sora2Model"]');
-        sora2ModelRadios.forEach(radio => {
-            radio.addEventListener('change', () => {
-                if (this.handlers.onSora2SelectionChange) this.handlers.onSora2SelectionChange();
-            });
-        });
-
-        const sora2SecondsRadios = document.querySelectorAll('input[name="sora2Seconds"]');
-        sora2SecondsRadios.forEach(radio => {
-            radio.addEventListener('change', () => {
-                if (this.handlers.onSora2SelectionChange) this.handlers.onSora2SelectionChange();
-            });
-        });
-
-        const sora2SizeRadios = document.querySelectorAll('input[name="sora2Size"]');
-        sora2SizeRadios.forEach(radio => {
-            radio.addEventListener('change', () => {
-                if (this.handlers.onSora2SelectionChange) this.handlers.onSora2SelectionChange();
-            });
-        });
     }
 
     bindFileUpload() {

@@ -213,16 +213,6 @@ export class Generator {
                     jimengParams.camera_fixed = this.dom.jimengCameraFixed ? this.dom.jimengCameraFixed.value : null;
                 }
 
-                // 收集 Sora2 专用参数
-                const sora2Params = {};
-                if (modelName === 'sora-2' || modelName === 'sora-2-pro') {
-                    const sora2SecondsEl = document.getElementById('sora2SecondsSelect');
-                    const sora2SizeEl = document.getElementById('sora2SizeSelect');
-                    sora2Params.seconds = sora2SecondsEl ? sora2SecondsEl.value : '12';
-                    sora2Params.size = sora2SizeEl ? sora2SizeEl.value : '720x1280';
-                    log.add('info', `Sora2 参数: seconds=${sora2Params.seconds}, size=${sora2Params.size}`);
-                }
-
                 // 收集 Grok 视频专用参数
                 const grokParams = {};
                 if (modelName === 'grok-video') {
@@ -252,7 +242,6 @@ export class Generator {
                     model: modelName,
                     prompt: optimizedPrompt,
                     jimeng: jimengParams,
-                    sora2: sora2Params,
                     grok: grokParams
                 }, imageFiles, log);
                 

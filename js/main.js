@@ -407,14 +407,7 @@ class App {
             onGrokSelectionChange: () => {
                 this.modelSelector.updateGrokModelSelection();
                 updateModeIndicator(this.dom, this.imagePreviewManager.getFiles().length > 0, this.modelSelector.getSelectedModels());
-            },
-            
-            onSora2SelectionChange: () => {
-                this.modelSelector.updateSora2ModelSelection();
-                updateModeIndicator(this.dom, this.imagePreviewManager.getFiles().length > 0, this.modelSelector.getSelectedModels());
-            },
-            
-            onFileSelect: (e) => this.imagePreviewManager.addFiles(Array.from(e.target.files)),
+            },            onFileSelect: (e) => this.imagePreviewManager.addFiles(Array.from(e.target.files)),
             onLoadUrl: () => this.imagePreviewManager.loadImagesFromUrls(),
             
             onGenerate: async () => {

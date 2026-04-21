@@ -32,7 +32,7 @@ export class VideoTaskManager {
         };
 
         // LocalStorage键名
-        this.storageKey = 'sora_video_tasks';
+        this.storageKey = 'video_tasks';
 
         // UI 更新回调（将在 main.js 中设置）
         this.onTaskUpdate = null;

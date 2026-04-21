@@ -41,9 +41,8 @@ export function showAnnouncement() {
             <div class="toast-section">
                 <strong>新增模型:</strong>
                 <div class="model-list">
-                    <code class="new-model">🔥 Sora-2-Pro</code><br>
                     <code class="new-model">🔥 Gemini 3.1 Flash Image</code><br>
-                    <code >🎬 sora-2</code> <code>🎬 grok-imagine-1.0</code>
+                    <code>🎬 grok-imagine-1.0</code>
                 </div>
             </div>
 
@@ -61,7 +60,6 @@ export function showAnnouncement() {
                     <p style="margin: 0; font-size: 0.85em; color: #4a5568; line-height: 1.6;">
                         <span style="color: #667eea; font-weight: 600;">版本号：v7.2.1</span><br>
                         <span style="color: #718096;">• 优化 Grok 18s视频选择</span><br>
-                        <span style="color: #718096;">• 优化 Sora2 20s视频选择</span><br>
                         <span style="color: #718096;">• 支持 提取视频帧、时间线 功能</span><br>
                     </p>
                 </div>

@@ -710,17 +710,6 @@ h1 {
     font-weight: 700;
 }
 
-/* Sora2 Pro 专属分辨率按钮 - 金色选中状态覆盖 */
-.sora2-pro-size:has(input[type="radio"]:checked) {
-    border-color: #d4a017 !important;
-    background: linear-gradient(135deg, rgba(212, 160, 23, 0.15) 0%, rgba(184, 134, 11, 0.15) 100%) !important;
-    box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.25) !important;
-}
-
-.sora2-pro-size:has(input[type="radio"]:checked) > div {
-    color: #b8860b !important;
-    font-weight: 700;
-}
 
 /* 响应式调整 */
 @media (max-width: 768px) {

@@ -4,8 +4,8 @@ import { MODEL_CONFIGS } from '../config/constants.js';
 export function isVideoModel(modelName) {
     if (!modelName) return false;
 
-    // 增加对 sora 及其他视频模型的通用名称判断
-    if (modelName.startsWith('sora') || modelName.includes('video')) {
+    // 增加对视频模型的通用名称判断
+    if (modelName.includes('video')) {
         return true;
     }
     const config = MODEL_CONFIGS[modelName];

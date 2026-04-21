@@ -93,7 +93,7 @@ export class ModelSelector {
 
     // 视频平台切换函数
     switchVideoPlatform(platform) {
-        const allPlatforms = ['sora2Models', 'grokModels', 'doubaoModels', 'veoModels'];
+        const allPlatforms = ['grokModels', 'doubaoModels', 'veoModels'];
         allPlatforms.forEach(id => {
             const element = document.getElementById(id);
             if (element) element.style.display = 'none';
@@ -222,60 +222,6 @@ export class ModelSelector {
         this.save();
     }
 
-    // 更新 Sora2 模型选择
-    updateSora2ModelSelection() {
-        const sora2ModelRadios = document.querySelectorAll('input[name="sora2Model"]');
-        const sora2SecondsRadios = document.querySelectorAll('input[name="sora2Seconds"]');
-        const sora2SizeRadios = document.querySelectorAll('input[name="sora2Size"]');
-        
-        let selectedModel = 'sora-2';
-        let selectedSeconds = '12';
-        let selectedSize = '720x1280';
-        
-        sora2ModelRadios.forEach(radio => {
-            if (radio.checked) selectedModel = radio.value;
-        });
-        sora2SecondsRadios.forEach(radio => {
-            if (radio.checked) selectedSeconds = radio.value;
-        });
-        sora2SizeRadios.forEach(radio => {
-            if (radio.checked) selectedSize = radio.value;
-        });
-        
-        // 切换 Pro 专属分辨率选项的显示
-        const proSizes = document.getElementById('sora2ProSizes');
-        const standardSizes = document.getElementById('sora2StandardSizes');
-        if (selectedModel === 'sora-2-pro') {
-            if (proSizes) proSizes.style.display = 'grid';
-        } else {
-            if (proSizes) proSizes.style.display = 'none';
-            // 若当前选中的是 Pro 专属分辨率，切换回默认
-            if (selectedSize === '1080x1920' || selectedSize === '1920x1080' || selectedSize === '1024x1792' || selectedSize === '1792x1024') {
-                selectedSize = '720x1280';
-                const defaultSizeRadio = document.querySelector('input[name="sora2Size"][value="720x1280"]');
-                if (defaultSizeRadio) defaultSizeRadio.checked = true;
-            }
-        }
-        
-        // 更新显示元素
-        const displayElement = document.getElementById('sora2ModelDisplay');
-        const secondsDisplay = document.getElementById('sora2SecondsDisplay');
-        const sizeDisplay = document.getElementById('sora2SizeDisplay');
-        const selectElement = document.getElementById('sora2ModelSelect');
-        const secondsSelectElement = document.getElementById('sora2SecondsSelect');
-        const sizeSelectElement = document.getElementById('sora2SizeSelect');
-        
-        if (displayElement) displayElement.textContent = selectedModel;
-        if (secondsDisplay) secondsDisplay.textContent = selectedSeconds + '秒';
-        if (sizeDisplay) sizeDisplay.textContent = selectedSize;
-        if (selectElement) selectElement.value = selectedModel;
-        if (secondsSelectElement) secondsSelectElement.value = selectedSeconds;
-        if (sizeSelectElement) sizeSelectElement.value = selectedSize;
-        
-        // 保存选择状态
-        this.save();
-    }
-
     // 更新 Grok 模型选择
     updateGrokModelSelection() {
         const grokModelRadios = document.querySelectorAll('input[name="grokModel"]');
@@ -344,7 +290,7 @@ export class ModelSelector {
     }
 
     clearVideoModelSelection() {
-        const platformSelects = ['sora2ModelSelect', 'grokModelSelect', 'doubaoModelSelect', 'veoModelSelect'];
+        const platformSelects = ['grokModelSelect', 'doubaoModelSelect', 'veoModelSelect'];
         platformSelects.forEach(id => {
             const select = document.getElementById(id);
             if (select) select.value = '';
@@ -353,7 +299,7 @@ export class ModelSelector {
         const platformRadios = document.querySelectorAll('input[name="videoPlatform"]');
         platformRadios.forEach(radio => radio.checked = false);
         
-        const allPlatforms = ['sora2Models', 'grokModels', 'doubaoModels', 'veoModels'];
+        const allPlatforms = ['grokModels', 'doubaoModels', 'veoModels'];
         allPlatforms.forEach(id => {
             const element = document.getElementById(id);
             if (element) element.style.display = 'none';
@@ -593,7 +539,7 @@ export class ModelSelector {
         });
         
         // 保存各平台的模型选择
-        const platformSelects = ['sora2ModelSelect', 'grokModelSelect', 'doubaoModelSelect', 'veoModelSelect'];
+        const platformSelects = ['grokModelSelect', 'doubaoModelSelect', 'veoModelSelect'];
         platformSelects.forEach(id => {
             const select = document.getElementById(id);
             if (select && select.value) {
@@ -659,28 +605,6 @@ export class ModelSelector {
             }
         });
 
-        // 保存 Sora2 模型的选择状态
-        const sora2ModelRadios = document.querySelectorAll('input[name="sora2Model"]');
-        sora2ModelRadios.forEach(radio => {
-            if (radio.checked) {
-                localStorage.setItem('aiPaintingSora2Model', radio.value);
-            }
-        });
-        
-        const sora2SecondsRadios = document.querySelectorAll('input[name="sora2Seconds"]');
-        sora2SecondsRadios.forEach(radio => {
-            if (radio.checked) {
-                localStorage.setItem('aiPaintingSora2Seconds', radio.value);
-            }
-        });
-        
-        const sora2SizeRadios = document.querySelectorAll('input[name="sora2Size"]');
-        sora2SizeRadios.forEach(radio => {
-            if (radio.checked) {
-                localStorage.setItem('aiPaintingSora2Size', radio.value);
-            }
-        });
-        
         if (this.dom.customVideoModelInput) {
             localStorage.setItem('aiPaintingCustomVideoModel', this.dom.customVideoModelInput.value.trim());
         }
@@ -742,7 +666,12 @@ export class ModelSelector {
         }
         
         // 恢复视频平台选择
-        const savedVideoPlatform = localStorage.getItem('aiPaintingVideoPlatform');
+        let savedVideoPlatform = localStorage.getItem('aiPaintingVideoPlatform');
+        const validVideoPlatforms = ['grok', 'doubao', 'veo'];
+        if (savedVideoPlatform && !validVideoPlatforms.includes(savedVideoPlatform)) {
+            savedVideoPlatform = 'grok';
+            localStorage.setItem('aiPaintingVideoPlatform', savedVideoPlatform);
+        }
         if (savedVideoPlatform) {
             const platformRadios = document.querySelectorAll('input[name="videoPlatform"]');
             platformRadios.forEach(radio => {
@@ -755,7 +684,7 @@ export class ModelSelector {
         }
         
         // 恢复各平台的模型选择
-        const platformSelects = ['sora2ModelSelect', 'grokModelSelect', 'doubaoModelSelect', 'veoModelSelect'];
+        const platformSelects = ['grokModelSelect', 'doubaoModelSelect', 'veoModelSelect'];
         platformSelects.forEach(id => {
             const select = document.getElementById(id);
             if (select) {
@@ -799,31 +728,6 @@ export class ModelSelector {
             }
         });
         
-        // 恢复 Sora2 模型的选择状态
-        const savedSora2Model = localStorage.getItem('aiPaintingSora2Model') || 'sora-2';
-        const sora2ModelRadios = document.querySelectorAll('input[name="sora2Model"]');
-        sora2ModelRadios.forEach(radio => {
-            if (radio.value === savedSora2Model) {
-                radio.checked = true;
-            }
-        });
-        
-        const savedSora2Seconds = localStorage.getItem('aiPaintingSora2Seconds') || '12';
-        const sora2SecondsRadios = document.querySelectorAll('input[name="sora2Seconds"]');
-        sora2SecondsRadios.forEach(radio => {
-            if (radio.value === savedSora2Seconds) {
-                radio.checked = true;
-            }
-        });
-        
-        const savedSora2Size = localStorage.getItem('aiPaintingSora2Size') || '720x1280';
-        const sora2SizeRadios = document.querySelectorAll('input[name="sora2Size"]');
-        sora2SizeRadios.forEach(radio => {
-            if (radio.value === savedSora2Size) {
-                radio.checked = true;
-            }
-        });
-        
         // 恢复 Grok 模型的选择状态
         const savedGrokModel = localStorage.getItem('aiPaintingGrokModel') || 'grok-imagine-0.9';
         const grokModelRadios = document.querySelectorAll('input[name="grokModel"]');
@@ -862,11 +766,6 @@ export class ModelSelector {
             this.updateVeoModelSelection();
         }
         
-        // 如果是 sora2 平台，更新模型选择
-        if (savedVideoPlatform === 'sora2') {
-            this.updateSora2ModelSelection();
-        }
-
         // 如果是 grok 平台，更新模型选择
         if (savedVideoPlatform === 'grok') {
             this.updateGrokModelSelection();

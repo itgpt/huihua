@@ -27,7 +27,7 @@ export function extractVideoUrlFromResult(result) {
         return result.url;
     }
 
-    // 方式4: 直接在顶层 (Sora等模型)
+    // 方式4: 直接在顶层
     if (result.video_url) {
         console.log('[视频URL提取] 从 result.video_url 提取:', result.video_url);
         return result.video_url;
@@ -59,7 +59,7 @@ export function extractVideoUrlFromResult(result) {
 export function extractVideoUrl(content) {
     if (!content) return null;
     
-    // 尝试多种视频标签格式，优先匹配 sora 的 markdown 格式
+    // 尝试多种视频标签格式
     const patterns = [
         /!\[[^\]]*\]\((https?:\/\/[^\s)'"]+\.mp4[^\s)'"]*)\)/i, // For ![Generated Video](URL) - 排除引号
         /\[[^\]]*\]\((https?:\/\/[^\s)'"]+\.mp4[^\s)'"]*)\)/i, // For [download video](URL) - 排除引号
@@ -94,11 +94,6 @@ export async function createVideoTask(client, params, imageFiles, log) {
         if (params.jimeng.watermark !== undefined) paramSuffix += ` -watermark=${params.jimeng.watermark}`;
         if (params.jimeng.camera_fixed !== undefined) paramSuffix += ` -camera_fixed=${params.jimeng.camera_fixed}`;
         if (paramSuffix) requestBody.prompt = params.prompt + paramSuffix;
-    }
-
-    if (params.sora2 && (params.model === 'sora-2' || params.model === 'sora-2-pro')) {
-        if (params.sora2.seconds) requestBody.seconds = params.sora2.seconds;
-        if (params.sora2.size) requestBody.size = params.sora2.size;
     }
 
     const isGrokVideo = params.model === 'grok-video';
