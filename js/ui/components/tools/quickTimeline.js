@@ -129,6 +129,7 @@ const QuickTimeline = {
         this.bindEvents();
         this.updateZoom(this.state.zoomLevel); // Initialize zoom
         this.render();
+        this.updatePreviewSource();
     },
 
     close() {
