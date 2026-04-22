@@ -2,10 +2,10 @@
 <html lang="zh-CN">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 AI 绘画&视频 工具</title>
-    <meta http-equiv="Content-Security-Policy" content="
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎨 AI 绘画&视频 工具</title>
+  <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline';
         style-src 'self' 'unsafe-inline';
@@ -13,1412 +13,1393 @@
         media-src 'self' data: blob: http: https:;
         connect-src http: https: *;
     ">
-    <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <!-- 浮动提示框 (从原位置移动至此) -->
-    <div id="errorMsg" class="toast-notification error"></div>
-    <div id="successMsg" class="toast-notification success"></div>
-    <div class="container">
-        <!-- 顶部标题区域 -->
-        <div class="header-section">
-            <h1>🎨 AI 创作工坊</h1>
-            <p class="subtitle">激发无限创意 · 探索AI艺术的边界</p>
+  <!-- 浮动提示框 (从原位置移动至此) -->
+  <div id="errorMsg" class="toast-notification error"></div>
+  <div id="successMsg" class="toast-notification success"></div>
+  <div class="container">
+    <!-- 顶部标题区域 -->
+    <div class="header-section">
+      <h1>🎨 AI 创作工坊</h1>
+      <p class="subtitle">激发无限创意 · 探索AI艺术的边界</p>
+    </div>
+
+    <div class="main-content">
+      <!-- 左侧控制面板 -->
+      <div class="left-panel">
+
+        <!-- API 设置卡片 - 可折叠 -->
+        <div class="card config-card api-config-card">
+          <div class="api-config-header">
+            <div class="api-config-title">
+              <span class="icon-box" style="background: linear-gradient(135deg, #667eea, #764ba2);">🔑</span>
+              <h3>API 配置</h3>
+              <span class="api-status required">⚠️ 必填</span>
+            </div>
+            <span class="api-toggle-icon">▼</span>
+          </div>
+          <div class="api-config-body">
+            <div class="card-body">
+              <!-- API KEY 输入框 -->
+              <div class="input-group api-input-container" id="apiKeyContainer">
+                <div class="api-input-header">
+                  <span class="api-status-badge"> </span>
+                  <label for="apiKey">API 令牌 (KEY)</label>
+                </div>
+                <input type="password" id="apiKey" placeholder="sk-..." class="glass-input">
+              </div>
+
+              <!-- 接口地址输入框 -->
+              <div class="input-group api-input-container" id="apiBaseUrlContainer">
+                <div class="api-input-header">
+                  <span class="api-status-badge"> </span>
+                  <label for="apiBaseUrl">接口地址 (Base URL)</label>
+                </div>
+                <input type="text" id="apiBaseUrl" placeholder="https://api.wanwuhuanxin.cn"
+                  value="https://api.wanwuhuanxin.cn" class="glass-input">
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="main-content">
-            <!-- 左侧控制面板 -->
-            <div class="left-panel">
+        <!-- 实用工具卡片 -->
+        <div class="card tools-card">
+          <h3>
+            <span class="icon-box" style="background: linear-gradient(135deg, #f093fb, #f5576c);">🛠️</span>
+            实用工具
+          </h3>
+          <div class="card-body">
+            <div class="tools-grid">
+              <!-- 提示词库 -->
+              <button class="tool-button" data-tool="promptLibrary" title="图片提示词库">
+                <span class="tool-icon">✨</span>
+                <span class="tool-label">提示词库</span>
+              </button>
 
-                <!-- API 设置卡片 - 可折叠 -->
-                <div class="card config-card api-config-card">
-                    <div class="api-config-header">
-                        <div class="api-config-title">
-                            <span class="icon-box"
-                                style="background: linear-gradient(135deg, #667eea, #764ba2);">🔑</span>
-                            <h3>API 配置</h3>
-                            <span class="api-status required">⚠️ 必填</span>
-                        </div>
-                        <span class="api-toggle-icon">▼</span>
-                    </div>
-                    <div class="api-config-body">
-                        <div class="card-body">
-                            <!-- API KEY 输入框 -->
-                            <div class="input-group api-input-container" id="apiKeyContainer">
-                                <div class="api-input-header">
-                                    <span class="api-status-badge"> </span>
-                                    <label for="apiKey">API 令牌 (KEY)</label>
-                                </div>
-                                <input type="password" id="apiKey" placeholder="sk-..." class="glass-input">
-                            </div>
+              <!-- 图片分割 -->
+              <button class="tool-button" data-tool="imageSlicer" title="图片分割工厂">
+                <span class="tool-icon">✂️</span>
+                <span class="tool-label">图片分割</span>
+              </button>
 
-                            <!-- 接口地址输入框 -->
-                            <div class="input-group api-input-container" id="apiBaseUrlContainer">
-                                <div class="api-input-header">
-                                    <span class="api-status-badge"> </span>
-                                    <label for="apiBaseUrl">接口地址 (Base URL)</label>
-                                </div>
-                                <input type="text" id="apiBaseUrl" placeholder="https://api.wanwuhuanxin.cn"
-                                    value="https://api.wanwuhuanxin.cn" class="glass-input">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              <!-- 视频帧提取 -->
+              <button class="tool-button" data-tool="videoFrames" title="提取视频帧">
+                <span class="tool-icon">🎞️</span>
+                <span class="tool-label">提取视频帧</span>
+              </button>
 
-                <!-- 实用工具卡片 -->
-                <div class="card tools-card">
-                    <h3>
-                        <span class="icon-box" style="background: linear-gradient(135deg, #f093fb, #f5576c);">🛠️</span>
-                        实用工具
-                    </h3>
-                    <div class="card-body">
-                        <div class="tools-grid">
-                            <!-- 提示词库 -->
-                            <button class="tool-button" data-tool="promptLibrary" title="图片提示词库">
-                                <span class="tool-icon">✨</span>
-                                <span class="tool-label">提示词库</span>
-                            </button>
+              <!-- 快捷时间线 -->
+              <button class="tool-button" data-tool="timeline" title="时间线">
+                <span class="tool-icon">🎬</span>
+                <span class="tool-label">时间线</span>
+              </button>
 
-                            <!-- 图片分割 -->
-                            <button class="tool-button" data-tool="imageSlicer" title="图片分割工厂">
-                                <span class="tool-icon">✂️</span>
-                                <span class="tool-label">图片分割</span>
-                            </button>
+              <!-- 分镜设计 -->
+              <button class="tool-button" data-tool="分镜设计" title="分镜设计">
+                <span class="tool-icon">📐</span>
+                <span class="tool-label">分镜设计</span>
+              </button>
 
-                            <!-- 视频帧提取 -->
-                            <button class="tool-button" data-tool="videoFrames" title="提取视频帧">
-                                <span class="tool-icon">🎞️</span>
-                                <span class="tool-label">提取视频帧</span>
-                            </button>
+              <!-- XHS灵感实验室 -->
+              <button class="tool-button" data-tool="灵感实验室" title="灵感实验室">
+                <span class="tool-icon">💡</span>
+                <span class="tool-label">灵感实验室</span>
+              </button>
 
-                            <!-- 快捷时间线 -->
-                            <button class="tool-button" data-tool="timeline" title="时间线">
-                                <span class="tool-icon">🎬</span>
-                                <span class="tool-label">时间线</span>
-                            </button>
-
-                            <!-- 分镜设计 -->
-                            <button class="tool-button" data-tool="分镜设计" title="分镜设计">
-                                <span class="tool-icon">📐</span>
-                                <span class="tool-label">分镜设计</span>
-                            </button>
-
-                            <!-- XHS灵感实验室 -->
-                            <button class="tool-button" data-tool="灵感实验室" title="灵感实验室">
-                                <span class="tool-icon">💡</span>
-                                <span class="tool-label">灵感实验室</span>
-                            </button>
-
-                            <!-- 敬请期待 -->
-                            <!-- <button class="tool-button" data-tool="更多工具" title="敬请期待">
+              <!-- 敬请期待 -->
+              <!-- <button class="tool-button" data-tool="更多工具" title="敬请期待">
                                 <span class="tool-icon">💡</span>
                                 <span class="tool-label">敬请期待..</span>
                             </button> -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 提示词卡片 -->
-                <div class="card prompt-card">
-                    <h3>
-                        <span class="icon-box" style="background: linear-gradient(135deg, #ff9a9e, #fecfef);">✨</span>
-                        提示词工程
-                        <span class="badge badge-blue">智能优化</span>
-                    </h3>
-                    <div class="card-body">
-                        <!-- 提示词优化开关 -->
-                        <div class="input-group">
-                            <label class="custom-checkbox"
-                                style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:0;">
-                                <input type="checkbox" id="enablePromptOptimizer"
-                                    style="width:18px; height:18px; cursor:pointer;">
-                                <span style="font-weight:600; color:#4a5568;">启用提示词优化</span>
-                            </label>
-                            <p style="font-size:0.85rem; color:#718096; margin:4px 0 0 26px;">
-                                开启后可使用AI优化你的提示词，提升生成效果
-                            </p>
-                        </div>
-
-                        <!-- 优化模型选择（默认隐藏） -->
-                        <div class="input-group" id="optimizerModelGroup" style="display:none;">
-                            <label for="promptOptimizerModel">优化模型</label>
-                            <select id="promptOptimizerModel">
-                                <option value="gpt-5-chat">gpt-5-chat (默认)</option>
-                                <option value="gpt-4o-mini">gpt-4o-mini</option>
-                                <option value="__custom__">自定义...</option>
-                            </select>
-                            <input type="text" id="customOptimizerModelInput" placeholder="请输入自定义优化模型名称"
-                                style="display:none; margin-top:8px;">
-                        </div>
-
-                        <!-- 优化指令（默认隐藏） -->
-                        <div class="input-group" id="optimizerSystemPromptGroup" style="display:none;">
-                            <label for="optimizerSystemPrompt">优化指令 (System Prompt)</label>
-                            <textarea id="optimizerSystemPrompt" class="glass-input"
-                                style="height: 80px;">你是一个专业的AI绘画提示词优化专家。请将用户输入的中文描述优化并翻译成高质量的英文绘画提示词。要求：1.保持原意不变 2.增加艺术性描述 3.使用专业绘画术语 4.直接返回优化后的英文提示词，不要解释过程</textarea>
-                        </div>
-
-                        <!-- 创意描述 -->
-                        <div class="input-group highlight-group prompt-input-container">
-                            <!-- 添加醒目的标题 -->
-                            <div class="prompt-header">
-                                <span class="prompt-status-badge"> </span>
-                                <h4 class="prompt-title">💡 创意描述 (Prompt)</h4>
-                                <p class="prompt-hint">请在此输入您的创意想法，描述想要生成的图片或视频</p>
-                            </div>
-                            <textarea id="prompt" placeholder="描述您想要生成的图片或视频..."
-                                style="height: 130px;">create a 1/7 scale commercialized figure of thecharacter in the illustration, in a realistic styie and environment.Place the figure on a computer desk, using a circular transparent acrylic base without any text.On the computer screen, display the ZBrush modeling process of the figure.Next to the computer screen, place a BANDAl-style toy packaging box printedwith the original artwork.</textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 模型参数卡片 -->
-                <div class="card params-card">
-                    <h3>
-                        <span class="icon-box" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb);">🎯</span>
-                        模型与参数
-                    </h3>
-                    <div class="card-body">
-                        <!-- 模型类型选择器 -->
-                        <div class="model-type-selector">
-                            <!-- 添加醒目的标题 -->
-                            <div class="selector-header">
-                                <span class="required-badge">⚠️ 必选</span>
-                                <h4 class="selector-title">第一步：选择模型类型</h4>
-                                <p class="selector-hint">请先选择您要使用的模型类型（绘画或视频）</p>
-                            </div>
-
-                            <div class="selector-options">
-                                <label class="model-type-option">
-                                    <input type="radio" name="modelType" value="image">
-                                    <div class="option-content">
-                                        <span class="option-icon">🎨</span>
-                                        <span class="option-title">绘画模型</span>
-                                        <span class="option-desc">生成静态图片</span>
-                                    </div>
-                                </label>
-                                <label class="model-type-option">
-                                    <input type="radio" name="modelType" value="video">
-                                    <div class="option-content">
-                                        <span class="option-icon">🎬</span>
-                                        <span class="option-title">视频模型</span>
-                                        <span class="option-desc">生成动态视频</span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- 绘画模型区域 -->
-                        <div id="imageModelSection" style="display:none;">
-                            <!-- 绘画平台选择器 -->
-                            <div class="video-platform-selector">
-                                <div class="selector-header">
-                                    <span class="required-badge">⚠️ 必选</span>
-                                    <h4 class="selector-title">第二步：选择绘画平台</h4>
-                                    <p class="selector-hint">请选择一个绘画生成平台</p>
-                                </div>
-
-                                <div class="selector-options">
-                                    <label class="platform-option">
-                                        <input type="radio" name="imagePlatform" value="openai">
-                                        <span>OpenAI</span>
-                                    </label>
-                                    <label class="platform-option">
-                                        <input type="radio" name="imagePlatform" value="gemini">
-                                        <span>Gemini</span>
-                                    </label>
-                                    <label class="platform-option">
-                                        <input type="radio" name="imagePlatform" value="grok">
-                                        <span>Grok</span>
-                                    </label>
-                                    <label class="platform-option">
-                                        <input type="radio" name="imagePlatform" value="doubao">
-                                        <span>Doubao</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- OpenAI 模型列表 -->
-                            <div id="openaiModels" class="platform-models" style="display:none;">
-                                <label style="font-weight: 600; margin-bottom: 8px; display: block; color: #333;">OpenAI
-                                    绘画模型（可多选）：</label>
-                                <select id="openaiModelSelect" multiple size="5"
-                                    style="width:100%; padding: 8px; border: 2px solid #e9ecef; border-radius: 8px; background: #fff;">
-                                    <option value="gpt-4o-image">gpt-4o-image</option>
-                                    <option value="gpt-4o-image-vip">gpt-4o-image-vip</option>
-                                    <option value="gpt-image-1">gpt-image-1</option>
-                                    <option value="gpt-image-1-vip">gpt-image-1-vip</option>
-                                    <option value="gpt-image-1.5">gpt-image-1.5</option>
-                                </select>
-                            </div>
-
-                            <!-- Gemini 模型列表 -->
-                            <div id="geminiModels" class="platform-models" style="display:none;">
-                                <label style="font-weight: 600; margin-bottom: 8px; display: block; color: #333;">Gemini
-                                    绘画模型（可多选）：</label>
-                                <select id="geminiModelSelect" multiple size="7"
-                                    style="width:100%; padding: 8px; border: 2px solid #e9ecef; border-radius: 8px; background: #fff;">
-                                    <option value="gemini-2.5-flash-image">gemini-2.5-flash-image（香蕉）</option>
-                                    <option value="gemini-3-pro-image-preview">gemini-3-pro-image-preview（香蕉Pro）
-                                    </option>
-                                    <option value="gemini-3-pro-image-preview-4k">gemini-3-pro-image-preview-4k（香蕉Pro
-                                        4K）</option>
-                                    <option value="gemini-3-pro-image-preview-url">gemini-3-pro-image-preview-url（香蕉Pro
-                                        Url）</option>
-                                    <option value="gemini-3-pro-image-preview-4k-url">
-                                        gemini-3-pro-image-preview-4k-url（香蕉Pro 4K Url）</option>
-                                    <option value="gemini-3.1-flash-image-preview">gemini-3.1-flash-image-preview（新香蕉
-                                        3.1）</option>
-                                    <option value="gemini-3.1-flash-image-preview-4k">
-                                        gemini-3.1-flash-image-preview-4k（新香蕉 3.1 4K）</option>
-                                </select>
-                            </div>
-
-                            <!-- Grok 模型列表 -->
-                            <div id="grokImageModels" class="platform-models" style="display:none;">
-                                <label style="font-weight: 600; margin-bottom: 8px; display: block; color: #333;">Grok
-                                    绘画模型（可多选）：</label>
-                                <select id="grokImageModelSelect" multiple size="3"
-                                    style="width:100%; padding: 8px; border: 2px solid #e9ecef; border-radius: 8px; background: #fff;">
-                                    <option value="grok-3-image">grok-3-image</option>
-                                    <option value="grok-4-image">grok-4-image</option>
-                                    <option value="grok-4.1-image">grok-4.1-image</option>
-                                </select>
-                            </div>
-
-                            <!-- Doubao 模型列表 -->
-                            <div id="doubaoImageModels" class="platform-models" style="display:none;">
-                                <label style="font-weight: 600; margin-bottom: 8px; display: block; color: #333;">Doubao
-                                    绘画模型（可多选）：</label>
-                                <select id="doubaoImageModelSelect" multiple size="2"
-                                    style="width:100%; padding: 8px; border: 2px solid #e9ecef; border-radius: 8px; background: #fff;">
-                                    <option value="doubao-seedream-4-5-251128">doubao-seedream-4-5-251128（即梦 4.5）
-                                    </option>
-                                </select>
-                            </div>
-
-                            <!-- 自定义绘画模型 -->
-                            <input type="text" id="customImageModelInput" placeholder="自定义绘画模型名称"
-                                style="display:none; margin-top:8px;">
-                            <label class="custom-checkbox" style="margin-top:8px;">
-                                <input type="checkbox" id="useCustomImageModel"
-                                    style="margin-right:8px; width:18px; height:18px; cursor:pointer;">
-                                <span>使用自定义模型</span>
-                            </label>
-                        </div>
-
-                        <!-- 视频模型区域 -->
-                        <div id="videoModelSection" style="display:none;">
-                            <!-- 视频平台选择器 -->
-                            <div class="video-platform-selector">
-                                <div class="selector-header">
-                                    <span class="required-badge">⚠️ 必选</span>
-                                    <h4 class="selector-title">第二步：选择视频平台</h4>
-                                    <p class="selector-hint">请选择一个视频生成平台</p>
-                                </div>
-
-                                <div class="selector-options">
-                                    <label class="platform-option">
-                                        <input type="radio" name="videoPlatform" value="grok">
-                                        <span>Grok</span>
-                                    </label>
-                                    <label class="platform-option">
-                                        <input type="radio" name="videoPlatform" value="doubao">
-                                        <span>Doubao</span>
-                                    </label>
-                                    <label class="platform-option">
-                                        <input type="radio" name="videoPlatform" value="veo">
-                                        <span>Veo3.1</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Grok 模型列表 -->
-                            <div id="grokModels" class="platform-models" style="display:none;">
-                                <!-- 模型选择 -->
-                                <div class="input-group" style="margin-bottom:16px;">
-                                    <label
-                                        style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">①</span> 模型版本
-                                    </label>
-                                    <div style="display:grid; grid-template-columns:1fr; gap:10px;">
-                                        <label class="radio-button"
-                                            style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokModel" value="grok-video" checked
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🎬 grok-video</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">视频生成模型</div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 视频时长选择 -->
-                                <div class="input-group" style="margin-bottom:16px;">
-                                    <label
-                                        style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">②</span> 视频时长 (duration)
-                                    </label>
-                                    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px;">
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokDuration" value="10" checked style="display:none;">
-                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">10秒</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokDuration" value="15" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">15秒</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokDuration" value="20" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">20秒</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokDuration" value="25" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">25秒</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokDuration" value="30" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">30秒</div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 画面比例选择 -->
-                                <div class="input-group" style="margin-bottom:16px;">
-                                    <label
-                                        style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">③</span> 画面比例 (aspect_ratio)
-                                    </label>
-                                    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;">
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="16:9" checked style="display:none;">
-                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">16:9</div>
-                                            <div style="font-size:0.7rem; color:#718096; margin-top:2px;">横屏</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="9:16" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">9:16</div>
-                                            <div style="font-size:0.7rem; color:#718096; margin-top:2px;">竖屏</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="1:1" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">1:1</div>
-                                            <div style="font-size:0.7rem; color:#718096; margin-top:2px;">方形</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="3:2" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">3:2</div>
-                                            <div style="font-size:0.7rem; color:#718096; margin-top:2px;">横向</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="grokAspectRatio" value="2:3" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">2:3</div>
-                                            <div style="font-size:0.7rem; color:#718096; margin-top:2px;">纵向</div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 显示当前选择的模型及参数 -->
-                                <div
-                                    style="padding:12px; background:linear-gradient(135deg, #667eea15, #764ba215); border:2px solid #667eea40; border-radius:8px; margin-top:4px;">
-                                    <div style="font-size:0.85rem; color:#718096; margin-bottom:6px;">✨ 当前配置</div>
-                                    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-                                        <span style="font-size:0.8rem; color:#718096;">模型:</span>
-                                        <span
-                                            style="font-weight:700; font-size:0.95rem; color:#667eea; font-family:monospace;"
-                                            id="grokModelDisplay">grok-video</span>
-                                        <span style="font-size:0.8rem; color:#718096;">时长:</span>
-                                        <span style="font-weight:600; font-size:0.9rem; color:#4a5568;"
-                                            id="grokDurationDisplay">10秒</span>
-                                        <span style="font-size:0.8rem; color:#718096;">比例:</span>
-                                        <span style="font-weight:600; font-size:0.9rem; color:#4a5568;"
-                                            id="grokAspectRatioDisplay">16:9</span>
-                                    </div>
-                                </div>
-
-                                <!-- 隐藏的input用于存储最终选择的模型 -->
-                                <input type="hidden" id="grokModelSelect" value="grok-video">
-                                <input type="hidden" id="grokDurationSelect" value="10">
-                                <input type="hidden" id="grokAspectRatioSelect" value="16:9">
-                            </div>
-
-                            <!-- Doubao 模型列表 -->
-                            <div id="doubaoModels" class="platform-models" style="display:none;">
-                                <select id="doubaoModelSelect" size="2"
-                                    style="width:100%; padding:8px; border:2px solid #e9ecef; border-radius:8px; background:#fff;">
-                                    <option value="doubao-seedance-1-5-pro-251215">doubao-seedance-1-5-pro-251215（豆包 1.5
-                                        Pro 12s）</option>
-                                    <option value="doubao-seedance-1-0-pro-250528">doubao-seedance-1-0-pro-250528（豆包 1.0
-                                        Pro 12s）</option>
-                                </select>
-                            </div>
-
-                            <!-- Veo 模型列表 -->
-                            <div id="veoModels" class="platform-models" style="display:none;">
-                                <!-- 第一级：视频类型选择 -->
-                                <div class="input-group" style="margin-bottom:16px;">
-                                    <label
-                                        style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">①</span> 选择视频类型
-                                    </label>
-                                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
-                                        <label class="radio-button"
-                                            style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="veoType" value="text2video" checked
-                                                style="display:none;">
-                                            <div style="font-size:1.2rem; margin-bottom:4px;">📝</div>
-                                            <div style="font-weight:600; font-size:0.9rem;">文生视频</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Text to Video
-                                            </div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="veoType" value="frame2video"
-                                                style="display:none;">
-                                            <div style="font-size:1.2rem; margin-bottom:4px;">🎞️</div>
-                                            <div style="font-weight:600; font-size:0.9rem;">帧转视频</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Frame to
-                                                Video</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="veoType" value="gif" style="display:none;">
-                                            <div style="font-size:1.2rem; margin-bottom:4px;">🎬</div>
-                                            <div style="font-weight:600; font-size:0.9rem;">生成GIF</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Generate GIF
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 第二级：画质选择（文生视频/帧转视频）-->
-                                <div class="input-group" id="veoQualityGroup" style="margin-bottom:16px;">
-                                    <label
-                                        style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">②</span> 选择画质
-                                    </label>
-                                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
-                                        <label class="radio-button"
-                                            style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="veoQuality" value="4k" checked
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">4K 超清</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Ultra 4K
-                                            </div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="veoQuality" value="hd" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">HD 高清</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">High
-                                                Definition</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="veoQuality" value="standard"
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">普通画质</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Standard
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 第二级：生成方式（GIF类型）-->
-                                <div class="input-group" id="veoGifModeGroup" style="margin-bottom:16px; display:none;">
-                                    <label
-                                        style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">②</span> 选择生成方式
-                                    </label>
-                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                                        <label class="radio-button"
-                                            style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="veoGifMode" value="text" checked
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">📝 文生GIF
-                                            </div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Text to GIF
-                                            </div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="veoGifMode" value="frame" style="display:none;">
-                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🎞️ 帧转GIF
-                                            </div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Frame to GIF
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 第三级：方向选择 -->
-                                <div class="input-group" style="margin-bottom:16px;">
-                                    <label
-                                        style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
-                                        <span style="color:#667eea;">③</span> 选择视频方向
-                                    </label>
-                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                                        <label class="radio-button"
-                                            style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="veoOrientation" value="landscape" checked
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🖥️ 横屏</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Landscape
-                                                (16:9)</div>
-                                        </label>
-                                        <label class="radio-button"
-                                            style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
-                                            <input type="radio" name="veoOrientation" value="portrait"
-                                                style="display:none;">
-                                            <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">📱 竖屏</div>
-                                            <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Portrait
-                                                (9:16)</div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 显示当前选择的模型 -->
-                                <div
-                                    style="padding:12px; background:linear-gradient(135deg, #667eea15, #764ba215); border:2px solid #667eea40; border-radius:8px; margin-top:16px;">
-                                    <div style="font-size:0.85rem; color:#718096; margin-bottom:4px;">✨ 当前选择的模型</div>
-                                    <div style="font-weight:600; font-size:1rem; color:#667eea; font-family:monospace;"
-                                        id="veoModelDisplay">veo3.1-landscape-4k</div>
-                                </div>
-
-                                <!-- 隐藏的input用于存储最终选择的模型 -->
-                                <input type="hidden" id="veoModelSelect" value="veo3.1-landscape-4k">
-                            </div>
-
-                            <!-- 自定义视频模型 -->
-                            <input type="text" id="customVideoModelInput" placeholder="自定义视频模型名称"
-                                style="display:none; margin-top:8px;">
-                            <label class="custom-checkbox" style="margin-top:8px;">
-                                <input type="checkbox" id="useCustomVideoModel"
-                                    style="margin-right:8px; width:18px; height:18px; cursor:pointer;">
-                                <span>使用自定义模型</span>
-                            </label>
-                        </div>
-
-                        <div class="param-grid">
-                            <!-- Gemini 分辨率选择器 - 第一位 -->
-                            <div class="input-group" id="geminiResolutionGroup" style="display:none;">
-                                <label for="geminiImageSize">清晰度</label>
-                                <select id="geminiImageSize" class="glass-select">
-                                    <option value="1K">1K - 标准</option>
-                                    <option value="2K">2K - 高清</option>
-                                    <option value="4K">4K - 超清</option>
-                                </select>
-                            </div>
-
-                            <!-- 尺寸/宽高比 - 第二位 -->
-                            <div class="input-group" id="size-param-group">
-                                <label for="size">宽高比</label>
-                                <select id="size" class="glass-select">
-                                    <option value="1:1">1:1 方形</option>
-                                    <option value="16:9">16:9 横向</option>
-                                    <option value="9:16">9:16 纵向</option>
-                                    <option value="4:3">4:3 横向</option>
-                                    <option value="3:4">3:4 纵向</option>
-                                    <option value="3:2">3:2 横向</option>
-                                    <option value="2:3">2:3 纵向</option>
-                                    <option value="5:4">5:4 横向</option>
-                                    <option value="4:5">4:5 纵向</option>
-                                    <option value="21:9">21:9 超宽</option>
-                                </select>
-                            </div>
-
-                            <!-- 返回格式 - 仅非Gemini模型显示 -->
-                            <div class="input-group" id="responseFormatGroup">
-                                <label for="response_format">格式</label>
-                                <select id="response_format" class="glass-select">
-                                    <option value="url">URL (链接)</option>
-                                    <option value="b64_json">Base64 (嵌入)</option>
-                                </select>
-                            </div>
-
-                            <!-- 输出个数 - 第三位 -->
-                            <div class="input-group">
-                                <label for="n">生成数量</label>
-                                <select id="n" class="glass-select">
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="__custom__">自定义...</option>
-                                </select>
-                                <input type="number" id="customNInput" placeholder="请输入自定义张数"
-                                    style="display:none; margin-top:8px;" min="1" max="10">
-                            </div>
-
-                        </div>
-
-                        <!-- 即梦视频模型专用参数 -->
-                        <div id="jimengVideoParamsGroup"
-                            style="display:none; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
-                            <div style="margin-bottom: 12px;">
-                                <span style="font-weight: 600; color: #667eea; font-size: 0.9rem;">🎬 豆包视频参数</span>
-                            </div>
-                            <div class="param-grid">
-                                <div class="input-group">
-                                    <label for="jimengSeconds">视频秒数</label>
-                                    <select id="jimengSeconds" class="glass-select">
-                                        <option value="4">4秒</option>
-                                        <option value="5">5秒</option>
-                                        <option value="6">6秒</option>
-                                        <option value="8">8秒</option>
-                                        <option value="10">10秒</option>
-                                        <option value="12" selected>12秒（默认）</option>
-                                    </select>
-                                </div>
-
-                                <div class="input-group">
-                                    <label for="jimengRatio">视频比例</label>
-                                    <select id="jimengRatio" class="glass-select">
-                                        <option value="16:9" selected>16:9 横屏</option>
-                                        <option value="9:16">9:16 竖屏</option>
-                                        <option value="1:1">1:1 方形</option>
-                                        <option value="4:3">4:3 横向</option>
-                                        <option value="3:4">3:4 纵向</option>
-                                        <option value="21:9">21:9 超宽</option>
-                                    </select>
-                                </div>
-
-                                <div class="input-group">
-                                    <label for="jimengResolution">分辨率</label>
-                                    <select id="jimengResolution" class="glass-select">
-                                        <option value="480p">480p 标清</option>
-                                        <option value="720p">720p 高清</option>
-                                        <option value="1080p" selected>1080p 全高清</option>
-                                    </select>
-                                </div>
-
-                                <div class="input-group">
-                                    <label for="jimengGenerateAudio">生成音频</label>
-                                    <select id="jimengGenerateAudio" class="glass-select">
-                                        <option value="false" selected>否</option>
-                                        <option value="true">是（仅1.5 Pro）</option>
-                                    </select>
-                                </div>
-
-                                <div class="input-group">
-                                    <label for="jimengWatermark">水印</label>
-                                    <select id="jimengWatermark" class="glass-select">
-                                        <option value="false" selected>无水印</option>
-                                        <option value="true">有水印</option>
-                                    </select>
-                                </div>
-
-                                <div class="input-group">
-                                    <label for="jimengCameraFixed">相机固定</label>
-                                    <select id="jimengCameraFixed" class="glass-select">
-                                        <option value="false" selected>否（默认）</option>
-                                        <option value="true">是</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 图片上传卡片 -->
-                <div class="card upload-card">
-                    <h3>
-                        <span class="icon-box" style="background: linear-gradient(135deg, #84fab0, #8fd3f4);">🖼️</span>
-                        参考素材
-                    </h3>
-                    <div class="card-body">
-                        <!-- 图片预览区域 -->
-                        <div id="imagePreviewContainer" class="image-preview-container"></div>
-
-                        <!-- 上传区域 -->
-                        <div class="upload-grid">
-                            <div class="file-upload">
-                                <input type="file" id="imageFile" accept="image/jpeg,image/png,image/jpg" multiple>
-                                <label for="imageFile" class="file-upload-label">
-                                    <span class="upload-icon">📁</span>
-                                    <span>上传本地图片</span>
-                                </label>
-                            </div>
-
-                            <div class="url-input-wrapper">
-                                <textarea id="imageUrls" placeholder="输入图片URL，每行一个" class="glass-input"></textarea>
-                                <button id="loadUrlsBtn" class="btn-url-load">加载</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 操作栏 -->
-                <div class="action-bar">
-                    <button class="btn btn-primary btn-lg">
-                        <span id="generateBtnText">🎨 立即生成</span>
-                    </button>
-                    <div id="modeIndicator" class="mode-badge">
-                        当前模式: <span id="currentMode">图片生成</span>
-                    </div>
-                </div>
-
-            </div> <!-- End of Left Panel -->
-
-            <!-- 右侧结果面板 -->
-            <div class="right-panel">
-                <div class="card result-card">
-                    <h3>
-                        <span class="icon-box" style="background: linear-gradient(135deg, #fccb90, #d57eeb);">🖼️</span>
-                        创作画廊
-                    </h3>
-                    <div class="card-body result-body">
-                        <div class="loading" id="loading">
-                            <div class="spinner"></div>
-                            <p>AI 正在挥洒创意...</p>
-                        </div>
-
-                        <!-- 视频任务容器 -->
-                        <div id="videoTasksContainer" class="video-tasks-container" style="display: none;">
-                            <div class="video-tasks-header">
-                                <h3>🎬 视频生成中</h3>
-                                <span class="tasks-count">进行中: <span id="tasksInProgress">0</span></span>
-                            </div>
-                            <div class="video-tasks-scroll">
-                                <div id="videoTasksList" class="video-tasks-list">
-                                    <!-- 任务卡片将动态插入这里 -->
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="resultImages" class="gallery-grid"></div>
-
-                        <!-- 实时日志面板 -->
-                        <div class="log-section">
-                            <div class="log-header">
-                                <span>📜 运行日志</span>
-                                <div class="log-actions">
-                                    <button id="copyLogsBtn" class="btn-icon" title="复制日志">📋</button>
-                                    <button id="clearLogsBtn" class="btn-icon" title="清空日志">🧹</button>
-                                </div>
-                            </div>
-                            <div id="liveLogs" class="log-panel" aria-live="polite" data-placeholder="等待任务开始..."></div>
-                        </div>
-                    </div>
-                </div>
             </div>
+          </div>
         </div>
 
-        <!-- 历史记录全宽卡片 -->
-        <div class="card history-card">
+        <!-- 提示词卡片 -->
+        <div class="card prompt-card">
+          <h3>
+            <span class="icon-box" style="background: linear-gradient(135deg, #ff9a9e, #fecfef);">✨</span>
+            提示词工程
+            <span class="badge badge-blue">智能优化</span>
+          </h3>
+          <div class="card-body">
+            <!-- 提示词优化开关 -->
+            <div class="input-group">
+              <label class="custom-checkbox"
+                style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:0;">
+                <input type="checkbox" id="enablePromptOptimizer" style="width:18px; height:18px; cursor:pointer;">
+                <span style="font-weight:600; color:#4a5568;">启用提示词优化</span>
+              </label>
+              <p style="font-size:0.85rem; color:#718096; margin:4px 0 0 26px;">
+                开启后可使用AI优化你的提示词，提升生成效果
+              </p>
+            </div>
+
+            <!-- 优化模型选择（默认隐藏） -->
+            <div class="input-group" id="optimizerModelGroup" style="display:none;">
+              <label for="promptOptimizerModel">优化模型</label>
+              <select id="promptOptimizerModel">
+                <option value="gpt-5-chat">gpt-5-chat (默认)</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+                <option value="__custom__">自定义...</option>
+              </select>
+              <input type="text" id="customOptimizerModelInput" placeholder="请输入自定义优化模型名称"
+                style="display:none; margin-top:8px;">
+            </div>
+
+            <!-- 优化指令（默认隐藏） -->
+            <div class="input-group" id="optimizerSystemPromptGroup" style="display:none;">
+              <label for="optimizerSystemPrompt">优化指令 (System Prompt)</label>
+              <textarea id="optimizerSystemPrompt" class="glass-input"
+                style="height: 80px;">你是一个专业的AI绘画提示词优化专家。请将用户输入的中文描述优化并翻译成高质量的英文绘画提示词。要求：1.保持原意不变 2.增加艺术性描述 3.使用专业绘画术语 4.直接返回优化后的英文提示词，不要解释过程</textarea>
+            </div>
+
+            <!-- 创意描述 -->
+            <div class="input-group highlight-group prompt-input-container">
+              <!-- 添加醒目的标题 -->
+              <div class="prompt-header">
+                <span class="prompt-status-badge"> </span>
+                <h4 class="prompt-title">💡 创意描述 (Prompt)</h4>
+                <p class="prompt-hint">请在此输入您的创意想法，描述想要生成的图片或视频</p>
+              </div>
+              <textarea id="prompt" placeholder="描述您想要生成的图片或视频..."
+                style="height: 130px;">create a 1/7 scale commercialized figure of thecharacter in the illustration, in a realistic styie and environment.Place the figure on a computer desk, using a circular transparent acrylic base without any text.On the computer screen, display the ZBrush modeling process of the figure.Next to the computer screen, place a BANDAl-style toy packaging box printedwith the original artwork.</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 模型参数卡片 -->
+        <div class="card params-card">
+          <h3>
+            <span class="icon-box" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb);">🎯</span>
+            模型与参数
+          </h3>
+          <div class="card-body">
+            <!-- 模型类型选择器 -->
+            <div class="model-type-selector">
+              <!-- 添加醒目的标题 -->
+              <div class="selector-header">
+                <span class="required-badge">⚠️ 必选</span>
+                <h4 class="selector-title">第一步：选择模型类型</h4>
+                <p class="selector-hint">请先选择您要使用的模型类型（绘画或视频）</p>
+              </div>
+
+              <div class="selector-options">
+                <label class="model-type-option">
+                  <input type="radio" name="modelType" value="image">
+                  <div class="option-content">
+                    <span class="option-icon">🎨</span>
+                    <span class="option-title">绘画模型</span>
+                    <span class="option-desc">生成静态图片</span>
+                  </div>
+                </label>
+                <label class="model-type-option">
+                  <input type="radio" name="modelType" value="video">
+                  <div class="option-content">
+                    <span class="option-icon">🎬</span>
+                    <span class="option-title">视频模型</span>
+                    <span class="option-desc">生成动态视频</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- 绘画模型区域 -->
+            <div id="imageModelSection" style="display:none;">
+              <!-- 绘画平台选择器 -->
+              <div class="video-platform-selector">
+                <div class="selector-header">
+                  <span class="required-badge">⚠️ 必选</span>
+                  <h4 class="selector-title">第二步：选择绘画平台</h4>
+                  <p class="selector-hint">请选择一个绘画生成平台</p>
+                </div>
+
+                <div class="selector-options">
+                  <label class="platform-option">
+                    <input type="radio" name="imagePlatform" value="openai">
+                    <span>OpenAI</span>
+                  </label>
+                  <label class="platform-option">
+                    <input type="radio" name="imagePlatform" value="gemini">
+                    <span>Gemini</span>
+                  </label>
+                  <label class="platform-option">
+                    <input type="radio" name="imagePlatform" value="grok">
+                    <span>Grok</span>
+                  </label>
+                  <label class="platform-option">
+                    <input type="radio" name="imagePlatform" value="doubao">
+                    <span>Doubao</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- OpenAI 模型列表 -->
+              <div id="openaiModels" class="platform-models" style="display:none;">
+                <label style="font-weight: 600; margin-bottom: 8px; display: block; color: #333;">OpenAI
+                  绘画模型（可多选）：</label>
+                <select id="openaiModelSelect" multiple size="5"
+                  style="width:100%; padding: 8px; border: 2px solid #e9ecef; border-radius: 8px; background: #fff;">
+                  <option value="gpt-image-2">gpt-image-2</option>
+                  <!-- <option value="gpt-4o-image-vip">gpt-4o-image-vip</option>
+                  <option value="gpt-image-1">gpt-image-1</option>
+                  <option value="gpt-image-1-vip">gpt-image-1-vip</option>
+                  <option value="gpt-image-1.5">gpt-image-1.5</option> -->
+                </select>
+              </div>
+
+              <!-- Gemini 模型列表 -->
+              <div id="geminiModels" class="platform-models" style="display:none;">
+                <label style="font-weight: 600; margin-bottom: 8px; display: block; color: #333;">Gemini
+                  绘画模型（可多选）：</label>
+                <select id="geminiModelSelect" multiple size="7"
+                  style="width:100%; padding: 8px; border: 2px solid #e9ecef; border-radius: 8px; background: #fff;">
+                  <option value="gemini-2.5-flash-image">gemini-2.5-flash-image（香蕉）</option>
+                  <option value="gemini-3-pro-image-preview">gemini-3-pro-image-preview（香蕉Pro）
+                  </option>
+                  <option value="gemini-3-pro-image-preview-4k">gemini-3-pro-image-preview-4k（香蕉Pro
+                    4K）</option>
+                  <option value="gemini-3-pro-image-preview-url">gemini-3-pro-image-preview-url（香蕉Pro
+                    Url）</option>
+                  <option value="gemini-3-pro-image-preview-4k-url">
+                    gemini-3-pro-image-preview-4k-url（香蕉Pro 4K Url）</option>
+                  <option value="gemini-3.1-flash-image-preview">gemini-3.1-flash-image-preview（新香蕉
+                    3.1）</option>
+                  <option value="gemini-3.1-flash-image-preview-4k">
+                    gemini-3.1-flash-image-preview-4k（新香蕉 3.1 4K）</option>
+                </select>
+              </div>
+
+              <!-- Grok 模型列表 -->
+              <div id="grokImageModels" class="platform-models" style="display:none;">
+                <label style="font-weight: 600; margin-bottom: 8px; display: block; color: #333;">Grok
+                  绘画模型（可多选）：</label>
+                <select id="grokImageModelSelect" multiple size="3"
+                  style="width:100%; padding: 8px; border: 2px solid #e9ecef; border-radius: 8px; background: #fff;">
+                  <option value="grok-3-image">grok-3-image</option>
+                  <option value="grok-4-image">grok-4-image</option>
+                  <option value="grok-4.1-image">grok-4.1-image</option>
+                </select>
+              </div>
+
+              <!-- Doubao 模型列表 -->
+              <div id="doubaoImageModels" class="platform-models" style="display:none;">
+                <label style="font-weight: 600; margin-bottom: 8px; display: block; color: #333;">Doubao
+                  绘画模型（可多选）：</label>
+                <select id="doubaoImageModelSelect" multiple size="2"
+                  style="width:100%; padding: 8px; border: 2px solid #e9ecef; border-radius: 8px; background: #fff;">
+                  <option value="doubao-seedream-4-5-251128">doubao-seedream-4-5-251128（即梦 4.5）
+                  </option>
+                </select>
+              </div>
+
+              <!-- 自定义绘画模型 -->
+              <input type="text" id="customImageModelInput" placeholder="自定义绘画模型名称"
+                style="display:none; margin-top:8px;">
+              <label class="custom-checkbox" style="margin-top:8px;">
+                <input type="checkbox" id="useCustomImageModel"
+                  style="margin-right:8px; width:18px; height:18px; cursor:pointer;">
+                <span>使用自定义模型</span>
+              </label>
+            </div>
+
+            <!-- 视频模型区域 -->
+            <div id="videoModelSection" style="display:none;">
+              <!-- 视频平台选择器 -->
+              <div class="video-platform-selector">
+                <div class="selector-header">
+                  <span class="required-badge">⚠️ 必选</span>
+                  <h4 class="selector-title">第二步：选择视频平台</h4>
+                  <p class="selector-hint">请选择一个视频生成平台</p>
+                </div>
+
+                <div class="selector-options">
+                  <label class="platform-option">
+                    <input type="radio" name="videoPlatform" value="grok">
+                    <span>Grok</span>
+                  </label>
+                  <label class="platform-option">
+                    <input type="radio" name="videoPlatform" value="doubao">
+                    <span>Doubao</span>
+                  </label>
+                  <label class="platform-option">
+                    <input type="radio" name="videoPlatform" value="veo">
+                    <span>Veo3.1</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Grok 模型列表 -->
+              <div id="grokModels" class="platform-models" style="display:none;">
+                <!-- 模型选择 -->
+                <div class="input-group" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">①</span> 模型版本
+                  </label>
+                  <div style="display:grid; grid-template-columns:1fr; gap:10px;">
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokModel" value="grok-video" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🎬 grok-video</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">视频生成模型</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 视频时长选择 -->
+                <div class="input-group" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">②</span> 视频时长 (duration)
+                  </label>
+                  <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px;">
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokDuration" value="10" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">10秒</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokDuration" value="15" style="display:none;">
+                      <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">15秒</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokDuration" value="20" style="display:none;">
+                      <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">20秒</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokDuration" value="25" style="display:none;">
+                      <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">25秒</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokDuration" value="30" style="display:none;">
+                      <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">30秒</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 画面比例选择 -->
+                <div class="input-group" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">③</span> 画面比例 (aspect_ratio)
+                  </label>
+                  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;">
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokAspectRatio" value="16:9" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">16:9</div>
+                      <div style="font-size:0.7rem; color:#718096; margin-top:2px;">横屏</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokAspectRatio" value="9:16" style="display:none;">
+                      <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">9:16</div>
+                      <div style="font-size:0.7rem; color:#718096; margin-top:2px;">竖屏</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokAspectRatio" value="1:1" style="display:none;">
+                      <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">1:1</div>
+                      <div style="font-size:0.7rem; color:#718096; margin-top:2px;">方形</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokAspectRatio" value="3:2" style="display:none;">
+                      <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">3:2</div>
+                      <div style="font-size:0.7rem; color:#718096; margin-top:2px;">横向</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokAspectRatio" value="2:3" style="display:none;">
+                      <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">2:3</div>
+                      <div style="font-size:0.7rem; color:#718096; margin-top:2px;">纵向</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 显示当前选择的模型及参数 -->
+                <div
+                  style="padding:12px; background:linear-gradient(135deg, #667eea15, #764ba215); border:2px solid #667eea40; border-radius:8px; margin-top:4px;">
+                  <div style="font-size:0.85rem; color:#718096; margin-bottom:6px;">✨ 当前配置</div>
+                  <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                    <span style="font-size:0.8rem; color:#718096;">模型:</span>
+                    <span style="font-weight:700; font-size:0.95rem; color:#667eea; font-family:monospace;"
+                      id="grokModelDisplay">grok-video</span>
+                    <span style="font-size:0.8rem; color:#718096;">时长:</span>
+                    <span style="font-weight:600; font-size:0.9rem; color:#4a5568;" id="grokDurationDisplay">10秒</span>
+                    <span style="font-size:0.8rem; color:#718096;">比例:</span>
+                    <span style="font-weight:600; font-size:0.9rem; color:#4a5568;"
+                      id="grokAspectRatioDisplay">16:9</span>
+                  </div>
+                </div>
+
+                <!-- 隐藏的input用于存储最终选择的模型 -->
+                <input type="hidden" id="grokModelSelect" value="grok-video">
+                <input type="hidden" id="grokDurationSelect" value="10">
+                <input type="hidden" id="grokAspectRatioSelect" value="16:9">
+              </div>
+
+              <!-- Doubao 模型列表 -->
+              <div id="doubaoModels" class="platform-models" style="display:none;">
+                <select id="doubaoModelSelect" size="2"
+                  style="width:100%; padding:8px; border:2px solid #e9ecef; border-radius:8px; background:#fff;">
+                  <option value="doubao-seedance-1-5-pro-251215">doubao-seedance-1-5-pro-251215（豆包 1.5
+                    Pro 12s）</option>
+                  <option value="doubao-seedance-1-0-pro-250528">doubao-seedance-1-0-pro-250528（豆包 1.0
+                    Pro 12s）</option>
+                </select>
+              </div>
+
+              <!-- Veo 模型列表 -->
+              <div id="veoModels" class="platform-models" style="display:none;">
+                <!-- 第一级：视频类型选择 -->
+                <div class="input-group" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">①</span> 选择视频类型
+                  </label>
+                  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                    <label class="radio-button"
+                      style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoType" value="text2video" checked style="display:none;">
+                      <div style="font-size:1.2rem; margin-bottom:4px;">📝</div>
+                      <div style="font-weight:600; font-size:0.9rem;">文生视频</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Text to Video
+                      </div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoType" value="frame2video" style="display:none;">
+                      <div style="font-size:1.2rem; margin-bottom:4px;">🎞️</div>
+                      <div style="font-weight:600; font-size:0.9rem;">帧转视频</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Frame to
+                        Video</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoType" value="gif" style="display:none;">
+                      <div style="font-size:1.2rem; margin-bottom:4px;">🎬</div>
+                      <div style="font-weight:600; font-size:0.9rem;">生成GIF</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Generate GIF
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 第二级：画质选择（文生视频/帧转视频）-->
+                <div class="input-group" id="veoQualityGroup" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">②</span> 选择画质
+                  </label>
+                  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoQuality" value="4k" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">4K 超清</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Ultra 4K
+                      </div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoQuality" value="hd" style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">HD 高清</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">High
+                        Definition</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoQuality" value="standard" style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">普通画质</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Standard
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 第二级：生成方式（GIF类型）-->
+                <div class="input-group" id="veoGifModeGroup" style="margin-bottom:16px; display:none;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">②</span> 选择生成方式
+                  </label>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoGifMode" value="text" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">📝 文生GIF
+                      </div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Text to GIF
+                      </div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoGifMode" value="frame" style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🎞️ 帧转GIF
+                      </div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Frame to GIF
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 第三级：方向选择 -->
+                <div class="input-group" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">③</span> 选择视频方向
+                  </label>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoOrientation" value="landscape" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🖥️ 横屏</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Landscape
+                        (16:9)</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoOrientation" value="portrait" style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">📱 竖屏</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Portrait
+                        (9:16)</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 显示当前选择的模型 -->
+                <div
+                  style="padding:12px; background:linear-gradient(135deg, #667eea15, #764ba215); border:2px solid #667eea40; border-radius:8px; margin-top:16px;">
+                  <div style="font-size:0.85rem; color:#718096; margin-bottom:4px;">✨ 当前选择的模型</div>
+                  <div style="font-weight:600; font-size:1rem; color:#667eea; font-family:monospace;"
+                    id="veoModelDisplay">veo3.1-landscape-4k</div>
+                </div>
+
+                <!-- 隐藏的input用于存储最终选择的模型 -->
+                <input type="hidden" id="veoModelSelect" value="veo3.1-landscape-4k">
+              </div>
+
+              <!-- 自定义视频模型 -->
+              <input type="text" id="customVideoModelInput" placeholder="自定义视频模型名称"
+                style="display:none; margin-top:8px;">
+              <label class="custom-checkbox" style="margin-top:8px;">
+                <input type="checkbox" id="useCustomVideoModel"
+                  style="margin-right:8px; width:18px; height:18px; cursor:pointer;">
+                <span>使用自定义模型</span>
+              </label>
+            </div>
+
+            <div class="param-grid">
+              <!-- Gemini 分辨率选择器 - 第一位 -->
+              <div class="input-group" id="geminiResolutionGroup" style="display:none;">
+                <label for="geminiImageSize">清晰度</label>
+                <select id="geminiImageSize" class="glass-select">
+                  <option value="1K">1K - 标准</option>
+                  <option value="2K">2K - 高清</option>
+                  <option value="4K">4K - 超清</option>
+                </select>
+              </div>
+
+              <!-- 尺寸/宽高比 - 第二位 -->
+              <div class="input-group" id="size-param-group">
+                <label for="size">宽高比</label>
+                <select id="size" class="glass-select">
+                  <option value="1:1">1:1 方形</option>
+                  <option value="16:9">16:9 横向</option>
+                  <option value="9:16">9:16 纵向</option>
+                  <option value="4:3">4:3 横向</option>
+                  <option value="3:4">3:4 纵向</option>
+                  <option value="3:2">3:2 横向</option>
+                  <option value="2:3">2:3 纵向</option>
+                  <option value="5:4">5:4 横向</option>
+                  <option value="4:5">4:5 纵向</option>
+                  <option value="21:9">21:9 超宽</option>
+                </select>
+              </div>
+
+              <!-- 返回格式 - 仅非Gemini模型显示 -->
+              <div class="input-group" id="responseFormatGroup">
+                <label for="response_format">格式</label>
+                <select id="response_format" class="glass-select">
+                  <option value="url">URL (链接)</option>
+                  <option value="b64_json">Base64 (嵌入)</option>
+                </select>
+              </div>
+
+              <!-- 输出个数 - 第三位 -->
+              <div class="input-group">
+                <label for="n">生成数量</label>
+                <select id="n" class="glass-select">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="__custom__">自定义...</option>
+                </select>
+                <input type="number" id="customNInput" placeholder="请输入自定义张数" style="display:none; margin-top:8px;"
+                  min="1" max="10">
+              </div>
+
+            </div>
+
+            <!-- 即梦视频模型专用参数 -->
+            <div id="jimengVideoParamsGroup"
+              style="display:none; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
+              <div style="margin-bottom: 12px;">
+                <span style="font-weight: 600; color: #667eea; font-size: 0.9rem;">🎬 豆包视频参数</span>
+              </div>
+              <div class="param-grid">
+                <div class="input-group">
+                  <label for="jimengSeconds">视频秒数</label>
+                  <select id="jimengSeconds" class="glass-select">
+                    <option value="4">4秒</option>
+                    <option value="5">5秒</option>
+                    <option value="6">6秒</option>
+                    <option value="8">8秒</option>
+                    <option value="10">10秒</option>
+                    <option value="12" selected>12秒（默认）</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="jimengRatio">视频比例</label>
+                  <select id="jimengRatio" class="glass-select">
+                    <option value="16:9" selected>16:9 横屏</option>
+                    <option value="9:16">9:16 竖屏</option>
+                    <option value="1:1">1:1 方形</option>
+                    <option value="4:3">4:3 横向</option>
+                    <option value="3:4">3:4 纵向</option>
+                    <option value="21:9">21:9 超宽</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="jimengResolution">分辨率</label>
+                  <select id="jimengResolution" class="glass-select">
+                    <option value="480p">480p 标清</option>
+                    <option value="720p">720p 高清</option>
+                    <option value="1080p" selected>1080p 全高清</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="jimengGenerateAudio">生成音频</label>
+                  <select id="jimengGenerateAudio" class="glass-select">
+                    <option value="false" selected>否</option>
+                    <option value="true">是（仅1.5 Pro）</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="jimengWatermark">水印</label>
+                  <select id="jimengWatermark" class="glass-select">
+                    <option value="false" selected>无水印</option>
+                    <option value="true">有水印</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="jimengCameraFixed">相机固定</label>
+                  <select id="jimengCameraFixed" class="glass-select">
+                    <option value="false" selected>否（默认）</option>
+                    <option value="true">是</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 图片上传卡片 -->
+        <div class="card upload-card">
+          <h3>
+            <span class="icon-box" style="background: linear-gradient(135deg, #84fab0, #8fd3f4);">🖼️</span>
+            参考素材
+          </h3>
+          <div class="card-body">
+            <!-- 图片预览区域 -->
+            <div id="imagePreviewContainer" class="image-preview-container"></div>
+
+            <!-- 上传区域 -->
+            <div class="upload-grid">
+              <div class="file-upload">
+                <input type="file" id="imageFile" accept="image/jpeg,image/png,image/jpg" multiple>
+                <label for="imageFile" class="file-upload-label">
+                  <span class="upload-icon">📁</span>
+                  <span>上传本地图片</span>
+                </label>
+              </div>
+
+              <div class="url-input-wrapper">
+                <textarea id="imageUrls" placeholder="输入图片URL，每行一个" class="glass-input"></textarea>
+                <button id="loadUrlsBtn" class="btn-url-load">加载</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 操作栏 -->
+        <div class="action-bar">
+          <button class="btn btn-primary btn-lg">
+            <span id="generateBtnText">🎨 立即生成</span>
+          </button>
+          <div id="modeIndicator" class="mode-badge">
+            当前模式: <span id="currentMode">图片生成</span>
+          </div>
+        </div>
+
+      </div> <!-- End of Left Panel -->
+
+      <!-- 右侧结果面板 -->
+      <div class="right-panel">
+        <div class="card result-card">
+          <h3>
+            <span class="icon-box" style="background: linear-gradient(135deg, #fccb90, #d57eeb);">🖼️</span>
+            创作画廊
+          </h3>
+          <div class="card-body result-body">
+            <div class="loading" id="loading">
+              <div class="spinner"></div>
+              <p>AI 正在挥洒创意...</p>
+            </div>
+
+            <!-- 视频任务容器 -->
+            <div id="videoTasksContainer" class="video-tasks-container" style="display: none;">
+              <div class="video-tasks-header">
+                <h3>🎬 视频生成中</h3>
+                <span class="tasks-count">进行中: <span id="tasksInProgress">0</span></span>
+              </div>
+              <div class="video-tasks-scroll">
+                <div id="videoTasksList" class="video-tasks-list">
+                  <!-- 任务卡片将动态插入这里 -->
+                </div>
+              </div>
+            </div>
+
+            <div id="resultImages" class="gallery-grid"></div>
+
+            <!-- 实时日志面板 -->
+            <div class="log-section">
+              <div class="log-header">
+                <span>📜 运行日志</span>
+                <div class="log-actions">
+                  <button id="copyLogsBtn" class="btn-icon" title="复制日志">📋</button>
+                  <button id="clearLogsBtn" class="btn-icon" title="清空日志">🧹</button>
+                </div>
+              </div>
+              <div id="liveLogs" class="log-panel" aria-live="polite" data-placeholder="等待任务开始..."></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 历史记录全宽卡片 -->
+    <div class="card history-card">
+      <div class="card-header">
+        <h3>
+          <span class="icon-box" style="background: linear-gradient(135deg, #e0c3fc, #8ec5fc);">📚</span>
+          灵感档案
+        </h3>
+        <div class="history-actions">
+          <button id="selectAllBtn" class="btn btn-outline">全选</button>
+          <button id="deleteSelectedBtn" class="btn btn-outline danger">删除</button>
+          <button id="clearAllBtn" class="btn btn-outline danger">清空</button>
+        </div>
+      </div>
+      <div class="history-grid" id="historyGrid"></div>
+    </div>
+  </div>
+
+  <!-- 视频任务创建成功弹窗 -->
+  <div id="videoSuccessToast" class="video-success-toast">
+    <div class="toast-content">
+      <div class="toast-icon">✓</div>
+      <div class="toast-text">
+        <div class="toast-title">视频任务创建成功！</div>
+        <div class="toast-id">任务ID: <span id="toastTaskId"></span></div>
+        <div class="toast-status">正在生成中...</div>
+      </div>
+      <button class="toast-close">×</button>
+    </div>
+  </div>
+
+  <!-- 视频帧提取模态框 -->
+  <div id="videoFrameModal" class="video-frame-modal" style="display: none;">
+    <div class="video-frame-container">
+      <!-- 标题栏 -->
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="icon">🎞️</span>
+          <div>
+            <h3>提取视频帧</h3>
+            <p class="subtitle">支持 30 秒内视频</p>
+          </div>
+        </div>
+        <button class="btn-close" id="videoFrameCloseBtn">×</button>
+      </div>
+
+      <!-- 操作栏 -->
+      <div class="modal-toolbar">
+        <input type="file" id="videoFrameFileInput" accept="video/*" style="display: none;">
+        <button class="btn-toolbar" id="videoFrameUploadBtn">
+          📁 上传视频
+        </button>
+        <input type="text" id="videoFrameUrlInput" placeholder="或输入视频URL" class="url-input">
+        <button class="btn-toolbar" id="videoFrameLoadBtn">
+          🔗 加载
+        </button>
+        <span id="videoFrameDuration" class="duration-display"></span>
+        <span id="videoFrameError" class="error-display"></span>
+      </div>
+
+      <!-- 主内容区 -->
+      <div class="video-preview-section">
+        <!-- 左侧：视频预览和操作 -->
+        <div class="preview-panel">
+          <h4>视频预览</h4>
+          <video id="videoFramePreview" controls class="video-preview"></video>
+
+          <div class="frame-action-buttons">
+            <button class="btn-extract-frame" id="captureFirstFrameBtn">
+              📸 提取首帧
+            </button>
+            <button class="btn-extract-frame" id="captureLastFrameBtn">
+              📸 提取尾帧
+            </button>
+            <button class="btn-extract-frame" id="captureCollageBtn">
+              🎬 视频抽帧
+            </button>
+            <button class="btn-extract-frame" id="clearLastFrameBtn">
+              ↩️ 清除上一帧
+            </button>
+          </div>
+
+          <div class="grid-selector">
+            <span>宫格数量：</span>
+            <button class="grid-option active" data-grid="3">3×3</button>
+            <button class="grid-option" data-grid="5">5×5</button>
+          </div>
+        </div>
+
+        <!-- 右侧：结果展示 -->
+        <div class="result-panel">
+          <h4 id="resultPanelTitle">提取结果</h4>
+
+          <!-- 首帧/尾帧模式 -->
+          <div id="framesResult" class="frames-result">
+            <div class="frame-result-card">
+              <p class="frame-label">首帧</p>
+              <img id="firstFramePreviewImg" class="frame-preview-img" style="display: none;">
+              <div id="firstFrameEmpty" class="frame-preview-empty">暂无</div>
+              <div id="firstFrameActions" class="frame-actions" style="display: none;">
+                <button class="btn-download" id="downloadFirstFrameBtn">
+                  💾 下载
+                </button>
+              </div>
+            </div>
+
+            <div class="frame-result-card">
+              <p class="frame-label">尾帧</p>
+              <img id="lastFramePreviewImg" class="frame-preview-img" style="display: none;">
+              <div id="lastFrameEmpty" class="frame-preview-empty">暂无</div>
+              <div id="lastFrameActions" class="frame-actions" style="display: none;">
+                <button class="btn-download" id="downloadLastFrameBtn">
+                  💾 下载
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 拼贴模式 -->
+          <div id="collageResult" class="collage-result" style="display: none;">
+            <div class="collage-info">
+              <span id="collageProgress">已填充 0/9</span>
+            </div>
+            <div class="collage-preview">
+              <canvas id="collageCanvas" class="collage-canvas"></canvas>
+              <p class="collage-hint">暂停视频后点击「视频抽帧」把当前画面填入宫格</p>
+            </div>
+            <button class="btn-download-collage" id="downloadCollageBtn">
+              💾 下载拼贴图
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提示词库模态框 -->
+  <div id="promptLibraryModal" class="prompt-library-modal" style="display: none;">
+    <div class="prompt-library-container">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="icon">✨</span>
+          <div>
+            <h3>提示词库</h3>
+            <p class="subtitle">海量优质提示词一键使用</p>
+          </div>
+        </div>
+        <button class="btn-close" id="promptLibraryCloseBtn">×</button>
+      </div>
+
+      <div class="prompt-toolbar">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="promptSearchInput" placeholder="搜索关键词 (标题、提示词、分类)...">
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn-icon-filter" id="promptNsfwBtn" title="隐藏 NSFW">🙈</button>
+          <div class="dropdown-container">
+            <button class="btn-filter-dropdown" id="promptCategoryBtn">
+              全部 <span class="icon">▼</span>
+            </button>
+            <div class="dropdown-menu hidden" id="promptCategoryMenu">
+              <div class="dropdown-item prompt-category-item" data-category="全部">全部</div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item prompt-category-item" data-category="工作">工作</div>
+              <div class="dropdown-item prompt-category-item" data-category="生活">生活</div>
+              <div class="dropdown-item prompt-category-item" data-category="学习">学习</div>
+              <div class="dropdown-item prompt-category-item" data-category="有趣">有趣</div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item prompt-category-item" data-category="NSFW">NSFW</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-tabs">
+        <button class="prompt-filter-chip active" data-tab="all">全部</button>
+        <button class="prompt-filter-chip" data-tab="recent">最近一周</button>
+        <button class="prompt-filter-chip" data-tab="favorites">收藏</button>
+        <button class="prompt-filter-chip" data-tab="custom">自定义</button>
+        <button class="prompt-filter-chip" data-tab="generate">文生图</button>
+        <button class="prompt-filter-chip" data-tab="edit">编辑</button>
+        <button class="btn-add-prompt" id="promptAddBtn" title="新增自定义提示词">+</button>
+      </div>
+
+      <div class="prompt-content">
+        <div class="prompt-grid" id="promptGrid">
+          <!-- 动态生成 -->
+        </div>
+      </div>
+
+      <div class="prompt-pagination">
+        <button class="btn-page" id="promptPrevPage" disabled>上一页</button>
+        <span class="page-info" id="promptPageInfo">1 / 1</span>
+        <button class="btn-page" id="promptNextPage" disabled>下一页</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图片分割模态框 -->
+  <div id="imageSlicerModal" class="image-slicer-modal" style="display: none;">
+    <div class="image-slicer-container">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="icon">✂️</span>
+          <div>
+            <h3>图片分割工厂</h3>
+            <p class="subtitle">自由切片，支持一键下载</p>
+          </div>
+        </div>
+        <button class="btn-close" id="slicerCloseBtn">×</button>
+      </div>
+
+      <div class="modal-toolbar">
+        <input type="file" id="slicerFileInput" accept="image/*" style="display: none;">
+        <button class="btn-toolbar" id="slicerUploadBtn">📁 上传图片</button>
+
+        <div class="divider"></div>
+
+        <div class="toolbar-group">
+          <span class="label">模式:</span>
+          <button class="slicer-mode-btn active" data-mode="h">横线</button>
+          <button class="slicer-mode-btn" data-mode="v">竖线</button>
+        </div>
+
+        <div class="toolbar-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="slicerForceSquare">
+            1:1 补全
+          </label>
+          <div id="slicerBgColorWrap" style="display: none;">
+            <input type="color" id="slicerBgColor" value="#ffffff">
+          </div>
+        </div>
+
+        <button class="btn-toolbar btn-danger" id="slicerClearBtn">🗑️ 清空</button>
+        <button class="btn-toolbar btn-primary" id="slicerGenerateBtn">⚡ 生成切片</button>
+        <button class="btn-toolbar" id="slicerDownloadAllBtn">💾 一键下载</button>
+      </div>
+
+      <div class="slicer-content">
+        <div class="slicer-panel canvas-panel">
+          <h4>切片画布</h4>
+          <div class="slicer-canvas-wrap">
+            <div id="slicerEmptyState" class="empty-state-text">
+              点击上传图片后开始分割
+            </div>
+            <div id="slicerImageBox" class="slicer-image-box">
+              <img id="slicerImage" style="display: none;">
+              <div id="slicerLinesLayer" class="lines-layer"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slicer-panel results-panel">
+          <h4>切片结果</h4>
+          <div id="slicerResults" class="results-grid">
+            <div class="slicer-results-empty">暂无结果</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 快捷时间线模态框 -->
+  <div id="quickTimelineModal" class="quick-timeline-modal" style="display: none;">
+    <div class="quick-timeline-container">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="icon">🎬</span>
+          <div>
+            <h3>时间线</h3>
+            <p class="subtitle">拖动片段排序后合并导出</p>
+          </div>
+        </div>
+        <button class="btn-close" id="timelineCloseBtn">×</button>
+      </div>
+
+      <div class="modal-toolbar compact-toolbar">
+        <input type="file" id="timelineFileInput" accept="video/*" multiple style="display: none;">
+        <button class="btn-toolbar" id="timelineAddBtn">➕ 添加视频</button>
+        <button class="btn-toolbar btn-danger" id="timelineClearBtn">🗑️ 清空</button>
+
+        <div class="divider"></div>
+
+        <button class="btn-toolbar" id="timelineSplitBtn" title="在当前位置分割">✂️ 分割</button>
+
+        <div class="toolbar-group" style="margin: 0 8px;">
+          <span class="label" style="font-size: 11px;">缩放:</span>
+          <input type="range" id="timelineZoomRange" min="5" max="100" value="24" class="zoom-slider"
+            style="width: 100px;">
+        </div>
+
+        <div class="flex-1"></div>
+
+        <div class="toolbar-group">
+          <button class="timeline-mode-btn active" data-mode="clip">片段预览</button>
+          <button class="timeline-mode-btn" data-mode="merged">合并预览</button>
+        </div>
+        <button class="btn-toolbar btn-primary" id="timelineMergeBtn" style="min-width: 90px;">合并导出</button>
+      </div>
+
+      <div class="timeline-content">
+        <div class="timeline-preview-area">
+          <video id="timelinePreviewVideo" class="timeline-preview"></video>
+
+          <!-- 预览控制条 -->
+          <div class="preview-controls-overlay">
+            <div class="control-bar-top">
+              <input type="range" id="timelineProgressBar" class="progress-bar" value="0" step="0.01">
+            </div>
+            <div class="control-bar-bottom">
+              <div class="time-container">
+                <span class="time-display" id="timelineTimeDisplay">00:00 / 00:00</span>
+              </div>
+              <div class="center-controls">
+                <button class="control-btn" id="timelineRewindBtn">⏪</button>
+                <button class="control-btn play-btn" id="timelinePlayBtn">▶</button>
+                <button class="control-btn" id="timelineForwardBtn">⏩</button>
+              </div>
+              <div class="right-controls">
+                <button class="control-btn" id="timelineMuteBtn">🔊</button>
+                <button class="control-btn" id="timelineFullscreenBtn">⛶</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-track-area">
+          <!-- 左侧轨道头 -->
+          <div class="timeline-headers">
+            <div class="track-header-item">
+              <span class="icon">🎬</span>
+            </div>
+          </div>
+
+          <!-- 右侧滚动区域 -->
+          <div class="timeline-scroll-container" id="timelineScroll">
+            <div class="timeline-ruler" id="timelineRuler"></div>
+            <div class="timeline-grid-bg"></div>
+            <div class="timeline-tracks" id="timelineTracks">
+              <div id="timelinePlayhead" class="timeline-playhead"></div>
+              <!-- 动态生成的片段 -->
+              <div class="timeline-empty" id="timelineEmptyTip">点击 "+ 添加视频" 开始制作</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分镜设计模态框 -->
+  <div id="storyboardModal" class="storyboard-modal" style="display: none;">
+    <div class="storyboard-container">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="icon">📐</span>
+          <div>
+            <h3>分镜设计</h3>
+            <p class="subtitle">固定 9 镜头，生成拼贴与脚本</p>
+          </div>
+        </div>
+        <button class="btn-close" id="storyboardCloseBtn">×</button>
+      </div>
+
+      <div class="modal-toolbar">
+        <div class="toolbar-group">
+          <span class="label">比例:</span>
+          <select id="storyboardRatio" class="glass-select-sm">
+            <option value="1:1">1:1</option>
+            <option value="16:9">16:9</option>
+            <option value="9:16">9:16</option>
+            <option value="4:3">4:3</option>
+            <option value="21:9">21:9</option>
+          </select>
+        </div>
+        <button class="btn-toolbar" id="storyboardPromptBtn">自定义提示词</button>
+        <button class="btn-toolbar btn-primary" id="storyboardGenerateBtn">生成分镜图与脚本</button>
+        <div class="divider"></div>
+        <button class="btn-toolbar btn-danger" id="storyboardClearBtn">清空</button>
+        <div class="flex-1"></div>
+        <button class="btn-toolbar" id="storyboardBulkVisionBtn" title="批量识图，填充空的画面描述">一键AI识图</button>
+        <button class="btn-toolbar" id="storyboardBulkImageBtn" title="批量生图，为空镜头生成图片">一键AI生图</button>
+      </div>
+
+      <div class="storyboard-content">
+        <div class="storyboard-grid-panel">
+          <div class="storyboard-grid" id="storyboardGrid">
+            <!-- 9个镜头卡片将在这里动态生成 -->
+          </div>
+
+          <div class="storyboard-roles-panel">
+            <div class="panel-header">
+              <h4>角色列表</h4>
+              <button class="btn-sm" id="storyboardAddRoleBtn">+ 新增</button>
+            </div>
+            <div id="storyboardRolesList" class="roles-list">
+              <!-- 角色列表 -->
+            </div>
+          </div>
+        </div>
+
+        <div class="storyboard-preview-panel">
+          <div class="preview-card">
             <div class="card-header">
-                <h3>
-                    <span class="icon-box" style="background: linear-gradient(135deg, #e0c3fc, #8ec5fc);">📚</span>
-                    灵感档案
-                </h3>
-                <div class="history-actions">
-                    <button id="selectAllBtn" class="btn btn-outline">全选</button>
-                    <button id="deleteSelectedBtn" class="btn btn-outline danger">删除</button>
-                    <button id="clearAllBtn" class="btn btn-outline danger">清空</button>
-                </div>
+              <h4>拼贴预览</h4>
+              <button class="btn-sm" id="storyboardDownloadBtn" disabled>⬇ 下载拼贴</button>
             </div>
-            <div class="history-grid" id="historyGrid"></div>
+            <div class="preview-box">
+              <canvas id="storyboardCanvas"></canvas>
+              <div id="storyboardEmptyPreview" class="empty-text">尚未生成拼贴</div>
+            </div>
+          </div>
+
+          <div class="script-card">
+            <div class="card-header">
+              <h4>脚本文字</h4>
+              <button class="btn-sm" id="storyboardCopyScriptBtn">📋 复制</button>
+            </div>
+            <textarea id="storyboardScript" placeholder="在此生成或编辑分镜脚本..."></textarea>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <!-- 视频任务创建成功弹窗 -->
-    <div id="videoSuccessToast" class="video-success-toast">
-        <div class="toast-content">
-            <div class="toast-icon">✓</div>
-            <div class="toast-text">
-                <div class="toast-title">视频任务创建成功！</div>
-                <div class="toast-id">任务ID: <span id="toastTaskId"></span></div>
-                <div class="toast-status">正在生成中...</div>
-            </div>
-            <button class="toast-close">×</button>
+  <!-- XHS 灵感实验室模态框 -->
+  <div id="xhsLabModal" class="xhs-lab-modal" style="display: none;">
+    <div class="xhs-lab-container">
+      <div class="modal-header">
+        <div class="header-left">
+          <button id="xhsSidebarToggle" class="btn-icon-sm" title="切换侧边栏">☰</button>
+          <span class="icon">💡</span>
+          <div>
+            <h3>XHS 灵感实验室</h3>
+            <p class="subtitle">爆款笔记创作与视觉设计</p>
+          </div>
         </div>
-    </div>
+        <button class="btn-close" id="xhsLabCloseBtn">×</button>
+      </div>
 
-    <!-- 视频帧提取模态框 -->
-    <div id="videoFrameModal" class="video-frame-modal" style="display: none;">
-        <div class="video-frame-container">
-            <!-- 标题栏 -->
-            <div class="modal-header">
-                <div class="header-left">
-                    <span class="icon">🎞️</span>
-                    <div>
-                        <h3>提取视频帧</h3>
-                        <p class="subtitle">支持 30 秒内视频</p>
-                    </div>
-                </div>
-                <button class="btn-close" id="videoFrameCloseBtn">×</button>
-            </div>
-
-            <!-- 操作栏 -->
-            <div class="modal-toolbar">
-                <input type="file" id="videoFrameFileInput" accept="video/*" style="display: none;">
-                <button class="btn-toolbar" id="videoFrameUploadBtn">
-                    📁 上传视频
-                </button>
-                <input type="text" id="videoFrameUrlInput" placeholder="或输入视频URL" class="url-input">
-                <button class="btn-toolbar" id="videoFrameLoadBtn">
-                    🔗 加载
-                </button>
-                <span id="videoFrameDuration" class="duration-display"></span>
-                <span id="videoFrameError" class="error-display"></span>
-            </div>
-
-            <!-- 主内容区 -->
-            <div class="video-preview-section">
-                <!-- 左侧：视频预览和操作 -->
-                <div class="preview-panel">
-                    <h4>视频预览</h4>
-                    <video id="videoFramePreview" controls class="video-preview"></video>
-
-                    <div class="frame-action-buttons">
-                        <button class="btn-extract-frame" id="captureFirstFrameBtn">
-                            📸 提取首帧
-                        </button>
-                        <button class="btn-extract-frame" id="captureLastFrameBtn">
-                            📸 提取尾帧
-                        </button>
-                        <button class="btn-extract-frame" id="captureCollageBtn">
-                            🎬 视频抽帧
-                        </button>
-                        <button class="btn-extract-frame" id="clearLastFrameBtn">
-                            ↩️ 清除上一帧
-                        </button>
-                    </div>
-
-                    <div class="grid-selector">
-                        <span>宫格数量：</span>
-                        <button class="grid-option active" data-grid="3">3×3</button>
-                        <button class="grid-option" data-grid="5">5×5</button>
-                    </div>
-                </div>
-
-                <!-- 右侧：结果展示 -->
-                <div class="result-panel">
-                    <h4 id="resultPanelTitle">提取结果</h4>
-
-                    <!-- 首帧/尾帧模式 -->
-                    <div id="framesResult" class="frames-result">
-                        <div class="frame-result-card">
-                            <p class="frame-label">首帧</p>
-                            <img id="firstFramePreviewImg" class="frame-preview-img" style="display: none;">
-                            <div id="firstFrameEmpty" class="frame-preview-empty">暂无</div>
-                            <div id="firstFrameActions" class="frame-actions" style="display: none;">
-                                <button class="btn-download" id="downloadFirstFrameBtn">
-                                    💾 下载
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="frame-result-card">
-                            <p class="frame-label">尾帧</p>
-                            <img id="lastFramePreviewImg" class="frame-preview-img" style="display: none;">
-                            <div id="lastFrameEmpty" class="frame-preview-empty">暂无</div>
-                            <div id="lastFrameActions" class="frame-actions" style="display: none;">
-                                <button class="btn-download" id="downloadLastFrameBtn">
-                                    💾 下载
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 拼贴模式 -->
-                    <div id="collageResult" class="collage-result" style="display: none;">
-                        <div class="collage-info">
-                            <span id="collageProgress">已填充 0/9</span>
-                        </div>
-                        <div class="collage-preview">
-                            <canvas id="collageCanvas" class="collage-canvas"></canvas>
-                            <p class="collage-hint">暂停视频后点击「视频抽帧」把当前画面填入宫格</p>
-                        </div>
-                        <button class="btn-download-collage" id="downloadCollageBtn">
-                            💾 下载拼贴图
-                        </button>
-                    </div>
-                </div>
-            </div>
+      <div class="xhs-layout">
+        <!-- 左侧历史记录 -->
+        <div class="xhs-sidebar">
+          <div class="sidebar-header">
+            <span>历史记录</span>
+            <button class="text-btn-danger" id="xhsHistoryClearBtn">清空</button>
+          </div>
+          <div id="xhsHistoryList" class="history-list">
+            <!-- 历史记录列表 -->
+            <div class="empty-text">暂无记录</div>
+          </div>
         </div>
-    </div>
 
-    <!-- 提示词库模态框 -->
-    <div id="promptLibraryModal" class="prompt-library-modal" style="display: none;">
-        <div class="prompt-library-container">
-            <div class="modal-header">
-                <div class="header-left">
-                    <span class="icon">✨</span>
-                    <div>
-                        <h3>提示词库</h3>
-                        <p class="subtitle">海量优质提示词一键使用</p>
-                    </div>
+        <!-- 中间输入区 -->
+        <div class="xhs-main">
+          <div class="input-card">
+            <div class="card-header">
+              <h4>灵感输入</h4>
+              <div class="provider-switch">
+                <button class="xhs-provider-btn active" data-provider="gemini">Gemini</button>
+                <button class="xhs-provider-btn" data-provider="openai">OpenAI</button>
+              </div>
+            </div>
+            <div class="input-area-wrapper">
+              <textarea id="xhsTopicInput" placeholder="输入你的想法，例如：复古风格城市漫游文案"></textarea>
+            </div>
+
+            <div class="input-actions">
+              <div class="upload-section">
+                <input type="file" id="xhsFileInput" accept="image/*" multiple style="display: none;">
+                <button class="btn-toolbar" id="xhsUploadBtn">📁 上传参考图</button>
+                <div class="image-count-input">
+                  <span>图片数量:</span>
+                  <input type="number" id="xhsImageCount" value="4" min="1" max="9">
                 </div>
-                <button class="btn-close" id="promptLibraryCloseBtn">×</button>
+              </div>
+              <button class="btn-primary" id="xhsGenerateBtn">生成方案</button>
             </div>
 
-            <div class="prompt-toolbar">
-                <div class="search-bar">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="promptSearchInput" placeholder="搜索关键词 (标题、提示词、分类)...">
-                </div>
+            <div id="xhsRefImages" class="ref-images-list"></div>
+          </div>
 
-                <div class="filter-actions">
-                    <button class="btn-icon-filter" id="promptNsfwBtn" title="隐藏 NSFW">🙈</button>
-                    <div class="dropdown-container">
-                        <button class="btn-filter-dropdown" id="promptCategoryBtn">
-                            全部 <span class="icon">▼</span>
-                        </button>
-                        <div class="dropdown-menu hidden" id="promptCategoryMenu">
-                            <div class="dropdown-item prompt-category-item" data-category="全部">全部</div>
-                            <div class="dropdown-divider"></div>
-                            <div class="dropdown-item prompt-category-item" data-category="工作">工作</div>
-                            <div class="dropdown-item prompt-category-item" data-category="生活">生活</div>
-                            <div class="dropdown-item prompt-category-item" data-category="学习">学习</div>
-                            <div class="dropdown-item prompt-category-item" data-category="有趣">有趣</div>
-                            <div class="dropdown-divider"></div>
-                            <div class="dropdown-item prompt-category-item" data-category="NSFW">NSFW</div>
-                        </div>
-                    </div>
-                </div>
+          <div class="preview-card">
+            <div class="card-header">
+              <h4>文案预览</h4>
+              <div class="actions">
+                <button class="btn-sm" id="xhsCopyTitleBtn">复制标题</button>
+                <button class="btn-sm" id="xhsCopyContentBtn">复制正文</button>
+              </div>
             </div>
-
-            <div class="prompt-tabs">
-                <button class="prompt-filter-chip active" data-tab="all">全部</button>
-                <button class="prompt-filter-chip" data-tab="recent">最近一周</button>
-                <button class="prompt-filter-chip" data-tab="favorites">收藏</button>
-                <button class="prompt-filter-chip" data-tab="custom">自定义</button>
-                <button class="prompt-filter-chip" data-tab="generate">文生图</button>
-                <button class="prompt-filter-chip" data-tab="edit">编辑</button>
-                <button class="btn-add-prompt" id="promptAddBtn" title="新增自定义提示词">+</button>
+            <div id="xhsContentPreview" class="content-preview">
+              <div class="empty-text">输入灵感后生成方案</div>
             </div>
-
-            <div class="prompt-content">
-                <div class="prompt-grid" id="promptGrid">
-                    <!-- 动态生成 -->
-                </div>
-            </div>
-
-            <div class="prompt-pagination">
-                <button class="btn-page" id="promptPrevPage" disabled>上一页</button>
-                <span class="page-info" id="promptPageInfo">1 / 1</span>
-                <button class="btn-page" id="promptNextPage" disabled>下一页</button>
-            </div>
+          </div>
         </div>
-    </div>
 
-    <!-- 图片分割模态框 -->
-    <div id="imageSlicerModal" class="image-slicer-modal" style="display: none;">
-        <div class="image-slicer-container">
-            <div class="modal-header">
-                <div class="header-left">
-                    <span class="icon">✂️</span>
-                    <div>
-                        <h3>图片分割工厂</h3>
-                        <p class="subtitle">自由切片，支持一键下载</p>
-                    </div>
-                </div>
-                <button class="btn-close" id="slicerCloseBtn">×</button>
+        <!-- 右侧结果区 -->
+        <div class="xhs-results">
+          <div class="results-header">
+            <div class="options">
+              <select id="xhsQuality" class="glass-select-sm">
+                <option value="1K">1K</option>
+                <option value="2K" selected>2K</option>
+                <option value="4K">4K</option>
+              </select>
+              <select id="xhsRatio" class="glass-select-sm">
+                <option value="auto">Auto</option>
+                <option value="3:4" selected>3:4</option>
+                <option value="1:1">1:1</option>
+                <option value="16:9">16:9</option>
+              </select>
+              <button class="btn-primary btn-sm" id="xhsBatchGenerateBtn" disabled>⚡ 批量生成</button>
             </div>
-
-            <div class="modal-toolbar">
-                <input type="file" id="slicerFileInput" accept="image/*" style="display: none;">
-                <button class="btn-toolbar" id="slicerUploadBtn">📁 上传图片</button>
-
-                <div class="divider"></div>
-
-                <div class="toolbar-group">
-                    <span class="label">模式:</span>
-                    <button class="slicer-mode-btn active" data-mode="h">横线</button>
-                    <button class="slicer-mode-btn" data-mode="v">竖线</button>
-                </div>
-
-                <div class="toolbar-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="slicerForceSquare">
-                        1:1 补全
-                    </label>
-                    <div id="slicerBgColorWrap" style="display: none;">
-                        <input type="color" id="slicerBgColor" value="#ffffff">
-                    </div>
-                </div>
-
-                <button class="btn-toolbar btn-danger" id="slicerClearBtn">🗑️ 清空</button>
-                <button class="btn-toolbar btn-primary" id="slicerGenerateBtn">⚡ 生成切片</button>
-                <button class="btn-toolbar" id="slicerDownloadAllBtn">💾 一键下载</button>
-            </div>
-
-            <div class="slicer-content">
-                <div class="slicer-panel canvas-panel">
-                    <h4>切片画布</h4>
-                    <div class="slicer-canvas-wrap">
-                        <div id="slicerEmptyState" class="empty-state-text">
-                            点击上传图片后开始分割
-                        </div>
-                        <div id="slicerImageBox" class="slicer-image-box">
-                            <img id="slicerImage" style="display: none;">
-                            <div id="slicerLinesLayer" class="lines-layer"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="slicer-panel results-panel">
-                    <h4>切片结果</h4>
-                    <div id="slicerResults" class="results-grid">
-                        <div class="slicer-results-empty">暂无结果</div>
-                    </div>
-                </div>
-            </div>
+          </div>
+          <div id="xhsShotGrid" class="shot-grid">
+            <div class="empty-text">等待生成图像卡片</div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <!-- 快捷时间线模态框 -->
-    <div id="quickTimelineModal" class="quick-timeline-modal" style="display: none;">
-        <div class="quick-timeline-container">
-            <div class="modal-header">
-                <div class="header-left">
-                    <span class="icon">🎬</span>
-                    <div>
-                        <h3>时间线</h3>
-                        <p class="subtitle">拖动片段排序后合并导出</p>
-                    </div>
-                </div>
-                <button class="btn-close" id="timelineCloseBtn">×</button>
-            </div>
-
-            <div class="modal-toolbar compact-toolbar">
-                <input type="file" id="timelineFileInput" accept="video/*" multiple style="display: none;">
-                <button class="btn-toolbar" id="timelineAddBtn">➕ 添加视频</button>
-                <button class="btn-toolbar btn-danger" id="timelineClearBtn">🗑️ 清空</button>
-
-                <div class="divider"></div>
-
-                <button class="btn-toolbar" id="timelineSplitBtn" title="在当前位置分割">✂️ 分割</button>
-
-                <div class="toolbar-group" style="margin: 0 8px;">
-                    <span class="label" style="font-size: 11px;">缩放:</span>
-                    <input type="range" id="timelineZoomRange" min="5" max="100" value="24" class="zoom-slider"
-                        style="width: 100px;">
-                </div>
-
-                <div class="flex-1"></div>
-
-                <div class="toolbar-group">
-                    <button class="timeline-mode-btn active" data-mode="clip">片段预览</button>
-                    <button class="timeline-mode-btn" data-mode="merged">合并预览</button>
-                </div>
-                <button class="btn-toolbar btn-primary" id="timelineMergeBtn" style="min-width: 90px;">合并导出</button>
-            </div>
-
-            <div class="timeline-content">
-                <div class="timeline-preview-area">
-                    <video id="timelinePreviewVideo" class="timeline-preview"></video>
-
-                    <!-- 预览控制条 -->
-                    <div class="preview-controls-overlay">
-                        <div class="control-bar-top">
-                            <input type="range" id="timelineProgressBar" class="progress-bar" value="0" step="0.01">
-                        </div>
-                        <div class="control-bar-bottom">
-                            <div class="time-container">
-                                <span class="time-display" id="timelineTimeDisplay">00:00 / 00:00</span>
-                            </div>
-                            <div class="center-controls">
-                                <button class="control-btn" id="timelineRewindBtn">⏪</button>
-                                <button class="control-btn play-btn" id="timelinePlayBtn">▶</button>
-                                <button class="control-btn" id="timelineForwardBtn">⏩</button>
-                            </div>
-                            <div class="right-controls">
-                                <button class="control-btn" id="timelineMuteBtn">🔊</button>
-                                <button class="control-btn" id="timelineFullscreenBtn">⛶</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-track-area">
-                    <!-- 左侧轨道头 -->
-                    <div class="timeline-headers">
-                        <div class="track-header-item">
-                            <span class="icon">🎬</span>
-                        </div>
-                    </div>
-
-                    <!-- 右侧滚动区域 -->
-                    <div class="timeline-scroll-container" id="timelineScroll">
-                        <div class="timeline-ruler" id="timelineRuler"></div>
-                        <div class="timeline-grid-bg"></div>
-                        <div class="timeline-tracks" id="timelineTracks">
-                            <div id="timelinePlayhead" class="timeline-playhead"></div>
-                            <!-- 动态生成的片段 -->
-                            <div class="timeline-empty" id="timelineEmptyTip">点击 "+ 添加视频" 开始制作</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <!-- 图片预览模态框 -->
+  <div id="imagePreviewModal" class="image-preview-modal" style="display: none;">
+    <div class="image-preview-backdrop"></div>
+    <div class="image-preview-content">
+      <button class="image-preview-close">×</button>
+      <div class="image-preview-wrapper">
+        <img id="imagePreviewImg" src="" alt="预览">
+      </div>
+      <div class="image-preview-info">
+        <div class="preview-info-header">
+          <h4 id="imagePreviewTitle"></h4>
+          <button class="btn-copy-preview" id="previewCopyBtn">📋 复制提示词</button>
         </div>
+        <p id="imagePreviewPrompt"></p>
+      </div>
     </div>
+  </div>
 
-    <!-- 分镜设计模态框 -->
-    <div id="storyboardModal" class="storyboard-modal" style="display: none;">
-        <div class="storyboard-container">
-            <div class="modal-header">
-                <div class="header-left">
-                    <span class="icon">📐</span>
-                    <div>
-                        <h3>分镜设计</h3>
-                        <p class="subtitle">固定 9 镜头，生成拼贴与脚本</p>
-                    </div>
-                </div>
-                <button class="btn-close" id="storyboardCloseBtn">×</button>
-            </div>
+  <!-- 添加自定义Prompt模态框 -->
+  <div id="addPromptModal" class="add-prompt-modal" style="display: none;">
+    <div class="add-prompt-backdrop"></div>
+    <div class="add-prompt-container">
+      <div class="add-prompt-header">
+        <h3>添加自定义 Prompt</h3>
+        <button class="btn-close-dark" id="addPromptCloseBtn">×</button>
+      </div>
 
-            <div class="modal-toolbar">
-                <div class="toolbar-group">
-                    <span class="label">比例:</span>
-                    <select id="storyboardRatio" class="glass-select-sm">
-                        <option value="1:1">1:1</option>
-                        <option value="16:9">16:9</option>
-                        <option value="9:16">9:16</option>
-                        <option value="4:3">4:3</option>
-                        <option value="21:9">21:9</option>
-                    </select>
-                </div>
-                <button class="btn-toolbar" id="storyboardPromptBtn">自定义提示词</button>
-                <button class="btn-toolbar btn-primary" id="storyboardGenerateBtn">生成分镜图与脚本</button>
-                <div class="divider"></div>
-                <button class="btn-toolbar btn-danger" id="storyboardClearBtn">清空</button>
-                <div class="flex-1"></div>
-                <button class="btn-toolbar" id="storyboardBulkVisionBtn" title="批量识图，填充空的画面描述">一键AI识图</button>
-                <button class="btn-toolbar" id="storyboardBulkImageBtn" title="批量生图，为空镜头生成图片">一键AI生图</button>
-            </div>
-
-            <div class="storyboard-content">
-                <div class="storyboard-grid-panel">
-                    <div class="storyboard-grid" id="storyboardGrid">
-                        <!-- 9个镜头卡片将在这里动态生成 -->
-                    </div>
-
-                    <div class="storyboard-roles-panel">
-                        <div class="panel-header">
-                            <h4>角色列表</h4>
-                            <button class="btn-sm" id="storyboardAddRoleBtn">+ 新增</button>
-                        </div>
-                        <div id="storyboardRolesList" class="roles-list">
-                            <!-- 角色列表 -->
-                        </div>
-                    </div>
-                </div>
-
-                <div class="storyboard-preview-panel">
-                    <div class="preview-card">
-                        <div class="card-header">
-                            <h4>拼贴预览</h4>
-                            <button class="btn-sm" id="storyboardDownloadBtn" disabled>⬇ 下载拼贴</button>
-                        </div>
-                        <div class="preview-box">
-                            <canvas id="storyboardCanvas"></canvas>
-                            <div id="storyboardEmptyPreview" class="empty-text">尚未生成拼贴</div>
-                        </div>
-                    </div>
-
-                    <div class="script-card">
-                        <div class="card-header">
-                            <h4>脚本文字</h4>
-                            <button class="btn-sm" id="storyboardCopyScriptBtn">📋 复制</button>
-                        </div>
-                        <textarea id="storyboardScript" placeholder="在此生成或编辑分镜脚本..."></textarea>
-                    </div>
-                </div>
-            </div>
+      <div class="add-prompt-body">
+        <div class="form-group">
+          <input type="text" id="addPromptTitle" class="dark-input" placeholder="标题">
         </div>
-    </div>
 
-    <!-- XHS 灵感实验室模态框 -->
-    <div id="xhsLabModal" class="xhs-lab-modal" style="display: none;">
-        <div class="xhs-lab-container">
-            <div class="modal-header">
-                <div class="header-left">
-                    <button id="xhsSidebarToggle" class="btn-icon-sm" title="切换侧边栏">☰</button>
-                    <span class="icon">💡</span>
-                    <div>
-                        <h3>XHS 灵感实验室</h3>
-                        <p class="subtitle">爆款笔记创作与视觉设计</p>
-                    </div>
-                </div>
-                <button class="btn-close" id="xhsLabCloseBtn">×</button>
-            </div>
-
-            <div class="xhs-layout">
-                <!-- 左侧历史记录 -->
-                <div class="xhs-sidebar">
-                    <div class="sidebar-header">
-                        <span>历史记录</span>
-                        <button class="text-btn-danger" id="xhsHistoryClearBtn">清空</button>
-                    </div>
-                    <div id="xhsHistoryList" class="history-list">
-                        <!-- 历史记录列表 -->
-                        <div class="empty-text">暂无记录</div>
-                    </div>
-                </div>
-
-                <!-- 中间输入区 -->
-                <div class="xhs-main">
-                    <div class="input-card">
-                        <div class="card-header">
-                            <h4>灵感输入</h4>
-                            <div class="provider-switch">
-                                <button class="xhs-provider-btn active" data-provider="gemini">Gemini</button>
-                                <button class="xhs-provider-btn" data-provider="openai">OpenAI</button>
-                            </div>
-                        </div>
-                        <div class="input-area-wrapper">
-                            <textarea id="xhsTopicInput" placeholder="输入你的想法，例如：复古风格城市漫游文案"></textarea>
-                        </div>
-
-                        <div class="input-actions">
-                            <div class="upload-section">
-                                <input type="file" id="xhsFileInput" accept="image/*" multiple style="display: none;">
-                                <button class="btn-toolbar" id="xhsUploadBtn">📁 上传参考图</button>
-                                <div class="image-count-input">
-                                    <span>图片数量:</span>
-                                    <input type="number" id="xhsImageCount" value="4" min="1" max="9">
-                                </div>
-                            </div>
-                            <button class="btn-primary" id="xhsGenerateBtn">生成方案</button>
-                        </div>
-
-                        <div id="xhsRefImages" class="ref-images-list"></div>
-                    </div>
-
-                    <div class="preview-card">
-                        <div class="card-header">
-                            <h4>文案预览</h4>
-                            <div class="actions">
-                                <button class="btn-sm" id="xhsCopyTitleBtn">复制标题</button>
-                                <button class="btn-sm" id="xhsCopyContentBtn">复制正文</button>
-                            </div>
-                        </div>
-                        <div id="xhsContentPreview" class="content-preview">
-                            <div class="empty-text">输入灵感后生成方案</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 右侧结果区 -->
-                <div class="xhs-results">
-                    <div class="results-header">
-                        <div class="options">
-                            <select id="xhsQuality" class="glass-select-sm">
-                                <option value="1K">1K</option>
-                                <option value="2K" selected>2K</option>
-                                <option value="4K">4K</option>
-                            </select>
-                            <select id="xhsRatio" class="glass-select-sm">
-                                <option value="auto">Auto</option>
-                                <option value="3:4" selected>3:4</option>
-                                <option value="1:1">1:1</option>
-                                <option value="16:9">16:9</option>
-                            </select>
-                            <button class="btn-primary btn-sm" id="xhsBatchGenerateBtn" disabled>⚡ 批量生成</button>
-                        </div>
-                    </div>
-                    <div id="xhsShotGrid" class="shot-grid">
-                        <div class="empty-text">等待生成图像卡片</div>
-                    </div>
-                </div>
-            </div>
+        <div class="form-group mode-toggle">
+          <label class="radio-tab active">
+            <input type="radio" name="addPromptMode" value="generate" checked>
+            <span>🖼️ 文生图</span>
+          </label>
+          <label class="radio-tab">
+            <input type="radio" name="addPromptMode" value="edit">
+            <span>✏️ 编辑</span>
+          </label>
         </div>
-    </div>
 
-    <!-- 图片预览模态框 -->
-    <div id="imagePreviewModal" class="image-preview-modal" style="display: none;">
-        <div class="image-preview-backdrop"></div>
-        <div class="image-preview-content">
-            <button class="image-preview-close">×</button>
-            <div class="image-preview-wrapper">
-                <img id="imagePreviewImg" src="" alt="预览">
-            </div>
-            <div class="image-preview-info">
-                <div class="preview-info-header">
-                    <h4 id="imagePreviewTitle"></h4>
-                    <button class="btn-copy-preview" id="previewCopyBtn">📋 复制提示词</button>
-                </div>
-                <p id="imagePreviewPrompt"></p>
-            </div>
+        <div class="form-group upload-area" id="addPromptUploadArea">
+          <input type="file" id="addPromptFile" accept="image/*" style="display: none;">
+          <div class="upload-placeholder">
+            <span class="icon">🖼️</span>
+            <span>点击上传封面图</span>
+          </div>
+          <img id="addPromptPreviewImg" style="display: none;">
+          <button class="btn-remove-img" id="addPromptRemoveImg" style="display: none;">×</button>
         </div>
-    </div>
 
-    <!-- 添加自定义Prompt模态框 -->
-    <div id="addPromptModal" class="add-prompt-modal" style="display: none;">
-        <div class="add-prompt-backdrop"></div>
-        <div class="add-prompt-container">
-            <div class="add-prompt-header">
-                <h3>添加自定义 Prompt</h3>
-                <button class="btn-close-dark" id="addPromptCloseBtn">×</button>
-            </div>
-
-            <div class="add-prompt-body">
-                <div class="form-group">
-                    <input type="text" id="addPromptTitle" class="dark-input" placeholder="标题">
-                </div>
-
-                <div class="form-group mode-toggle">
-                    <label class="radio-tab active">
-                        <input type="radio" name="addPromptMode" value="generate" checked>
-                        <span>🖼️ 文生图</span>
-                    </label>
-                    <label class="radio-tab">
-                        <input type="radio" name="addPromptMode" value="edit">
-                        <span>✏️ 编辑</span>
-                    </label>
-                </div>
-
-                <div class="form-group upload-area" id="addPromptUploadArea">
-                    <input type="file" id="addPromptFile" accept="image/*" style="display: none;">
-                    <div class="upload-placeholder">
-                        <span class="icon">🖼️</span>
-                        <span>点击上传封面图</span>
-                    </div>
-                    <img id="addPromptPreviewImg" style="display: none;">
-                    <button class="btn-remove-img" id="addPromptRemoveImg" style="display: none;">×</button>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group col-category">
-                        <select id="addPromptCategory" class="dark-select">
-                            <option value="工作">工作</option>
-                            <option value="生活">生活</option>
-                            <option value="学习">学习</option>
-                            <option value="有趣">有趣</option>
-                            <option value="NSFW">NSFW</option>
-                            <option value="自定义">自定义</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-subcategory">
-                        <input type="text" id="addPromptSubCategory" class="dark-input" placeholder="子分类 (可选)">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <textarea id="addPromptContent" class="dark-textarea" placeholder="Prompt 内容"></textarea>
-                </div>
-            </div>
-
-            <div class="add-prompt-footer">
-                <button class="btn-dark-cancel" id="addPromptCancelBtn">取消</button>
-                <button class="btn-dark-save" id="addPromptSaveBtn">保存</button>
-            </div>
+        <div class="form-row">
+          <div class="form-group col-category">
+            <select id="addPromptCategory" class="dark-select">
+              <option value="工作">工作</option>
+              <option value="生活">生活</option>
+              <option value="学习">学习</option>
+              <option value="有趣">有趣</option>
+              <option value="NSFW">NSFW</option>
+              <option value="自定义">自定义</option>
+            </select>
+          </div>
+          <div class="form-group col-subcategory">
+            <input type="text" id="addPromptSubCategory" class="dark-input" placeholder="子分类 (可选)">
+          </div>
         </div>
-    </div>
 
-    <script type="module" src="js/main.js"></script>
+        <div class="form-group">
+          <textarea id="addPromptContent" class="dark-textarea" placeholder="Prompt 内容"></textarea>
+        </div>
+      </div>
+
+      <div class="add-prompt-footer">
+        <button class="btn-dark-cancel" id="addPromptCancelBtn">取消</button>
+        <button class="btn-dark-save" id="addPromptSaveBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
 </body>
 
 </html>

@@ -19,6 +19,21 @@ export class Generator {
         this.videoTaskManager = videoTaskManager;
         this.logger = logger;
         this.imagePreviewManager = imagePreviewManager;
+        this._activeTaskCount = 0;
+    }
+
+    _incrementTask() {
+        this._activeTaskCount++;
+        this.dom.loading.classList.add('show');
+    }
+
+    _decrementTask() {
+        this._activeTaskCount--;
+        if (this._activeTaskCount <= 0) {
+            this._activeTaskCount = 0;
+            this.dom.loading.classList.remove('show');
+            this.dom.generateBtnText.textContent = '生成';
+        }
     }
 
     async generate() {
@@ -44,11 +59,9 @@ export class Generator {
         // 验证逻辑已经在 validator.js 中处理，这里假设调用前已验证，或者再次验证
         // 这里主要负责执行
 
-        this.dom.generateBtn.disabled = true;
-        this.dom.generateBtnText.textContent = '生成中...';
+        this.dom.generateBtnText.textContent = '上传参考素材...';
+        this._incrementTask();
         this.logger.clear();
-        this.dom.loading.classList.add('show');
-        this.dom.resultImages.innerHTML = '';
 
         const baseLog = createCallLogger(this.logger);
         baseLog.add('info', `任务开始，Base URL: ${this.apiClient.baseUrl}`);
@@ -123,8 +136,7 @@ export class Generator {
             this.logger.append('error', '关键步骤失败', String(error));
             showError('生成流程遇到严重错误', error.message);
         } finally {
-            this.dom.loading.classList.remove('show');
-            this.dom.generateBtn.disabled = false;
+            this._decrementTask();
             updateModeIndicator(this.dom, imageFiles.length > 0, models);
         }
     }
@@ -286,29 +298,37 @@ export class Generator {
             // ========== 处理普通绘画模型 ==========
             let result;
             
-            // 为 GPT 和 Grok 模型添加比例参数到提示词末尾
             let finalPrompt = optimizedPrompt;
-            if (isGPTImageModel(modelName) || isGrokImageModel(modelName)) {
-                // 将比例参数添加到提示词末尾
-                const aspectRatio = size || '1:1';
-                finalPrompt = `${optimizedPrompt}, aspect ratio ${aspectRatio}`;
-                log.add('info', `为 ${modelName} 添加比例参数到提示词: ${aspectRatio}`);
-            }
-            
+
             const params = {
                 model: modelName,
-                size: size,
                 response_format: responseFormat,
                 mode: modeTag
             };
 
-            if (modeTag === 'edit') {
+            // gpt-image-2 和 Grok 绘画模型使用 aspect_ratio 参数，不传 size
+            if (isGPTImageModel(modelName) || isGrokImageModel(modelName)) {
+                params.aspect_ratio = size || '1:1';
+                if (isGrokImageModel(modelName)) {
+                    log.add('info', `[Grok 绘画] 优化参数调用方式`);
+                }
+            } else {
+                params.size = size;
+            }
+
+            if (modeTag === 'edit' && isGPTImageModel(modelName)) {
+                // gpt-image-2 图生图：使用 /v1/images/generations JSON，image URLs 放入 image 数组
                 params.prompt = finalPrompt;
-                params.n = 1; // 强制为 1
+                params.n = 1;
+                params.image = imageFiles.map(f => f.originalUrl || f.url).filter(Boolean);
+                result = await generateImage(this.apiClient, params, log);
+            } else if (modeTag === 'edit') {
+                params.prompt = finalPrompt;
+                params.n = 1;
                 result = await editImage(this.apiClient, params, imageFiles, log);
             } else {
                 params.prompt = finalPrompt;
-                params.n = 1; // 单次调用生成一张，因为外层循环控制数量
+                params.n = 1;
                 result = await generateImage(this.apiClient, params, log);
             }
 

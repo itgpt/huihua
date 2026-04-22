@@ -33,16 +33,21 @@ export async function editImage(client, params, imageFiles, log) {
     
     // ** 修正: 根据API中转逻辑，动态选择 'image' 或 'image[]' **
     const fieldName = imageFiles.length > 1 ? 'image[]' : 'image';
-    imageFiles.forEach(file => {
+    for (const file of imageFiles) {
         if (file.isFromUrl) {
-            formData.append(fieldName, file.originalUrl);
+            // 从公网 URL 下载为 Blob 再上传，避免部分 API 不接受 URL 字符串
+            const resp = await fetch(file.originalUrl);
+            const blob = await resp.blob();
+            const ext = (file.name || 'image.png').split('.').pop() || 'png';
+            formData.append(fieldName, blob, file.name || `image.${ext}`);
         } else {
             formData.append(fieldName, file);
         }
-    });
+    }
 
+    const skipFields = new Set(['mode']);
     for (const [key, value] of Object.entries(params)) {
-        formData.append(key, value);
+        if (!skipFields.has(key)) formData.append(key, value);
     }
 
     const fieldsForLog = { ...params };
