@@ -369,6 +369,63 @@ const QuickTimeline = {
                     e.preventDefault();
                     this.seek(this.getTotalDuration());
                     break;
+                case 'Delete':
+                case 'Backspace': {
+                    // 删除选中片段
+                    if (this.state.selectedClipId) {
+                        e.preventDefault();
+                        this.state.clips = this.state.clips.filter(c => c.id !== this.state.selectedClipId);
+                        this.state.selectedClipId = this.state.clips[0]?.id || null;
+                        this.render();
+                    }
+                    break;
+                }
+                case 'b':
+                case 'B':
+                    // Ctrl+B 分割片段
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        this.splitClip();
+                    }
+                    break;
+                case 'e':
+                case 'E':
+                    // Ctrl+E 导出
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        this.mergeClips();
+                    }
+                    break;
+                case 'i':
+                case 'I': {
+                    // 设入点：把选中片段的 offset 推到当前时间
+                    e.preventDefault();
+                    const clip = this.state.clips.find(c => c.id === this.state.selectedClipId);
+                    if (clip) {
+                        const newOffset = clip.offset + this.state.previewTimeSec;
+                        const newDuration = clip.duration - this.state.previewTimeSec;
+                        if (newDuration > 0.1) {
+                            clip.offset = newOffset;
+                            clip.duration = newDuration;
+                            this.render();
+                        }
+                    }
+                    break;
+                }
+                case 'o':
+                case 'O': {
+                    // 设出点：把选中片段的 duration 截到当前时间
+                    e.preventDefault();
+                    const clip = this.state.clips.find(c => c.id === this.state.selectedClipId);
+                    if (clip) {
+                        const newDuration = this.state.previewTimeSec;
+                        if (newDuration > 0.1) {
+                            clip.duration = newDuration;
+                            this.render();
+                        }
+                    }
+                    break;
+                }
             }
         });
     },
