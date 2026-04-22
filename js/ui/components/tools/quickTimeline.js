@@ -965,7 +965,14 @@ const QuickTimeline = {
             canvas.height = metaVideo.videoHeight || 1080;
 
             const stream = canvas.captureStream(30);
-            let mimeType = 'video/webm;codecs=vp9';
+
+            // 音频：用 AudioContext 把视频音频混入录制流
+            const audioCtx = new AudioContext();
+            await audioCtx.resume();
+            const audioDestination = audioCtx.createMediaStreamDestination();
+            stream.addTrack(audioDestination.stream.getAudioTracks()[0]);
+
+            let mimeType = 'video/webm;codecs=vp9,opus';
             if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
 
             // 设置高码率以接近无损质量 (25Mbps)
@@ -1023,10 +1030,18 @@ const QuickTimeline = {
             recorder.start();
 
             const video = document.createElement('video');
-            video.muted = true;
+            video.muted = false;
             video.playsInline = true;
             video.width = canvas.width;
             video.height = canvas.height;
+
+            // 把视频音频接入 AudioContext，用 GainNode 静音扬声器输出但保留录制
+            const mediaSource = audioCtx.createMediaElementSource(video);
+            const silentGain = audioCtx.createGain();
+            silentGain.gain.value = 0; // 不从扬声器播出
+            mediaSource.connect(silentGain);
+            silentGain.connect(audioCtx.destination);
+            mediaSource.connect(audioDestination);
 
             // Sequential play and record
             for (const clip of this.state.clips) {
@@ -1081,6 +1096,7 @@ const QuickTimeline = {
             }
 
             recorder.stop();
+            audioCtx.close();
 
         } catch (e) {
             console.error('Merge error:', e);
