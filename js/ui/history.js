@@ -2,6 +2,7 @@ import { showFullImage, showFullVideo } from './components/modal.js';
 import { showError, showSuccess } from './components/toast.js';
 import { safeStringify } from '../utils/format.js';
 import { HISTORY_PER_PAGE } from '../config/constants.js';
+import QuickTimeline from './components/tools/quickTimeline.js';
 
 export class HistoryUI {
     constructor(dom, historyManager) {
@@ -161,6 +162,16 @@ export class HistoryUI {
             if (thumbnail) {
                 thumbnail.addEventListener('click', () => showFullVideo(mediaUrl));
             }
+            // 添加到时间线按钮
+            const timelineBtn = document.createElement('button');
+            timelineBtn.className = 'btn btn-sm btn-light';
+            timelineBtn.style.cssText = 'margin-top: 6px; width: 100%; font-size: 12px;';
+            timelineBtn.textContent = '🎞️ 添加到时间线';
+            timelineBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                QuickTimeline.addClipFromUrl(mediaUrl, `history_video_${item.id}.mp4`);
+            });
+            historyItem.querySelector('.history-video-thumbnail').after(timelineBtn);
         } else {
             const img = historyItem.querySelector('.history-image');
             if (img) {

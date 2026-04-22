@@ -2,6 +2,63 @@ import { showSuccess, showError } from '../toast.js';
 import { VideoFrameUtils } from '../../../utils/videoFrame.js';
 import { formatTime } from '../../../utils/format.js';
 
+function showExportDialog() {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;';
+
+        overlay.innerHTML = `
+            <div style="background:#fff;border-radius:16px;padding:28px 32px;min-width:320px;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;">
+                <div style="font-size:16px;font-weight:700;margin-bottom:8px;">选择导出格式</div>
+                <div style="font-size:13px;color:#666;margin-bottom:24px;">WebM 无需转码，速度快，推荐导入剪映使用</div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <button id="_exp_mp4" style="padding:12px;border-radius:10px;border:2px solid #6366f1;background:#6366f1;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">
+                        🎬 导出 MP4（需转码，较慢）
+                    </button>
+                    <button id="_exp_webm" style="padding:12px;border-radius:10px;border:2px solid #e9ecef;background:#f8f9fa;color:#333;font-size:14px;font-weight:600;cursor:pointer;">
+                        ⚡ 导出 WebM（快速，推荐剪映导入）
+                    </button>
+                    <button id="_exp_cancel" style="padding:8px;border:none;background:none;color:#999;font-size:13px;cursor:pointer;">取消</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        overlay.querySelector('#_exp_mp4').onclick = () => { document.body.removeChild(overlay); resolve('mp4'); };
+        overlay.querySelector('#_exp_webm').onclick = () => { document.body.removeChild(overlay); resolve('webm'); };
+        overlay.querySelector('#_exp_cancel').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+    });
+}
+
+async function convertToMp4(webmBlob, onProgress) {
+    // 动态加载 UMD 版 ffmpeg（只加载一次）
+    if (!window.FFmpegWASM) {
+        await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = '/vendor/ffmpeg/ffmpeg.js';
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+    }
+    const { FFmpeg } = window.FFmpegWASM;
+    const ffmpeg = new FFmpeg();
+    if (onProgress) ffmpeg.on('progress', ({ progress }) => onProgress(Math.round(progress * 100)));
+    await ffmpeg.load({
+        coreURL: '/vendor/ffmpeg/ffmpeg-core.js',
+        wasmURL: '/vendor/ffmpeg/ffmpeg-core.wasm',
+    });
+
+    const inputName = 'input.webm';
+    const outputName = 'output.mp4';
+    const arrayBuffer = await webmBlob.arrayBuffer();
+    await ffmpeg.writeFile(inputName, new Uint8Array(arrayBuffer));
+    await ffmpeg.exec(['-i', inputName, '-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-movflags', '+faststart', outputName]);
+    const data = await ffmpeg.readFile(outputName);
+    return new Blob([data.buffer], { type: 'video/mp4' });
+}
+
 const DEFAULT_PX_PER_SEC = 24;
 const TIMELINE_MIN_CLIP_PX = 40; // 允许更短的片段
 
@@ -507,17 +564,24 @@ const QuickTimeline = {
     playPreview() {
         if (!this.elements.previewVideo) return;
         this.state.isPreviewPlaying = true;
-        this.elements.previewVideo.play().catch(e => {
-            console.error('Play failed', e);
-            this.state.isPreviewPlaying = false;
-        });
         this.renderControls();
+        const p = this.elements.previewVideo.play();
+        if (p) p.catch(e => {
+            if (e.name !== 'AbortError') console.error('Play failed', e);
+            this.state.isPreviewPlaying = false;
+            this.renderControls();
+        });
     },
 
     pausePreview() {
         if (!this.elements.previewVideo) return;
         this.state.isPreviewPlaying = false;
-        this.elements.previewVideo.pause();
+        const p = this.elements.previewVideo.play();
+        if (p) {
+            p.then(() => this.elements.previewVideo.pause()).catch(() => {});
+        } else {
+            this.elements.previewVideo.pause();
+        }
         this.renderControls();
     },
 
@@ -882,7 +946,11 @@ const QuickTimeline = {
 
     async mergeClips() {
         if (this.state.clips.length === 0) return;
-        
+
+        // 让用户选择导出格式
+        const choice = await showExportDialog();
+        if (!choice) return; // 取消
+
         this.state.isMerging = true;
         this.renderControls();
 
@@ -911,21 +979,44 @@ const QuickTimeline = {
                 if (e.data.size > 0) chunks.push(e.data);
             };
 
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: mimeType });
-                if (this.state.mergedUrl) URL.revokeObjectURL(this.state.mergedUrl);
-                this.state.mergedUrl = URL.createObjectURL(blob);
-                
+            recorder.onstop = async () => {
+                const webmBlob = new Blob(chunks, { type: mimeType });
+
+                if (choice === 'mp4') {
+                    try {
+                        if (this.elements.mergeBtn) this.elements.mergeBtn.textContent = '转码中 0%';
+                        const mp4Blob = await convertToMp4(webmBlob, (pct) => {
+                            if (this.elements.mergeBtn) this.elements.mergeBtn.textContent = `转码中 ${pct}%`;
+                        });
+                        if (this.state.mergedUrl) URL.revokeObjectURL(this.state.mergedUrl);
+                        this.state.mergedUrl = URL.createObjectURL(mp4Blob);
+                        const a = document.createElement('a');
+                        a.href = this.state.mergedUrl;
+                        a.download = `merged_${Date.now()}.mp4`;
+                        a.click();
+                    } catch (e) {
+                        console.warn('MP4 转码失败，降级为 WebM:', e);
+                        if (this.state.mergedUrl) URL.revokeObjectURL(this.state.mergedUrl);
+                        this.state.mergedUrl = URL.createObjectURL(webmBlob);
+                        const a = document.createElement('a');
+                        a.href = this.state.mergedUrl;
+                        a.download = `merged_${Date.now()}.webm`;
+                        a.click();
+                    }
+                } else {
+                    // webm 直接下载
+                    if (this.state.mergedUrl) URL.revokeObjectURL(this.state.mergedUrl);
+                    this.state.mergedUrl = URL.createObjectURL(webmBlob);
+                    const a = document.createElement('a');
+                    a.href = this.state.mergedUrl;
+                    a.download = `merged_${Date.now()}.webm`;
+                    a.click();
+                }
+
                 this.state.isMerging = false;
                 this.state.previewMode = 'merged';
                 this.renderControls();
                 showSuccess('合并完成');
-                
-                const a = document.createElement('a');
-                a.href = this.state.mergedUrl;
-                a.download = `merged_${Date.now()}.webm`;
-                a.click();
-                
                 this.updatePreviewSource();
             };
 
@@ -996,6 +1087,19 @@ const QuickTimeline = {
             showError('合并失败: ' + e.message);
             this.state.isMerging = false;
             this.renderControls();
+        }
+    },
+
+    async addClipFromUrl(url, name = 'video.mp4') {
+        try {
+            const resp = await fetch(url);
+            const blob = await resp.blob();
+            const file = new File([blob], name, { type: blob.type || 'video/mp4' });
+            await this.handleFiles([file]);
+            if (!this.state.isOpen) this.open();
+            showSuccess('已添加到时间线');
+        } catch (e) {
+            showError('添加失败: ' + e.message);
         }
     }
 };

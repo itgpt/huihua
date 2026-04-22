@@ -1,5 +1,6 @@
 import { showFullImage, showFullVideo } from './components/modal.js';
 import { showError, showSuccess } from './components/toast.js';
+import QuickTimeline from './components/tools/quickTimeline.js';
 
 export function displayImageResults(dom, result, originalPrompt, optimizedPrompt, params) {
     const dataArr = Array.isArray(result?.data) ? result.data : [];
@@ -237,7 +238,13 @@ export function displayVideoResults(dom, dataArr, originalPrompt, optimizedPromp
         
         btnBar.appendChild(openBtn);
         btnBar.appendChild(downloadBtn);
-        
+
+        const timelineBtn = document.createElement('button');
+        timelineBtn.className = 'btn btn-light btn-result-action';
+        timelineBtn.textContent = '🎞️ 添加到时间线';
+        timelineBtn.onclick = () => QuickTimeline.addClipFromUrl(videoUrl, `ai_video_${Date.now()}.mp4`);
+        btnBar.appendChild(timelineBtn);
+
         videoCell.appendChild(video);
         videoCell.appendChild(btnBar);
         
