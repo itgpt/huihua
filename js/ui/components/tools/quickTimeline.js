@@ -71,11 +71,19 @@ async function convertToMp4(webmBlob, onProgress) {
 
 const DEFAULT_PX_PER_SEC = 24;
 const TIMELINE_MIN_CLIP_PX = 40; // 允许更短的片段
+const UNDO_STACK_LIMIT = 50;
+
+export function isTimelineUndoShortcut(event) {
+    const targetTag = event.target?.tagName;
+    if (targetTag === 'INPUT' || targetTag === 'TEXTAREA') return false;
+    return (event.ctrlKey || event.metaKey) && !event.shiftKey && event.key?.toLowerCase() === 'z';
+}
 
 const QuickTimeline = {
     state: {
         isOpen: false,
         clips: [], // { id, src, thumbUrl, duration, offset, name }
+        undoStack: [],
         
         pxPerSec: DEFAULT_PX_PER_SEC, // 缩放比例
         zoomLevel: 24,
@@ -152,9 +160,9 @@ const QuickTimeline = {
     },
 
     reset() {
-        this.state.clips.forEach(c => {
-            if (c.src.startsWith('blob:')) URL.revokeObjectURL(c.src);
-        });
+        if (this.state.clips.length > 0) {
+            this.pushUndoSnapshot();
+        }
         if (this.state.mergedUrl) URL.revokeObjectURL(this.state.mergedUrl);
         
         this.state.clips = [];
@@ -165,6 +173,36 @@ const QuickTimeline = {
         this.state.mergedUrl = null;
         
         this.render();
+    },
+
+    pushUndoSnapshot() {
+        this.state.undoStack.push({
+            clips: this.state.clips.map(clip => ({ ...clip })),
+            selectedClipId: this.state.selectedClipId,
+            previewTimeSec: this.state.previewTimeSec,
+            previewMode: this.state.previewMode
+        });
+
+        if (this.state.undoStack.length > UNDO_STACK_LIMIT) {
+            this.state.undoStack.shift();
+        }
+    },
+
+    undoLastAction() {
+        const snapshot = this.state.undoStack.pop();
+        if (!snapshot) return false;
+
+        this.state.clips = snapshot.clips.map(clip => ({ ...clip }));
+        this.state.selectedClipId = snapshot.selectedClipId;
+        this.state.previewTimeSec = snapshot.previewTimeSec;
+        this.state.previewMode = snapshot.previewMode;
+        this.state.dragSourceId = null;
+        this.state.dragOverId = null;
+
+        this.render();
+        this.updatePreviewSource();
+        this.updateUI();
+        return true;
     },
 
     bindEvents() {
@@ -356,6 +394,12 @@ const QuickTimeline = {
             
             // 如果焦点在输入框，不响应
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            if (isTimelineUndoShortcut(e)) {
+                e.preventDefault();
+                if (this.undoLastAction()) showSuccess('已撤销');
+                return;
+            }
             
             const fps = 30;
             const frameTime = 1 / fps;
@@ -386,9 +430,11 @@ const QuickTimeline = {
                     // 删除选中片段
                     if (this.state.selectedClipId) {
                         e.preventDefault();
+                        this.pushUndoSnapshot();
                         this.state.clips = this.state.clips.filter(c => c.id !== this.state.selectedClipId);
                         this.state.selectedClipId = this.state.clips[0]?.id || null;
                         this.render();
+                        this.updatePreviewSource();
                     }
                     break;
                 }
@@ -417,9 +463,11 @@ const QuickTimeline = {
                         const newOffset = clip.offset + this.state.previewTimeSec;
                         const newDuration = clip.duration - this.state.previewTimeSec;
                         if (newDuration > 0.1) {
+                            this.pushUndoSnapshot();
                             clip.offset = newOffset;
                             clip.duration = newDuration;
                             this.render();
+                            this.updatePreviewSource();
                         }
                     }
                     break;
@@ -432,8 +480,10 @@ const QuickTimeline = {
                     if (clip) {
                         const newDuration = this.state.previewTimeSec;
                         if (newDuration > 0.1) {
+                            this.pushUndoSnapshot();
                             clip.duration = newDuration;
                             this.render();
+                            this.updatePreviewSource();
                         }
                     }
                     break;
@@ -506,6 +556,10 @@ const QuickTimeline = {
             newClips.push(clip);
         }
 
+        if (newClips.length > 0) {
+            this.pushUndoSnapshot();
+        }
+
         this.state.clips = [...this.state.clips, ...newClips];
         if (!this.state.selectedClipId && newClips.length > 0) {
             this.state.selectedClipId = newClips[0].id;
@@ -517,6 +571,9 @@ const QuickTimeline = {
 
     removeClip(id) {
         const clip = this.state.clips.find(c => c.id === id);
+        if (!clip) return;
+
+        this.pushUndoSnapshot();
         this.state.clips = this.state.clips.filter(c => c.id !== id);
         if (this.state.selectedClipId === id) {
             this.state.selectedClipId = this.state.clips.length > 0 ? this.state.clips[0].id : null;
@@ -542,6 +599,7 @@ const QuickTimeline = {
         }
 
         const originalClip = seg.clip;
+        this.pushUndoSnapshot();
         
         // Clip 1: 0 -> relativeTime
         const clip1 = {
@@ -923,6 +981,7 @@ const QuickTimeline = {
         const toIdx = this.state.clips.findIndex(c => c.id === toId);
         if (fromIdx === -1 || toIdx === -1) return;
 
+        this.pushUndoSnapshot();
         const item = this.state.clips[fromIdx];
         this.state.clips.splice(fromIdx, 1);
         this.state.clips.splice(toIdx, 0, item);

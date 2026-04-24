@@ -6,9 +6,9 @@ import { HistoryManager } from './storage/history.js';
 import { APIClient } from './api/base.js';
 import { ModelSelector } from './models/modelSelector.js';
 import { VideoTaskManager } from './models/videoTask.js';
-import { Generator } from './core/generator.js?v=result-order-20260424';
+import { Generator } from './core/generator.js?v=timeline-undo-20260424';
 import { EventManager } from './ui/events.js';
-import { HistoryUI } from './ui/history.js?v=result-order-20260424';
+import { HistoryUI } from './ui/history.js?v=timeline-undo-20260424';
 import { ImagePreviewManager } from './ui/components/imagePreview.js';
 import { showAnnouncement, showSuccess, showError } from './ui/components/toast.js';
 import { validateInputs } from './core/validator.js';
@@ -16,7 +16,7 @@ import { createTaskCard, updateTaskCard } from './ui/components/videoTask.js';
 import { updateModeIndicator, updatePromptStatus, updateApiKeyStatus, updateApiBaseUrlStatus } from './ui/status.js';
 import { normalizeUrl } from './utils/format.js';
 import ApiConfig from './ui/components/apiConfig.js';
-import ToolsBar from './ui/components/toolsBar.js';
+import ToolsBar from './ui/components/toolsBar.js?v=timeline-undo-20260424';
 
 class App {
     constructor() {
