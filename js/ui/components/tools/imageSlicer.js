@@ -1,4 +1,7 @@
 import { showSuccess, showError } from '../toast.js';
+import { loadStylesheet } from '../../../utils/styles.js';
+
+const STYLE_PATHS = ['css/tools/shared.css', 'css/tools/imageSlicer.css'];
 
 const ImageSlicer = {
     state: {
@@ -36,7 +39,8 @@ const ImageSlicer = {
         this.elements.bgColorInput = document.getElementById('slicerBgColor');
     },
 
-    open() {
+    async open() {
+        await Promise.all(STYLE_PATHS.map(loadStylesheet));
         this.cacheElements();
         if (!this.elements.modal) return;
 

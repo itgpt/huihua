@@ -1,8 +1,10 @@
 import { showSuccess, showError } from '../toast.js';
 import { ModelSelector } from '../../../models/modelSelector.js';
 import { APIClient } from '../../../api/base.js';
+import { loadStylesheet } from '../../../utils/styles.js';
 
 const SHOT_COUNT = 9;
+const STYLE_PATHS = ['css/tools/shared.css', 'css/tools/storyboard.css'];
 const ROLE_STORAGE_KEY = 'storyboard_roles_v1';
 const VISION_PROMPT_STORAGE_KEY = 'storyboard_vision_prompt';
 const IMAGE_PROMPT_STORAGE_KEY = 'storyboard_image_prompt';
@@ -53,7 +55,8 @@ const Storyboard = {
         this.elements.previewBox = document.querySelector('.preview-box');
     },
 
-    open() {
+    async open() {
+        await Promise.all(STYLE_PATHS.map(loadStylesheet));
         this.cacheElements();
         if (!this.elements.modal) return;
 

@@ -1,5 +1,8 @@
 import { VideoFrameUtils } from '../../../utils/videoFrame.js';
+import { loadStylesheet } from '../../../utils/styles.js';
 import { showSuccess, showError } from '../toast.js';
+
+const STYLE_PATHS = ['css/tools/shared.css', 'css/tools/videoFrameExtractor.css'];
 
 const VideoFrameExtractor = {
     // 状态
@@ -89,7 +92,8 @@ const VideoFrameExtractor = {
         });
     },
 
-    open(videoUrl = null) {
+    async open(videoUrl = null) {
+        await Promise.all(STYLE_PATHS.map(loadStylesheet));
         this.cacheElements();
         if (!this.elements.modal) {
             console.error('VideoFrameModal element not found!');

@@ -1,10 +1,12 @@
 import { showSuccess, showError } from '../toast.js';
 import { VideoFrameUtils } from '../../../utils/videoFrame.js';
 import { formatTime } from '../../../utils/format.js';
+import { loadStylesheet } from '../../../utils/styles.js';
 
 const FFMPEG_MODULE_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/esm/index.js';
 const FFMPEG_CORE_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js';
 const FFMPEG_WASM_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm';
+const STYLE_PATHS = ['css/tools/shared.css', 'css/tools/quickTimeline.css'];
 
 let ffmpegModuleLoadPromise = null;
 
@@ -128,7 +130,8 @@ const QuickTimeline = {
         this.elements.splitBtn = document.getElementById('timelineSplitBtn');
     },
 
-    open() {
+    async open() {
+        await Promise.all(STYLE_PATHS.map(loadStylesheet));
         this.cacheElements();
         if (!this.elements.modal) return;
 
@@ -1178,7 +1181,7 @@ const QuickTimeline = {
             const blob = await resp.blob();
             const file = new File([blob], name, { type: blob.type || 'video/mp4' });
             await this.handleFiles([file]);
-            if (!this.state.isOpen) this.open();
+            if (!this.state.isOpen) await this.open();
             showSuccess('已添加到时间线');
         } catch (e) {
             showError('添加失败: ' + e.message);

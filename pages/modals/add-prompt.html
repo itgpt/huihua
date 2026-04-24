@@ -1,0 +1,62 @@
+  <!-- 添加自定义Prompt模态框 -->
+  <div id="addPromptModal" class="add-prompt-modal" style="display: none;">
+    <div class="add-prompt-backdrop"></div>
+    <div class="add-prompt-container">
+      <div class="add-prompt-header">
+        <h3>添加自定义 Prompt</h3>
+        <button class="btn-close-dark" id="addPromptCloseBtn">×</button>
+      </div>
+
+      <div class="add-prompt-body">
+        <div class="form-group">
+          <input type="text" id="addPromptTitle" class="dark-input" placeholder="标题">
+        </div>
+
+        <div class="form-group mode-toggle">
+          <label class="radio-tab active">
+            <input type="radio" name="addPromptMode" value="generate" checked>
+            <span>🖼️ 文生图</span>
+          </label>
+          <label class="radio-tab">
+            <input type="radio" name="addPromptMode" value="edit">
+            <span>✏️ 编辑</span>
+          </label>
+        </div>
+
+        <div class="form-group upload-area" id="addPromptUploadArea">
+          <input type="file" id="addPromptFile" accept="image/*" style="display: none;">
+          <div class="upload-placeholder">
+            <span class="icon">🖼️</span>
+            <span>点击上传封面图</span>
+          </div>
+          <img id="addPromptPreviewImg" style="display: none;">
+          <button class="btn-remove-img" id="addPromptRemoveImg" style="display: none;">×</button>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-category">
+            <select id="addPromptCategory" class="dark-select">
+              <option value="工作">工作</option>
+              <option value="生活">生活</option>
+              <option value="学习">学习</option>
+              <option value="有趣">有趣</option>
+              <option value="NSFW">NSFW</option>
+              <option value="自定义">自定义</option>
+            </select>
+          </div>
+          <div class="form-group col-subcategory">
+            <input type="text" id="addPromptSubCategory" class="dark-input" placeholder="子分类 (可选)">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <textarea id="addPromptContent" class="dark-textarea" placeholder="Prompt 内容"></textarea>
+        </div>
+      </div>
+
+      <div class="add-prompt-footer">
+        <button class="btn-dark-cancel" id="addPromptCancelBtn">取消</button>
+        <button class="btn-dark-save" id="addPromptSaveBtn">保存</button>
+      </div>
+    </div>
+  </div>

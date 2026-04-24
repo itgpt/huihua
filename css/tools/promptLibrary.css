@@ -1,0 +1,703 @@
+/* ========== 提示词库模态框样式 ========== */
+
+.prompt-library-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+}
+
+.prompt-library-container {
+    width: 96%;
+    max-width: 1400px;
+    height: 90vh;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* 工具栏 */
+.prompt-toolbar {
+    padding: 16px 24px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.search-bar {
+    flex: 1;
+    position: relative;
+    max-width: 400px;
+}
+
+.search-bar input {
+    width: 100%;
+    height: 40px;
+    padding-left: 40px;
+    padding-right: 16px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.search-bar input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+    pointer-events: none;
+}
+
+.filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-icon-filter {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-icon-filter:hover {
+    background: #f1f5f9;
+}
+
+.dropdown-container {
+    position: relative;
+}
+
+.btn-filter-dropdown {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-filter-dropdown:hover {
+    background: #f1f5f9;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 160px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    padding: 8px 0;
+    z-index: 10;
+}
+
+.dropdown-menu.hidden {
+    display: none;
+}
+
+.dropdown-item {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    color: #4a5568;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: #f7fafc;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 4px 0;
+}
+
+/* 标签栏 */
+.prompt-tabs {
+    padding: 12px 24px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.prompt-filter-chip {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #718096;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.prompt-filter-chip:hover {
+    background: #f7fafc;
+}
+
+.prompt-filter-chip.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.btn-add-prompt {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #667eea;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: none; /* 暂时隐藏入口 */
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-left: auto;
+    transition: transform 0.2s;
+}
+
+.btn-add-prompt:hover {
+    transform: scale(1.1);
+    background: #5a67d8;
+}
+
+/* 内容区 */
+.prompt-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    background: #f8fafc;
+}
+
+.prompt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.prompt-loading, .prompt-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    color: #a0aec0;
+    font-size: 0.9rem;
+    gap: 16px;
+}
+
+/* 提示词卡片 */
+.prompt-card-item {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    height: 100%;
+}
+
+.prompt-card-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: #cbd5e0;
+}
+
+.prompt-card-preview {
+    height: 160px;
+    position: relative;
+    background: #f1f5f9;
+    overflow: hidden;
+}
+
+.prompt-card-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.prompt-card-preview .no-preview {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a0aec0;
+    font-size: 0.8rem;
+}
+
+.prompt-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 12px;
+    opacity: 1;
+    pointer-events: none; /* 让点击事件穿透到图片 */
+}
+
+.prompt-card-title {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.prompt-card-tags {
+    display: flex;
+    gap: 6px;
+}
+
+.prompt-card-tags span {
+    background: rgba(255,255,255,0.9);
+    color: #4a5568;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.prompt-card-tags span.mode {
+    background: #48bb78;
+    color: white;
+}
+
+.prompt-fav-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+    opacity: 0;
+    pointer-events: auto; /* 恢复收藏按钮的点击事件 */
+}
+
+.prompt-card-item:hover .prompt-fav-btn,
+.prompt-fav-btn.active {
+    opacity: 1;
+}
+
+.prompt-fav-btn:hover {
+    background: rgba(0,0,0,0.7);
+    transform: scale(1.1);
+}
+
+.prompt-fav-btn.active {
+    color: #fbbf24;
+}
+
+.prompt-card-body {
+    padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.prompt-text {
+    font-size: 0.8rem;
+    color: #718096;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+}
+
+.prompt-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.author {
+    font-size: 0.75rem;
+    color: #a0aec0;
+}
+
+.prompt-copy-btn {
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #718096;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.prompt-copy-btn:hover {
+    background: #f7fafc;
+    color: #4a5568;
+    border-color: #cbd5e0;
+}
+
+/* 分页 */
+.prompt-pagination {
+    padding: 16px 24px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.btn-page {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #4a5568;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-page:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-page:not(:disabled):hover {
+    background: #f7fafc;
+    border-color: #cbd5e0;
+}
+
+.page-info {
+    font-size: 0.9rem;
+    color: #718096;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .prompt-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .search-bar {
+        max-width: none;
+    }
+    
+    .filter-actions {
+        justify-content: space-between;
+    }
+    
+    .prompt-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+/* 自定义 Prompt 模态框样式 */
+.add-prompt-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.add-prompt-container {
+    width: 600px;
+    background: #1a1a1a;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    color: #e2e8f0;
+    border: 1px solid #333;
+}
+
+.add-prompt-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-prompt-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.btn-close-dark {
+    background: transparent;
+    border: none;
+    color: #718096;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.btn-close-dark:hover {
+    color: #e2e8f0;
+}
+
+.add-prompt-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dark-input, .dark-textarea, .dark-select {
+    background: #2d2d2d;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    width: 100%;
+}
+
+.dark-input:focus, .dark-textarea:focus, .dark-select:focus {
+    border-color: #667eea;
+    outline: none;
+}
+
+.dark-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.mode-toggle {
+    flex-direction: row;
+    background: #2d2d2d;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.radio-tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+    color: #718096;
+}
+
+.radio-tab:hover {
+    color: #e2e8f0;
+}
+
+.radio-tab:has(input:checked) {
+    background: #3d3d3d;
+    color: #fff;
+    font-weight: 600;
+}
+
+.radio-tab input {
+    display: none;
+}
+
+.upload-area {
+    height: 160px;
+    border: 2px dashed #444;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #252525;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-area:hover {
+    border-color: #667eea;
+    background: #2a2a2a;
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: #718096;
+}
+
+.upload-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+.btn-remove-img {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.col-category {
+    width: 40%;
+}
+
+.col-subcategory {
+    width: 60%;
+}
+
+.add-prompt-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #333;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-dark-cancel {
+    background: transparent;
+    border: 1px solid #444;
+    color: #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-dark-cancel:hover {
+    border-color: #718096;
+}
+
+.btn-dark-save {
+    background: #667eea;
+    border: none;
+    color: white;
+    padding: 8px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-dark-save:hover {
+    background: #5a67d8;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+    .image-preview-content img {
+        max-height: 60vh;
+    }
+    
+    .image-preview-info {
+        max-width: 90vw;
+        padding: 12px 16px;
+    }
+    
+    .image-preview-close {
+        top: 10px;
+        right: 10px;
+    }
+}

@@ -1,0 +1,399 @@
+/* ========== 分镜设计模态框样式 ========== */
+
+.storyboard-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+}
+
+.storyboard-container {
+    width: 96%;
+    max-width: 1400px;
+    height: 90vh;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.storyboard-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+    padding: 24px;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+.storyboard-grid-panel {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+    min-width: 0;
+}
+
+.storyboard-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.storyboard-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.storyboard-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.storyboard-card .card-header .actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.storyboard-card .idx {
+    font-size: 0.75rem;
+    color: #a0aec0;
+}
+
+.image-area {
+    height: 120px;
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
+    background: #fcfcfc;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.image-area:hover, .image-area.drag-over {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+.image-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-area .placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #a0aec0;
+    font-size: 0.8rem;
+}
+
+.image-actions {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.image-area:hover .image-actions {
+    opacity: 1;
+}
+
+.btn-icon-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid #e2e8f0;
+    color: #4a5568;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-icon-circle:hover {
+    color: #e53e3e;
+    background: white;
+}
+
+.desc-input {
+    width: 100%;
+    height: 60px;
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    resize: none;
+}
+
+.meta-row {
+    display: flex;
+    gap: 8px;
+}
+
+.duration-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+.dialogue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 100px;
+    overflow-y: auto;
+    padding: 4px 0;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.empty-dialogue {
+    text-align: center;
+    color: #a0aec0;
+    font-size: 0.75rem;
+    padding: 8px 0;
+}
+
+.dialogue-item {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.role-select {
+    width: 70px;
+    padding: 4px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.dialogue-text {
+    flex: 1;
+    padding: 4px 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.btn-add-dialogue {
+    width: 100%;
+    padding: 6px;
+    border: 1px dashed #e2e8f0;
+    background: white;
+    color: #718096;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-add-dialogue:hover {
+    border-color: #cbd5e0;
+    background: #f7fafc;
+}
+
+.storyboard-roles-panel {
+    width: 240px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.storyboard-roles-panel .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.storyboard-roles-panel .panel-header h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #2d3748;
+}
+
+.roles-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.role-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: #f8fafc;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #edf2f7;
+}
+
+.role-name-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-size: 0.85rem;
+    color: #4a5568;
+}
+
+.storyboard-preview-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.preview-card, .script-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.preview-card {
+    flex: 1;
+}
+
+.script-card {
+    height: 300px;
+}
+
+.preview-card .card-header, .script-card .card-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.preview-card .card-header h4, .script-card .card-header h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #2d3748;
+}
+
+.preview-box {
+    flex: 1;
+    background: #f1f5f9;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 16px;
+}
+
+.preview-box canvas {
+    max-width: 100%;
+    max-height: 100%;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.preview-box .empty-text {
+    position: absolute;
+    color: #a0aec0;
+    font-size: 0.9rem;
+}
+
+#storyboardScript {
+    flex: 1;
+    resize: none;
+    border: none;
+    padding: 16px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #4a5568;
+    background: #fff;
+}
+
+.glass-select-sm {
+    height: 32px;
+    padding: 0 24px 0 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-size: 0.85rem;
+    color: #4a5568;
+    cursor: pointer;
+}
+
+.btn-sm {
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #4a5568;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-sm:hover {
+    background: #f7fafc;
+    border-color: #cbd5e0;
+}
+
+.btn-icon-sm {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: #a0aec0;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon-sm:hover {
+    color: #e53e3e;
+    background: rgba(0,0,0,0.05);
+    border-radius: 4px;
+}

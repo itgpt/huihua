@@ -1,0 +1,52 @@
+        <!-- 提示词卡片 -->
+        <div class="card prompt-card">
+          <h3>
+            <span class="icon-box" style="background: linear-gradient(135deg, #ff9a9e, #fecfef);">✨</span>
+            提示词工程
+            <span class="badge badge-blue">智能优化</span>
+          </h3>
+          <div class="card-body">
+            <!-- 提示词优化开关 -->
+            <div class="input-group">
+              <label class="custom-checkbox"
+                style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-bottom:0;">
+                <input type="checkbox" id="enablePromptOptimizer" style="width:18px; height:18px; cursor:pointer;">
+                <span style="font-weight:600; color:#4a5568;">启用提示词优化</span>
+              </label>
+              <p style="font-size:0.85rem; color:#718096; margin:4px 0 0 26px;">
+                开启后可使用AI优化你的提示词，提升生成效果
+              </p>
+            </div>
+
+            <!-- 优化模型选择（默认隐藏） -->
+            <div class="input-group" id="optimizerModelGroup" style="display:none;">
+              <label for="promptOptimizerModel">优化模型</label>
+              <select id="promptOptimizerModel">
+                <option value="gpt-5-chat">gpt-5-chat (默认)</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+                <option value="__custom__">自定义...</option>
+              </select>
+              <input type="text" id="customOptimizerModelInput" placeholder="请输入自定义优化模型名称"
+                style="display:none; margin-top:8px;">
+            </div>
+
+            <!-- 优化指令（默认隐藏） -->
+            <div class="input-group" id="optimizerSystemPromptGroup" style="display:none;">
+              <label for="optimizerSystemPrompt">优化指令 (System Prompt)</label>
+              <textarea id="optimizerSystemPrompt" class="glass-input"
+                style="height: 80px;">你是一个专业的AI绘画提示词优化专家。请将用户输入的中文描述优化并翻译成高质量的英文绘画提示词。要求：1.保持原意不变 2.增加艺术性描述 3.使用专业绘画术语 4.直接返回优化后的英文提示词，不要解释过程</textarea>
+            </div>
+
+            <!-- 创意描述 -->
+            <div class="input-group highlight-group prompt-input-container">
+              <!-- 添加醒目的标题 -->
+              <div class="prompt-header">
+                <span class="prompt-status-badge"> </span>
+                <h4 class="prompt-title">💡 创意描述 (Prompt)</h4>
+                <p class="prompt-hint">请在此输入您的创意想法，描述想要生成的图片或视频</p>
+              </div>
+              <textarea id="prompt" placeholder="描述您想要生成的图片或视频..."
+                style="height: 130px;">create a 1/7 scale commercialized figure of thecharacter in the illustration, in a realistic styie and environment.Place the figure on a computer desk, using a circular transparent acrylic base without any text.On the computer screen, display the ZBrush modeling process of the figure.Next to the computer screen, place a BANDAl-style toy packaging box printedwith the original artwork.</textarea>
+            </div>
+          </div>
+        </div>

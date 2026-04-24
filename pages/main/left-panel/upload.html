@@ -1,0 +1,27 @@
+        <!-- 图片上传卡片 -->
+        <div class="card upload-card">
+          <h3>
+            <span class="icon-box" style="background: linear-gradient(135deg, #84fab0, #8fd3f4);">🖼️</span>
+            参考素材
+          </h3>
+          <div class="card-body">
+            <!-- 图片预览区域 -->
+            <div id="imagePreviewContainer" class="image-preview-container"></div>
+
+            <!-- 上传区域 -->
+            <div class="upload-grid">
+              <div class="file-upload">
+                <input type="file" id="imageFile" accept="image/jpeg,image/png,image/jpg" multiple>
+                <label for="imageFile" class="file-upload-label">
+                  <span class="upload-icon">📁</span>
+                  <span>上传本地图片</span>
+                </label>
+              </div>
+
+              <div class="url-input-wrapper">
+                <textarea id="imageUrls" placeholder="输入图片URL，每行一个" class="glass-input"></textarea>
+                <button id="loadUrlsBtn" class="btn-url-load">加载</button>
+              </div>
+            </div>
+          </div>
+        </div>

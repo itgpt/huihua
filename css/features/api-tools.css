@@ -1,0 +1,178 @@
+/* ========== API配置折叠样式 ========== */
+
+/* API配置卡片 */
+.api-config-card {
+    margin-bottom: 0;
+    transition: all 0.3s ease;
+}
+
+/* API配置标题栏（可点击） */
+.api-config-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid #f7fafc;
+    transition: background 0.2s ease;
+}
+
+.api-config-header:hover {
+    background: #f7fafc;
+}
+
+/* 标题左侧 */
+.api-config-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.api-config-title h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2d3748;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+/* 状态徽章 */
+.api-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.api-status.configured {
+    background: rgba(72, 187, 120, 0.1);
+    color: #48bb78;
+    border: 1px solid rgba(72, 187, 120, 0.3);
+}
+
+.api-status.required {
+    background: rgba(245, 101, 101, 0.1);
+    color: #f56565;
+    border: 1px solid rgba(245, 101, 101, 0.3);
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* 展开/收起图标 */
+.api-toggle-icon {
+    font-size: 1.2rem;
+    color: #718096;
+    transition: transform 0.3s ease;
+}
+
+.api-config-card.collapsed .api-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+/* API配置内容区 */
+.api-config-body {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+.api-config-card.collapsed .api-config-body {
+    max-height: 0;
+    opacity: 0;
+}
+
+/* ========== 工具栏样式 ========== */
+
+/* 工具栏卡片 */
+.tools-card {
+    margin-bottom: 0;
+}
+
+/* 工具网格布局 - 3列2行 */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+/* 工具按钮 - 扁长横向布局 */
+.tool-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    gap: 8px;
+}
+
+.tool-button:hover {
+    border-color: #cbd5e0;
+    background: #f7fafc;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tool-button:active {
+    transform: translateY(0);
+}
+
+/* 工具图标 - 柔和彩色 */
+.tool-icon {
+    font-size: 1.25rem;
+    filter: saturate(0.65) brightness(1.05);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.tool-button:hover .tool-icon {
+    filter: saturate(1) brightness(1);
+    transform: scale(1.08);
+}
+
+/* 工具标签 */
+.tool-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #4a5568;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+}
+
+.tool-button:hover .tool-label {
+    color: #2d3748;
+}
+
+/* 响应式：小屏幕改为2列 */
+@media (max-width: 768px) {
+    .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .tool-button {
+        padding: 9px 10px;
+    }
+    
+    .tool-icon {
+        font-size: 1.15rem;
+    }
+    
+    .tool-label {
+        font-size: 0.75rem;
+    }
+}

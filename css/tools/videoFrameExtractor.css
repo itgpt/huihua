@@ -1,0 +1,358 @@
+/* ========== 视频帧提取模态框样式 ========== */
+
+.video-frame-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+}
+
+.video-frame-container {
+    width: 94%;
+    max-width: 1200px;
+    height: 85vh;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* 标题栏 */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-left .icon {
+    font-size: 1.5rem;
+}
+
+.header-left h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: #2d3748;
+}
+
+.header-left .subtitle {
+    font-size: 0.8rem;
+    color: #718096;
+    margin: 0;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #a0aec0;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.btn-close:hover {
+    color: #4a5568;
+}
+
+/* 操作栏 */
+.modal-toolbar {
+    padding: 10px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.btn-toolbar {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #4a5568;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-toolbar:hover {
+    border-color: #cbd5e0;
+    background: #f1f5f9;
+}
+
+.url-input {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.85rem;
+}
+
+.duration-display {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.error-display {
+    font-size: 0.85rem;
+    color: #e53e3e;
+}
+
+/* 主内容区 */
+.video-preview-section {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 24px;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+/* 预览面板 */
+.preview-panel, .result-panel {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.preview-panel h4, .result-panel h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.video-preview {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: 12px;
+    object-fit: contain;
+}
+
+.frame-action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.btn-extract-frame {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #4a5568;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-extract-frame:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: #f0f4ff;
+}
+
+.grid-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #4a5568;
+}
+
+.grid-option {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.grid-option.active {
+    background: #4a5568;
+    color: white;
+    border-color: #4a5568;
+}
+
+/* 结果面板 */
+.frames-result {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.frame-result-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    background: #fcfcfc;
+}
+
+.frame-label {
+    margin: 0 0 8px 0;
+    font-size: 0.85rem;
+    color: #718096;
+    font-weight: 600;
+}
+
+.frame-preview-img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+}
+
+.frame-preview-empty {
+    width: 100%;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
+    color: #a0aec0;
+    font-size: 0.9rem;
+}
+
+.frame-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-download {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #4a5568;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-download:hover {
+    border-color: #48bb78;
+    color: #48bb78;
+}
+
+/* 拼贴结果 */
+.collage-result {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+}
+
+.collage-info {
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.collage-preview {
+    flex: 1;
+    border: 2px dashed #e2e8f0;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fcfcfc;
+    overflow: hidden;
+    position: relative;
+    min-height: 300px;
+}
+
+.collage-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.collage-hint {
+    position: absolute;
+    color: #a0aec0;
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
+.collage-canvas + .collage-hint {
+    display: none;
+}
+
+.btn-download-collage {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-download-collage:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .video-preview-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .frame-action-buttons {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .modal-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .url-input {
+        max-width: none;
+    }
+}

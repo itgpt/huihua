@@ -1,0 +1,116 @@
+/* 移除 Google Fonts 外部引用以符合 CSP 策略 */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background-color: #f8f9fa; /* 极淡灰白背景 */
+    color: #2d3748;
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1280px; /* 缩小最大宽度，留出更多空白 */
+    margin: 0 auto;
+    padding: 0 40px; /* 增加两侧内边距 */
+}
+
+/* 顶部标题 */
+.header-section {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 40px 0;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1a202c;
+    margin-bottom: 10px;
+    letter-spacing: -0.025em;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    color: #718096;
+    font-size: 1.1rem;
+}
+
+/* 主布局：左右分栏 */
+.main-content {
+    display: grid;
+    grid-template-columns: 500px 1fr; /* 黄金比例调整，加宽左侧面板 */
+    gap: 35px;
+    margin-bottom: 40px;
+    align-items: start;
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.right-panel {
+    min-width: 0;
+}
+
+/* 卡片通用样式 */
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+}
+
+.card h3 {
+    font-size: 0.95rem; /* 稍微调小标题字体 */
+    font-weight: 700;
+    color: #2d3748;
+    padding: 16px 20px; /* 减小内边距 */
+    margin: 0;
+    border-bottom: 1px solid #f7fafc;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+}
+
+.card-body {
+    padding: 18px 20px;
+}
+
+/* 图标盒子 */
+.icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* 徽章 */
+.badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #edf2f7;
+    color: #718096;
+    margin-left: auto;
+    font-weight: 500;
+}
+.badge-blue { background: #ebf8ff; color: #4299e1; }

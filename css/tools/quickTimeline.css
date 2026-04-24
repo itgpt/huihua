@@ -1,0 +1,1048 @@
+/* ========== 快捷时间线模态框样式 ========== */
+
+.quick-timeline-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+}
+
+.quick-timeline-container {
+    width: 96%;
+    max-width: 1400px;
+    height: 90vh;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.timeline-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #1a1a1a; /* 深色背景更适合时间线 */
+}
+
+.timeline-preview-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    min-height: 200px;
+    padding: 20px;
+}
+
+.timeline-preview {
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 16/9;
+}
+
+.timeline-track-area {
+    height: 240px;
+    background: #262626;
+    border-top: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-tracks {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 20px;
+    display: flex;
+    gap: 2px;
+    align-items: center;
+}
+
+.timeline-clip {
+    height: 120px;
+    min-width: 160px;
+    background: #333;
+    border-radius: 8px;
+    border: 2px solid #444;
+    cursor: grab;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-clip:hover {
+    border-color: #666;
+}
+
+.timeline-clip.active {
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+}
+
+.timeline-clip.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.timeline-clip.drag-over {
+    border-left: 4px solid #667eea;
+}
+
+.clip-thumb {
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.clip-duration {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.clip-info {
+    height: 32px;
+    background: #1f1f1f;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #333;
+}
+
+.clip-name {
+    color: #ccc;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.clip-remove-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0 4px;
+}
+
+.clip-remove-btn:hover {
+    color: #e53e3e;
+}
+
+.timeline-empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 0.9rem;
+    border: 2px dashed #444;
+    border-radius: 12px;
+}
+
+.timeline-mode-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.timeline-mode-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+/* ========== QuickTimeline 新增样式 ========== */
+
+.timeline-scroll-container {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    position: relative;
+    background: #262626;
+}
+
+.timeline-ruler {
+    height: 24px;
+    background: #1f1f1f;
+    border-bottom: 1px solid #333;
+    position: relative;
+    width: fit-content;
+    min-width: 100%;
+}
+
+.ruler-mark {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid #444;
+    font-size: 10px;
+    color: #888;
+    padding-left: 2px;
+    pointer-events: none;
+}
+
+.timeline-tracks {
+    position: relative;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    width: fit-content;
+    min-width: 100%;
+}
+
+.timeline-clip-item {
+    height: 100px;
+    background: #333;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #444;
+    position: relative;
+    cursor: grab;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.timeline-clip-item.active {
+    border: 2px solid #667eea;
+    z-index: 10;
+}
+
+.timeline-clip-item.drag-over {
+    transform: scale(1.02);
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+    z-index: 20;
+}
+
+.clip-inner {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.clip-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.6);
+    color: #eee;
+    font-size: 10px;
+    padding: 2px 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.clip-dur {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 9px;
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+
+.clip-del-btn {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.timeline-clip-item:hover .clip-del-btn {
+    display: flex;
+}
+
+.timeline-clip-item:hover .clip-del-btn:hover {
+    background: #e53e3e;
+}
+
+.timeline-playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e53e3e;
+    z-index: 30;
+    pointer-events: none;
+}
+
+.timeline-playhead::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -5px;
+    width: 12px;
+    height: 12px;
+    background: #e53e3e;
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+}
+
+.timeline-add-block {
+    height: 100px;
+    background: #2a2a2a;
+    border: 1px dashed #444;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    cursor: pointer;
+    font-size: 24px;
+    transition: background 0.2s;
+}
+
+.timeline-add-block:hover {
+    background: #333;
+    color: #888;
+}
+
+.preview-controls-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.timeline-preview-area:hover .preview-controls-overlay {
+    opacity: 1;
+}
+
+.control-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+}
+
+.control-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    transition: transform 0.1s;
+}
+
+.control-btn:hover {
+    transform: scale(1.1);
+}
+
+.play-btn {
+    font-size: 20px;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 4px;
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    outline: none;
+}
+
+.progress-bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+}
+
+.time-display {
+    font-size: 12px;
+    font-family: monospace;
+    min-width: 80px;
+    text-align: right;
+}
+
+/* ========== QuickTimeline 2.0 (Clean Light Theme) ========== */
+
+.quick-timeline-container {
+    background: #ffffff !important;
+    color: #2d3748;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.quick-timeline-container .modal-header {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.quick-timeline-container .modal-header h3 {
+    color: #2d3748 !important;
+}
+.quick-timeline-container .modal-header .subtitle {
+    color: #718096 !important;
+}
+.quick-timeline-container .btn-close {
+    color: #a0aec0 !important;
+}
+.quick-timeline-container .btn-close:hover {
+    color: #4a5568 !important;
+}
+
+/* 紧凑工具栏 - 浅色 */
+.compact-toolbar {
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    height: 52px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.compact-toolbar .btn-toolbar {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #4a5568 !important;
+    padding: 0 12px;
+    height: 32px;
+    font-size: 13px;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.compact-toolbar .btn-toolbar:hover {
+    background: #edf2f7 !important;
+    color: #2d3748 !important;
+    border-color: #cbd5e0 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.compact-toolbar .btn-danger {
+    color: #e53e3e !important;
+    border-color: #feb2b2 !important;
+}
+.compact-toolbar .btn-danger:hover {
+    background: #fff5f5 !important;
+    border-color: #fc8181 !important;
+}
+
+#timelineMergeBtn {
+    max-width: 120px;
+}
+
+.compact-toolbar .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+.compact-toolbar .btn-primary:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.compact-toolbar .label {
+    color: #718096 !important;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.compact-toolbar .divider {
+    width: 1px;
+    height: 24px;
+    background: #e2e8f0;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+.compact-toolbar .toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.compact-toolbar .flex-1 {
+    flex: 1;
+    min-width: 20px;
+}
+
+/* 缩放滑块 - 浅色适配 */
+.zoom-slider {
+    width: 100px;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    outline: none;
+    -webkit-appearance: none;
+}
+.zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    transition: all 0.2s;
+}
+.zoom-slider::-webkit-slider-thumb:hover {
+    background: #5a67d8;
+    transform: scale(1.1);
+}
+
+/* 轨道区域布局 - 浅色 */
+.timeline-track-area {
+    background: #edf2f7 !important;
+    border-top: 1px solid #e2e8f0 !important;
+    height: 280px !important;
+    display: flex;
+    flex-direction: row;
+}
+
+/* 左侧轨道头 - 白色 */
+.timeline-headers {
+    width: 60px;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    padding-top: 32px;
+    z-index: 20;
+    flex-shrink: 0;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+}
+
+.track-header-item {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #e2e8f0;
+    color: #a0aec0;
+}
+
+.track-header-item .icon {
+    font-size: 1.2rem;
+    color: #718096;
+}
+
+/* 右侧滚动区 */
+.timeline-scroll-container {
+    flex: 1;
+    background: #edf2f7 !important;
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* 标尺 - 浅色 */
+.timeline-ruler {
+    height: 32px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    position: relative;
+    cursor: ew-resize;
+}
+
+/* 主刻度 - 显示文字 */
+.ruler-mark-major {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 2px solid #718096 !important;
+    color: #718096 !important;
+    font-family: -apple-system, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding-left: 4px;
+    line-height: 32px;
+    pointer-events: none;
+}
+
+/* 次刻度 - 只显示线 */
+.ruler-mark-minor {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid #e2e8f0 !important;
+    pointer-events: none;
+}
+
+/* 兼容旧的ruler-mark类 */
+.ruler-mark {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid #cbd5e0 !important;
+    color: #718096 !important;
+    font-family: -apple-system, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    padding-left: 4px;
+    line-height: 32px;
+    pointer-events: none;
+}
+
+/* 网格背景 - 仅显示秒网格 */
+.timeline-grid-bg {
+    position: absolute;
+    top: 32px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: linear-gradient(
+        to right,
+        rgba(160, 174, 192, 0.3) 1px,
+        transparent 1px
+    );
+    background-size: 24px 100%; /* 默认值，JS会动态更新 */
+}
+
+/* 轨道容器 */
+.timeline-tracks {
+    position: relative;
+    height: calc(280px - 32px) !important;
+    min-height: 100%;
+    padding: 20px 0 !important;
+    display: block !important;
+}
+
+/* 视频片段样式 - 浅色卡片 */
+.timeline-clip-item {
+    position: absolute;
+    top: 20px;
+    height: 100px !important;
+    background: #ffffff !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+    cursor: grab;
+    transition: all 0.2s ease;
+}
+
+.timeline-clip-item:hover {
+    border-color: #cbd5e0 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.timeline-clip-item.active {
+    border: 2px solid #667eea !important;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    z-index: 10;
+}
+
+.timeline-clip-item.dragging {
+    opacity: 0.6;
+    cursor: grabbing;
+    transform: scale(0.98);
+}
+
+.timeline-clip-item.drag-over {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* 片段内部 */
+.clip-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background-color: #333; /* 深色背景，未加载帧时显示 */
+    position: relative;
+    z-index: 2; /* 确保内容在帧图层之上 */
+    background: transparent !important; /* 让位给帧图层 */
+}
+
+/* 视频帧序列容器 */
+.clip-frames-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 8px;
+    opacity: 0.8;
+}
+
+.clip-frame-item {
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+}
+
+.clip-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.95) !important;
+    color: #2d3748 !important;
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+    font-weight: 600;
+    border-top: 1px solid #e2e8f0;
+    backdrop-filter: blur(8px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.clip-dur {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+.clip-del-btn {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 20px;
+    height: 20px;
+    background: rgba(229, 62, 62, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.timeline-clip-item:hover .clip-del-btn {
+    display: flex;
+}
+
+.clip-del-btn:hover {
+    background: #e53e3e;
+    transform: scale(1.1);
+}
+
+/* 游标 - 精致红色，可拖动 */
+.timeline-playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px !important;
+    background: #e53e3e !important;
+    z-index: 100;
+    pointer-events: auto; /* 允许交互 */
+    cursor: ew-resize;
+    box-shadow: 0 0 8px rgba(229, 62, 62, 0.6);
+    transition: box-shadow 0.2s;
+}
+
+.timeline-playhead:hover {
+    box-shadow: 0 0 12px rgba(229, 62, 62, 0.8);
+}
+
+.timeline-playhead::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -7px;
+    width: 16px;
+    height: 16px;
+    background: #e53e3e;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    cursor: ew-resize;
+    transition: all 0.2s;
+}
+
+.timeline-playhead:hover::before {
+    transform: rotate(-45deg) scale(1.15);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+
+/* 拖动时的样式 */
+.timeline-playhead.dragging {
+    box-shadow: 0 0 16px rgba(229, 62, 62, 1);
+}
+
+.timeline-playhead.dragging::before {
+    transform: rotate(-45deg) scale(1.2);
+}
+
+/* 预览区 - 深色背景 */
+.timeline-preview-area {
+    flex: 1;
+    background: #1a202c !important;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 300px;
+}
+
+.timeline-preview {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* 控制条 - 新版布局 */
+.preview-controls-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.95) !important;
+    border-top: 1px solid #e2e8f0;
+    padding: 16px 24px !important;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 20;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.timeline-preview-area:hover .preview-controls-overlay {
+    opacity: 1;
+}
+
+.control-bar-top {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.control-bar-bottom {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.center-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    justify-content: center;
+}
+
+.right-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+}
+
+.time-container {
+    display: flex;
+    align-items: center;
+}
+
+.control-btn {
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #4a5568 !important;
+    font-size: 1.1rem;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    padding: 0;
+}
+
+.control-btn:hover {
+    color: #2d3748 !important;
+    background: #f7fafc;
+    border-color: #cbd5e0;
+    transform: translateY(-1px);
+}
+
+.play-btn {
+    background: #10b981 !important; /* 绿色播放按钮 */
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+}
+
+.play-btn:hover {
+    background: #059669 !important;
+    transform: scale(1.05);
+    box-shadow: 0 6px 10px rgba(16, 185, 129, 0.4);
+}
+
+.time-display {
+    color: #4a5568 !important;
+    font-weight: 600;
+    font-size: 14px;
+    font-family: monospace;
+    min-width: 100px;
+}
+
+/* 进度条 - 宽大气风格（带绿色填充） */
+.progress-bar {
+    flex: 1;
+    height: 8px !important;
+    background: #e2e8f0;
+    border-radius: 4px;
+    outline: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    /* 动态进度填充 */
+    background-image: linear-gradient(#10b981, #10b981);
+    background-size: var(--progress, 0%) 100%;
+    background-repeat: no-repeat;
+}
+
+.progress-bar::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 4px;
+    background: transparent; /* 背景由 input 本身控制 */
+}
+
+.progress-bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50%;
+    background: #10b981 !important; /* 绿色滑块 */
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    border: 2px solid #ffffff;
+    transition: transform 0.1s;
+    margin-top: -5px; /* (8 - 18) / 2 = -5px 垂直居中 */
+}
+
+.progress-bar::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+/* 滚动条美化 */
+.timeline-scroll-container::-webkit-scrollbar {
+    height: 10px;
+    background: #f7fafc;
+}
+
+.timeline-scroll-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 5px;
+    border: 2px solid #f7fafc;
+    transition: background 0.2s;
+}
+
+.timeline-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* 添加按钮 */
+.timeline-add-block {
+    position: absolute;
+    top: 20px;
+    height: 100px;
+    width: 100px;
+    background: #ffffff !important;
+    border: 2px dashed #cbd5e0 !important;
+    color: #a0aec0 !important;
+    border-radius: 10px !important;
+    font-size: 32px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.timeline-add-block:hover {
+    border-color: #667eea !important;
+    color: #667eea !important;
+    background: #f7fafc !important;
+    transform: scale(1.02);
+}
+
+/* 空状态提示 */
+.timeline-empty {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #a0aec0;
+    font-size: 14px;
+    text-align: center;
+    pointer-events: none;
+}

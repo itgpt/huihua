@@ -1,0 +1,74 @@
+  <!-- 分镜设计模态框 -->
+  <div id="storyboardModal" class="storyboard-modal" style="display: none;">
+    <div class="storyboard-container">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="icon">📐</span>
+          <div>
+            <h3>分镜设计</h3>
+            <p class="subtitle">固定 9 镜头，生成拼贴与脚本</p>
+          </div>
+        </div>
+        <button class="btn-close" id="storyboardCloseBtn">×</button>
+      </div>
+
+      <div class="modal-toolbar">
+        <div class="toolbar-group">
+          <span class="label">比例:</span>
+          <select id="storyboardRatio" class="glass-select-sm">
+            <option value="1:1">1:1</option>
+            <option value="16:9">16:9</option>
+            <option value="9:16">9:16</option>
+            <option value="4:3">4:3</option>
+            <option value="21:9">21:9</option>
+          </select>
+        </div>
+        <button class="btn-toolbar" id="storyboardPromptBtn">自定义提示词</button>
+        <button class="btn-toolbar btn-primary" id="storyboardGenerateBtn">生成分镜图与脚本</button>
+        <div class="divider"></div>
+        <button class="btn-toolbar btn-danger" id="storyboardClearBtn">清空</button>
+        <div class="flex-1"></div>
+        <button class="btn-toolbar" id="storyboardBulkVisionBtn" title="批量识图，填充空的画面描述">一键AI识图</button>
+        <button class="btn-toolbar" id="storyboardBulkImageBtn" title="批量生图，为空镜头生成图片">一键AI生图</button>
+      </div>
+
+      <div class="storyboard-content">
+        <div class="storyboard-grid-panel">
+          <div class="storyboard-grid" id="storyboardGrid">
+            <!-- 9个镜头卡片将在这里动态生成 -->
+          </div>
+
+          <div class="storyboard-roles-panel">
+            <div class="panel-header">
+              <h4>角色列表</h4>
+              <button class="btn-sm" id="storyboardAddRoleBtn">+ 新增</button>
+            </div>
+            <div id="storyboardRolesList" class="roles-list">
+              <!-- 角色列表 -->
+            </div>
+          </div>
+        </div>
+
+        <div class="storyboard-preview-panel">
+          <div class="preview-card">
+            <div class="card-header">
+              <h4>拼贴预览</h4>
+              <button class="btn-sm" id="storyboardDownloadBtn" disabled>⬇ 下载拼贴</button>
+            </div>
+            <div class="preview-box">
+              <canvas id="storyboardCanvas"></canvas>
+              <div id="storyboardEmptyPreview" class="empty-text">尚未生成拼贴</div>
+            </div>
+          </div>
+
+          <div class="script-card">
+            <div class="card-header">
+              <h4>脚本文字</h4>
+              <button class="btn-sm" id="storyboardCopyScriptBtn">📋 复制</button>
+            </div>
+            <textarea id="storyboardScript" placeholder="在此生成或编辑分镜脚本..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

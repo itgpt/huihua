@@ -1,8 +1,10 @@
 import { showSuccess, showError } from '../toast.js';
+import { loadStylesheet } from '../../../utils/styles.js';
 // GeminiAPI is not exported from gemini.js, so we'll use direct API calls if needed
 // import { callGeminiNativeAPI } from '../../../api/gemini.js';
 
 const HISTORY_KEY = 'xhs_lab_history_v1';
+const STYLE_PATHS = ['css/tools/shared.css', 'css/tools/xhsLab.css'];
 const MAX_IMAGES = 9;
 
 const SHOT_STYLES = [
@@ -60,7 +62,8 @@ const XhsLab = {
         this.elements.providerBtns = document.querySelectorAll('.xhs-provider-btn');
     },
 
-    open() {
+    async open() {
+        await Promise.all(STYLE_PATHS.map(loadStylesheet));
         this.cacheElements();
         if (!this.elements.modal) return;
 

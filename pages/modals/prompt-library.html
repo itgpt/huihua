@@ -1,0 +1,63 @@
+  <!-- 提示词库模态框 -->
+  <div id="promptLibraryModal" class="prompt-library-modal" style="display: none;">
+    <div class="prompt-library-container">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="icon">✨</span>
+          <div>
+            <h3>提示词库</h3>
+            <p class="subtitle">海量优质提示词一键使用</p>
+          </div>
+        </div>
+        <button class="btn-close" id="promptLibraryCloseBtn">×</button>
+      </div>
+
+      <div class="prompt-toolbar">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="promptSearchInput" placeholder="搜索关键词 (标题、提示词、分类)...">
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn-icon-filter" id="promptNsfwBtn" title="隐藏 NSFW">🙈</button>
+          <div class="dropdown-container">
+            <button class="btn-filter-dropdown" id="promptCategoryBtn">
+              全部 <span class="icon">▼</span>
+            </button>
+            <div class="dropdown-menu hidden" id="promptCategoryMenu">
+              <div class="dropdown-item prompt-category-item" data-category="全部">全部</div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item prompt-category-item" data-category="工作">工作</div>
+              <div class="dropdown-item prompt-category-item" data-category="生活">生活</div>
+              <div class="dropdown-item prompt-category-item" data-category="学习">学习</div>
+              <div class="dropdown-item prompt-category-item" data-category="有趣">有趣</div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item prompt-category-item" data-category="NSFW">NSFW</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-tabs">
+        <button class="prompt-filter-chip active" data-tab="all">全部</button>
+        <button class="prompt-filter-chip" data-tab="recent">最近一周</button>
+        <button class="prompt-filter-chip" data-tab="favorites">收藏</button>
+        <button class="prompt-filter-chip" data-tab="custom">自定义</button>
+        <button class="prompt-filter-chip" data-tab="generate">文生图</button>
+        <button class="prompt-filter-chip" data-tab="edit">编辑</button>
+        <button class="btn-add-prompt" id="promptAddBtn" title="新增自定义提示词">+</button>
+      </div>
+
+      <div class="prompt-content">
+        <div class="prompt-grid" id="promptGrid">
+          <!-- 动态生成 -->
+        </div>
+      </div>
+
+      <div class="prompt-pagination">
+        <button class="btn-page" id="promptPrevPage" disabled>上一页</button>
+        <span class="page-info" id="promptPageInfo">1 / 1</span>
+        <button class="btn-page" id="promptNextPage" disabled>下一页</button>
+      </div>
+    </div>
+  </div>

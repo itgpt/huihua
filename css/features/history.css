@@ -1,0 +1,162 @@
+/* 历史记录全宽卡片 */
+.history-card { margin-top: 0; }
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #f7fafc;
+}
+.card-header h3 { border: none; padding: 0; }
+
+.history-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 强制每行4个 */
+    gap: 15px;
+    padding: 20px;
+}
+
+@media (max-width: 1100px) {
+    .history-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 800px) {
+    .history-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.history-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+}
+.history-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: #cbd5e0;
+}
+.history-item.selected {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+.history-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+.history-prompt {
+    padding: 8px 10px;
+    font-size: 12px; /* 更小的字体 */
+    color: #4a5568;
+    line-height: 1.4;
+}
+.history-prompt strong {
+    font-size: 12px; /* 标题也变小 */
+}
+.history-time {
+    padding: 0 10px 8px;
+    font-size: 11px; /* 更小的字体 */
+    color: #a0aec0;
+}
+
+.history-logs {
+    padding: 0 10px 10px;
+}
+
+.history-logs summary {
+    font-size: 11px;
+    cursor: pointer;
+    color: #718096;
+    margin-bottom: 4px;
+    outline: none;
+    font-weight: 500;
+}
+
+.history-logs pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 10px; /* 更小的字体 */
+    color: #4a5568;
+    max-height: 120px; /* 固定高度 */
+    overflow-y: auto; /* 支持滚动 */
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    margin: 0;
+}
+
+/* 自定义滚动条样式 */
+.history-logs pre::-webkit-scrollbar {
+    width: 4px;
+}
+.history-logs pre::-webkit-scrollbar-track {
+    background: transparent;
+}
+.history-logs pre::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 2px;
+}
+.history-logs pre::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+.history-item-checkbox {
+    position: absolute;
+    top: 8px; left: 8px;
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    gap: 15px;
+    border-top: 1px solid #f0f0f0;
+}
+.page-btn {
+    padding: 6px 12px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #4a5568;
+    transition: all 0.2s;
+}
+.page-btn:hover:not(:disabled) {
+    background: #f7fafc;
+    border-color: #cbd5e0;
+    color: #2d3748;
+}
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.page-info {
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.btn-outline {
+    padding: 6px 16px;
+    border: 1px solid #cbd5e0;
+    background: white;
+    color: #4a5568;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-outline:hover {
+    border-color: #a0aec0;
+    background: #f7fafc;
+}
+.btn-outline.danger { color: #e53e3e; border-color: #feb2b2; }
+.btn-outline.danger:hover { background: #fff5f5; border-color: #fc8181; }

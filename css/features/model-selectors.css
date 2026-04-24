@@ -1,0 +1,356 @@
+/* 模型选择 */
+.model-selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+/* 自适应高度的多选框 */
+#imageModels {
+    min-height: 130px;
+    max-height: 190px;
+    height: auto;
+    background: #fff;
+    padding: 8px;
+    line-height: 1.5;
+}
+#videoModels {
+    min-height: 130px;
+    max-height: 240px;
+    height: auto;
+    background: #fff;
+    padding: 8px;
+    line-height: 1.5;
+}
+
+/* 优化选项样式 */
+#imageModels option,
+#videoModels option {
+    padding: 4px 6px;
+    color: #2d3748;
+}
+
+/* 选中状态的样式 */
+#imageModels option:checked,
+#videoModels option:checked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+}
+
+/* 悬停状态 - 未选中时 */
+#imageModels option:hover:not(:checked),
+#videoModels option:hover:not(:checked) {
+    background: #f7f9fc;
+    color: #2d3748;
+}
+
+/* 悬停状态 - 已选中时（保持选中样式，稍微加深） */
+#imageModels option:checked:hover,
+#videoModels option:checked:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.model-column {
+    display: flex;
+    flex-direction: column;
+}
+.model-column label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* ========== 选择器标题样式 ========== */
+.selector-header {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+    border-left: 3px solid #f56565;
+    border-radius: 6px;
+    animation: headerPulse 2s ease-in-out infinite;
+}
+
+.selector-header .required-badge {
+    display: inline-block;
+    background: #f56565;
+    color: white;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-right: 6px;
+    animation: badgePulse 1.5s ease-in-out infinite;
+}
+
+.selector-header .selector-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 6px 0 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.selector-header .selector-hint {
+    font-size: 0.8rem;
+    color: #718096;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* 脉冲动画 */
+@keyframes headerPulse {
+    0%, 100% {
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+        box-shadow: 0 0 0 0 rgba(245, 101, 101, 0.4);
+    }
+    50% {
+        background: linear-gradient(135deg, #ffe5e5 0%, #ffd5d5 100%);
+        box-shadow: 0 0 0 8px rgba(245, 101, 101, 0);
+    }
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* 选中后停止动画 */
+.model-type-selector:has(input[type="radio"]:checked) .selector-header,
+.video-platform-selector:has(input[type="radio"]:checked) .selector-header {
+    animation: none;
+    background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+    border-left-color: #38b2ac;
+}
+
+.model-type-selector:has(input[type="radio"]:checked) .required-badge,
+.video-platform-selector:has(input[type="radio"]:checked) .required-badge {
+    animation: none;
+    background: #38b2ac;
+}
+
+/* ========== 选项卡片增强 ========== */
+.selector-options {
+    display: flex;
+    gap: 12px;
+}
+
+/* 模型类型选择器样式 - 增强版（缩小版） */
+.model-type-selector {
+    margin-bottom: 18px;
+    padding: 12px;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+/* 未选择时的提示效果 */
+.model-type-selector:not(:has(input[type="radio"]:checked)) {
+    border-color: #f56565;
+    box-shadow: 0 0 0 2px rgba(245, 101, 101, 0.1);
+}
+
+.model-type-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    min-height: 75px;
+}
+
+.model-type-option:hover {
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.model-type-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* 选项内容布局 */
+.option-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+}
+
+.option-icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.option-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.option-desc {
+    font-size: 0.8rem;
+    color: #718096;
+}
+
+/* 选中状态 */
+.model-type-option:has(input[type="radio"]:checked) {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    transform: scale(1.02);
+}
+
+.model-type-option:has(input[type="radio"]:checked) .option-title {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.model-type-option:has(input[type="radio"]:checked) .option-icon {
+    transform: scale(1.1);
+}
+
+/* 保持旧的type-label样式以防万一 */
+.type-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4a5568;
+    transition: all 0.3s ease;
+}
+
+/* 视频平台选择器样式 - 增强版（缩小版） */
+.video-platform-selector {
+    margin-bottom: 15px;
+    padding: 12px;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+/* 未选择时的提示效果 */
+.video-platform-selector:not(:has(input[type="radio"]:checked)) {
+    border-color: #f56565;
+    box-shadow: 0 0 0 2px rgba(245, 101, 101, 0.1);
+}
+
+.video-platform-selector .selector-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.platform-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4a5568;
+    position: relative;
+    min-height: 45px;
+}
+
+.platform-option:hover {
+    border-color: #cbd5e0;
+    background: #f7fafc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.platform-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.platform-option:has(input[type="radio"]:checked) {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.12) 100%);
+    color: #667eea;
+    font-weight: 700;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    transform: scale(1.05);
+}
+
+/* 平台模型列表样式 */
+.platform-models {
+    margin-bottom: 15px;
+}
+
+.platform-models select {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.platform-models select option {
+    padding: 6px;
+    color: #2d3748;
+}
+
+.platform-models select option:checked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+}
+
+/* Veo 模型选择器的单选按钮样式 */
+.radio-button {
+    position: relative;
+    display: block;
+}
+
+.radio-button input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.radio-button:has(input[type="radio"]:checked) {
+    border-color: #667eea !important;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.12) 100%) !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2) !important;
+    transform: scale(1.02);
+}
+
+.radio-button:has(input[type="radio"]:checked) > div {
+    color: #667eea;
+    font-weight: 700;
+}
+
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .video-platform-selector {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

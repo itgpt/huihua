@@ -1,0 +1,42 @@
+      <!-- 右侧结果面板 -->
+      <div class="right-panel">
+        <div class="card result-card">
+          <h3>
+            <span class="icon-box" style="background: linear-gradient(135deg, #fccb90, #d57eeb);">🖼️</span>
+            创作画廊
+          </h3>
+          <div class="card-body result-body">
+            <div class="loading" id="loading">
+              <div class="spinner"></div>
+              <p>AI 正在挥洒创意...</p>
+            </div>
+
+            <!-- 视频任务容器 -->
+            <div id="videoTasksContainer" class="video-tasks-container" style="display: none;">
+              <div class="video-tasks-header">
+                <h3>🎬 视频生成中</h3>
+                <span class="tasks-count">进行中: <span id="tasksInProgress">0</span></span>
+              </div>
+              <div class="video-tasks-scroll">
+                <div id="videoTasksList" class="video-tasks-list">
+                  <!-- 任务卡片将动态插入这里 -->
+                </div>
+              </div>
+            </div>
+
+            <div id="resultImages" class="gallery-grid"></div>
+
+            <!-- 实时日志面板 -->
+            <div class="log-section">
+              <div class="log-header">
+                <span>📜 运行日志</span>
+                <div class="log-actions">
+                  <button id="copyLogsBtn" class="btn-icon" title="复制日志">📋</button>
+                  <button id="clearLogsBtn" class="btn-icon" title="清空日志">🧹</button>
+                </div>
+              </div>
+              <div id="liveLogs" class="log-panel" aria-live="polite" data-placeholder="等待任务开始..."></div>
+            </div>
+          </div>
+        </div>
+      </div>

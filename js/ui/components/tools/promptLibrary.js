@@ -1,4 +1,7 @@
 import { showSuccess, showError } from '../toast.js';
+import { loadStylesheet } from '../../../utils/styles.js';
+
+const STYLE_PATHS = ['css/tools/shared.css', 'css/tools/promptLibrary.css'];
 
 const PROMPT_SOURCES = [
     'https://raw.githubusercontent.com/glidea/banana-prompt-quicker/refs/heads/main/prompts.json',
@@ -52,6 +55,7 @@ const PromptLibrary = {
     },
 
     async open() {
+        await Promise.all(STYLE_PATHS.map(loadStylesheet));
         this.cacheElements();
         if (!this.elements.modal) return;
 

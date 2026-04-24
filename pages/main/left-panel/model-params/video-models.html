@@ -1,0 +1,283 @@
+            <!-- 视频模型区域 -->
+            <div id="videoModelSection" style="display:none;">
+              <!-- 视频平台选择器 -->
+              <div class="video-platform-selector">
+                <div class="selector-header">
+                  <span class="required-badge">⚠️ 必选</span>
+                  <h4 class="selector-title">第二步：选择视频平台</h4>
+                  <p class="selector-hint">请选择一个视频生成平台</p>
+                </div>
+
+                <div class="selector-options">
+                  <label class="platform-option">
+                    <input type="radio" name="videoPlatform" value="grok">
+                    <span>Grok</span>
+                  </label>
+                  <label class="platform-option">
+                    <input type="radio" name="videoPlatform" value="doubao">
+                    <span>Doubao</span>
+                  </label>
+                  <label class="platform-option">
+                    <input type="radio" name="videoPlatform" value="veo">
+                    <span>Veo3.1</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Grok 模型列表 -->
+              <div id="grokModels" class="platform-models" style="display:none;">
+                <!-- 模型选择 -->
+                <div class="input-group" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">①</span> 模型版本
+                  </label>
+                  <div style="display:grid; grid-template-columns:1fr; gap:10px;">
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokModel" value="grok-video" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🎬 grok-video</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">视频生成模型</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 视频时长选择 -->
+                <div class="input-group" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">②</span> 视频时长 (duration)
+                  </label>
+                  <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px;">
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokDuration" value="10" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">10秒</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokDuration" value="15" style="display:none;">
+                      <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">15秒</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokDuration" value="20" style="display:none;">
+                      <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">20秒</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokDuration" value="25" style="display:none;">
+                      <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">25秒</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokDuration" value="30" style="display:none;">
+                      <div style="font-weight:600; font-size:0.9rem; color:#2d3748;">30秒</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 画面比例选择 -->
+                <div class="input-group" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">③</span> 画面比例 (aspect_ratio)
+                  </label>
+                  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;">
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokAspectRatio" value="16:9" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">16:9</div>
+                      <div style="font-size:0.7rem; color:#718096; margin-top:2px;">横屏</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokAspectRatio" value="9:16" style="display:none;">
+                      <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">9:16</div>
+                      <div style="font-size:0.7rem; color:#718096; margin-top:2px;">竖屏</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokAspectRatio" value="1:1" style="display:none;">
+                      <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">1:1</div>
+                      <div style="font-size:0.7rem; color:#718096; margin-top:2px;">方形</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokAspectRatio" value="3:2" style="display:none;">
+                      <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">3:2</div>
+                      <div style="font-size:0.7rem; color:#718096; margin-top:2px;">横向</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:8px 4px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="grokAspectRatio" value="2:3" style="display:none;">
+                      <div style="font-weight:600; font-size:0.85rem; color:#2d3748;">2:3</div>
+                      <div style="font-size:0.7rem; color:#718096; margin-top:2px;">纵向</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 显示当前选择的模型及参数 -->
+                <div
+                  style="padding:12px; background:linear-gradient(135deg, #667eea15, #764ba215); border:2px solid #667eea40; border-radius:8px; margin-top:4px;">
+                  <div style="font-size:0.85rem; color:#718096; margin-bottom:6px;">✨ 当前配置</div>
+                  <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                    <span style="font-size:0.8rem; color:#718096;">模型:</span>
+                    <span style="font-weight:700; font-size:0.95rem; color:#667eea; font-family:monospace;"
+                      id="grokModelDisplay">grok-video</span>
+                    <span style="font-size:0.8rem; color:#718096;">时长:</span>
+                    <span style="font-weight:600; font-size:0.9rem; color:#4a5568;" id="grokDurationDisplay">10秒</span>
+                    <span style="font-size:0.8rem; color:#718096;">比例:</span>
+                    <span style="font-weight:600; font-size:0.9rem; color:#4a5568;"
+                      id="grokAspectRatioDisplay">16:9</span>
+                  </div>
+                </div>
+
+                <!-- 隐藏的input用于存储最终选择的模型 -->
+                <input type="hidden" id="grokModelSelect" value="grok-video">
+                <input type="hidden" id="grokDurationSelect" value="10">
+                <input type="hidden" id="grokAspectRatioSelect" value="16:9">
+              </div>
+
+              <!-- Doubao 模型列表 -->
+              <div id="doubaoModels" class="platform-models" style="display:none;">
+                <select id="doubaoModelSelect" size="2"
+                  style="width:100%; padding:8px; border:2px solid #e9ecef; border-radius:8px; background:#fff;">
+                  <option value="doubao-seedance-1-5-pro-251215">doubao-seedance-1-5-pro-251215（豆包 1.5
+                    Pro 12s）</option>
+                  <option value="doubao-seedance-1-0-pro-250528">doubao-seedance-1-0-pro-250528（豆包 1.0
+                    Pro 12s）</option>
+                </select>
+              </div>
+
+              <!-- Veo 模型列表 -->
+              <div id="veoModels" class="platform-models" style="display:none;">
+                <!-- 第一级：视频类型选择 -->
+                <div class="input-group" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">①</span> 选择视频类型
+                  </label>
+                  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                    <label class="radio-button"
+                      style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoType" value="text2video" checked style="display:none;">
+                      <div style="font-size:1.2rem; margin-bottom:4px;">📝</div>
+                      <div style="font-weight:600; font-size:0.9rem;">文生视频</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Text to Video
+                      </div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoType" value="frame2video" style="display:none;">
+                      <div style="font-size:1.2rem; margin-bottom:4px;">🎞️</div>
+                      <div style="font-weight:600; font-size:0.9rem;">帧转视频</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Frame to
+                        Video</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px 8px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoType" value="gif" style="display:none;">
+                      <div style="font-size:1.2rem; margin-bottom:4px;">🎬</div>
+                      <div style="font-weight:600; font-size:0.9rem;">生成GIF</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Generate GIF
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 第二级：画质选择（文生视频/帧转视频）-->
+                <div class="input-group" id="veoQualityGroup" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">②</span> 选择画质
+                  </label>
+                  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoQuality" value="4k" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">4K 超清</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Ultra 4K
+                      </div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoQuality" value="hd" style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">HD 高清</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">High
+                        Definition</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoQuality" value="standard" style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">普通画质</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Standard
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 第二级：生成方式（GIF类型）-->
+                <div class="input-group" id="veoGifModeGroup" style="margin-bottom:16px; display:none;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">②</span> 选择生成方式
+                  </label>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoGifMode" value="text" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">📝 文生GIF
+                      </div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Text to GIF
+                      </div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoGifMode" value="frame" style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🎞️ 帧转GIF
+                      </div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Frame to GIF
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 第三级：方向选择 -->
+                <div class="input-group" style="margin-bottom:16px;">
+                  <label style="font-weight:600; margin-bottom:8px; display:block; color:#2d3748; font-size:0.95rem;">
+                    <span style="color:#667eea;">③</span> 选择视频方向
+                  </label>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoOrientation" value="landscape" checked style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">🖥️ 横屏</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Landscape
+                        (16:9)</div>
+                    </label>
+                    <label class="radio-button"
+                      style="padding:10px; border:2px solid #e9ecef; border-radius:8px; cursor:pointer; text-align:center; transition:all 0.2s;">
+                      <input type="radio" name="veoOrientation" value="portrait" style="display:none;">
+                      <div style="font-weight:600; font-size:0.95rem; color:#2d3748;">📱 竖屏</div>
+                      <div style="font-size:0.75rem; color:#718096; margin-top:2px;">Portrait
+                        (9:16)</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 显示当前选择的模型 -->
+                <div
+                  style="padding:12px; background:linear-gradient(135deg, #667eea15, #764ba215); border:2px solid #667eea40; border-radius:8px; margin-top:16px;">
+                  <div style="font-size:0.85rem; color:#718096; margin-bottom:4px;">✨ 当前选择的模型</div>
+                  <div style="font-weight:600; font-size:1rem; color:#667eea; font-family:monospace;"
+                    id="veoModelDisplay">veo3.1-landscape-4k</div>
+                </div>
+
+                <!-- 隐藏的input用于存储最终选择的模型 -->
+                <input type="hidden" id="veoModelSelect" value="veo3.1-landscape-4k">
+              </div>
+
+              <!-- 自定义视频模型 -->
+              <input type="text" id="customVideoModelInput" placeholder="自定义视频模型名称"
+                style="display:none; margin-top:8px;">
+              <label class="custom-checkbox" style="margin-top:8px;">
+                <input type="checkbox" id="useCustomVideoModel"
+                  style="margin-right:8px; width:18px; height:18px; cursor:pointer;">
+                <span>使用自定义模型</span>
+              </label>
+            </div>

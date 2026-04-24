@@ -1,0 +1,86 @@
+  <!-- 快捷时间线模态框 -->
+  <div id="quickTimelineModal" class="quick-timeline-modal" style="display: none;">
+    <div class="quick-timeline-container">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="icon">🎬</span>
+          <div>
+            <h3>时间线</h3>
+            <p class="subtitle">拖动片段排序后合并导出</p>
+          </div>
+        </div>
+        <button class="btn-close" id="timelineCloseBtn">×</button>
+      </div>
+
+      <div class="modal-toolbar compact-toolbar">
+        <input type="file" id="timelineFileInput" accept="video/*" multiple style="display: none;">
+        <button class="btn-toolbar" id="timelineAddBtn">➕ 添加视频</button>
+        <button class="btn-toolbar btn-danger" id="timelineClearBtn">🗑️ 清空</button>
+
+        <div class="divider"></div>
+
+        <button class="btn-toolbar" id="timelineSplitBtn" title="在当前位置分割">✂️ 分割</button>
+
+        <div class="toolbar-group" style="margin: 0 8px;">
+          <span class="label" style="font-size: 11px;">缩放:</span>
+          <input type="range" id="timelineZoomRange" min="5" max="100" value="24" class="zoom-slider"
+            style="width: 100px;">
+        </div>
+
+        <div class="flex-1"></div>
+
+        <div class="toolbar-group">
+          <button class="timeline-mode-btn active" data-mode="clip">片段预览</button>
+          <button class="timeline-mode-btn" data-mode="merged">合并预览</button>
+        </div>
+        <button class="btn-toolbar btn-primary" id="timelineMergeBtn" style="min-width: 90px;">合并导出</button>
+      </div>
+
+      <div class="timeline-content">
+        <div class="timeline-preview-area">
+          <video id="timelinePreviewVideo" class="timeline-preview"></video>
+
+          <!-- 预览控制条 -->
+          <div class="preview-controls-overlay">
+            <div class="control-bar-top">
+              <input type="range" id="timelineProgressBar" class="progress-bar" value="0" step="0.01">
+            </div>
+            <div class="control-bar-bottom">
+              <div class="time-container">
+                <span class="time-display" id="timelineTimeDisplay">00:00 / 00:00</span>
+              </div>
+              <div class="center-controls">
+                <button class="control-btn" id="timelineRewindBtn">⏪</button>
+                <button class="control-btn play-btn" id="timelinePlayBtn">▶</button>
+                <button class="control-btn" id="timelineForwardBtn">⏩</button>
+              </div>
+              <div class="right-controls">
+                <button class="control-btn" id="timelineMuteBtn">🔊</button>
+                <button class="control-btn" id="timelineFullscreenBtn">⛶</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-track-area">
+          <!-- 左侧轨道头 -->
+          <div class="timeline-headers">
+            <div class="track-header-item">
+              <span class="icon">🎬</span>
+            </div>
+          </div>
+
+          <!-- 右侧滚动区域 -->
+          <div class="timeline-scroll-container" id="timelineScroll">
+            <div class="timeline-ruler" id="timelineRuler"></div>
+            <div class="timeline-grid-bg"></div>
+            <div class="timeline-tracks" id="timelineTracks">
+              <div id="timelinePlayhead" class="timeline-playhead"></div>
+              <!-- 动态生成的片段 -->
+              <div class="timeline-empty" id="timelineEmptyTip">点击 "+ 添加视频" 开始制作</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

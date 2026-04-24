@@ -1,0 +1,64 @@
+  <!-- 图片分割模态框 -->
+  <div id="imageSlicerModal" class="image-slicer-modal" style="display: none;">
+    <div class="image-slicer-container">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="icon">✂️</span>
+          <div>
+            <h3>图片分割工厂</h3>
+            <p class="subtitle">自由切片，支持一键下载</p>
+          </div>
+        </div>
+        <button class="btn-close" id="slicerCloseBtn">×</button>
+      </div>
+
+      <div class="modal-toolbar">
+        <input type="file" id="slicerFileInput" accept="image/*" style="display: none;">
+        <button class="btn-toolbar" id="slicerUploadBtn">📁 上传图片</button>
+
+        <div class="divider"></div>
+
+        <div class="toolbar-group">
+          <span class="label">模式:</span>
+          <button class="slicer-mode-btn active" data-mode="h">横线</button>
+          <button class="slicer-mode-btn" data-mode="v">竖线</button>
+        </div>
+
+        <div class="toolbar-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="slicerForceSquare">
+            1:1 补全
+          </label>
+          <div id="slicerBgColorWrap" style="display: none;">
+            <input type="color" id="slicerBgColor" value="#ffffff">
+          </div>
+        </div>
+
+        <button class="btn-toolbar btn-danger" id="slicerClearBtn">🗑️ 清空</button>
+        <button class="btn-toolbar btn-primary" id="slicerGenerateBtn">⚡ 生成切片</button>
+        <button class="btn-toolbar" id="slicerDownloadAllBtn">💾 一键下载</button>
+      </div>
+
+      <div class="slicer-content">
+        <div class="slicer-panel canvas-panel">
+          <h4>切片画布</h4>
+          <div class="slicer-canvas-wrap">
+            <div id="slicerEmptyState" class="empty-state-text">
+              点击上传图片后开始分割
+            </div>
+            <div id="slicerImageBox" class="slicer-image-box">
+              <img id="slicerImage" style="display: none;">
+              <div id="slicerLinesLayer" class="lines-layer"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slicer-panel results-panel">
+          <h4>切片结果</h4>
+          <div id="slicerResults" class="results-grid">
+            <div class="slicer-results-empty">暂无结果</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

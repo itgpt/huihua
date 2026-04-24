@@ -1,0 +1,65 @@
+            <!-- 即梦视频模型专用参数 -->
+            <div id="jimengVideoParamsGroup"
+              style="display:none; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
+              <div style="margin-bottom: 12px;">
+                <span style="font-weight: 600; color: #667eea; font-size: 0.9rem;">🎬 豆包视频参数</span>
+              </div>
+              <div class="param-grid">
+                <div class="input-group">
+                  <label for="jimengSeconds">视频秒数</label>
+                  <select id="jimengSeconds" class="glass-select">
+                    <option value="4">4秒</option>
+                    <option value="5">5秒</option>
+                    <option value="6">6秒</option>
+                    <option value="8">8秒</option>
+                    <option value="10">10秒</option>
+                    <option value="12" selected>12秒（默认）</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="jimengRatio">视频比例</label>
+                  <select id="jimengRatio" class="glass-select">
+                    <option value="16:9" selected>16:9 横屏</option>
+                    <option value="9:16">9:16 竖屏</option>
+                    <option value="1:1">1:1 方形</option>
+                    <option value="4:3">4:3 横向</option>
+                    <option value="3:4">3:4 纵向</option>
+                    <option value="21:9">21:9 超宽</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="jimengResolution">分辨率</label>
+                  <select id="jimengResolution" class="glass-select">
+                    <option value="480p">480p 标清</option>
+                    <option value="720p">720p 高清</option>
+                    <option value="1080p" selected>1080p 全高清</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="jimengGenerateAudio">生成音频</label>
+                  <select id="jimengGenerateAudio" class="glass-select">
+                    <option value="false" selected>否</option>
+                    <option value="true">是（仅1.5 Pro）</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="jimengWatermark">水印</label>
+                  <select id="jimengWatermark" class="glass-select">
+                    <option value="false" selected>无水印</option>
+                    <option value="true">有水印</option>
+                  </select>
+                </div>
+
+                <div class="input-group">
+                  <label for="jimengCameraFixed">相机固定</label>
+                  <select id="jimengCameraFixed" class="glass-select">
+                    <option value="false" selected>否（默认）</option>
+                    <option value="true">是</option>
+                  </select>
+                </div>
+              </div>
+            </div>

@@ -1,0 +1,203 @@
+/* Loading */
+.loading { display: none; padding: 40px; text-align: center; color: #718096; }
+.loading.show { display: block; }
+.spinner {
+    border: 3px solid #edf2f7;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* 公告弹窗样式 (还原备份版并优化) */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.8); /* 增加透明度 */
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    color: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1); /* 柔和阴影 */
+    padding: 20px 25px;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-radius: 16px;
+    max-width: 380px; /* 恢复原有宽度 */
+    font-size: 14px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    visibility: hidden;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    visibility: visible;
+}
+
+.toast-content p { margin: 0; }
+.toast-content strong { color: #434190; }
+.toast-content a { color: #667eea; text-decoration: none; font-weight: 600;}
+.toast-content a:hover { text-decoration: underline; }
+
+.toast-header { font-size: 1.1em; font-weight: 600; color: #333; margin-bottom: 15px; border-bottom: none; padding-bottom: 0; display: block; }
+.toast-section { margin-bottom: 12px; }
+.toast-section > strong { display: block; margin-bottom: 8px; font-size: 1em; color: #434190; }
+.toast-section ul { list-style: none; padding: 5px 0 0 5px; margin: 0; }
+.toast-section code {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 500;
+    margin: 4px 2px;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.toast-section code:hover {
+    transform: scale(1.1) rotate(-2deg);
+}
+
+.toast-tips {
+    background: rgba(102, 126, 234, 0.1); padding: 8px 12px; border-radius: 8px; font-size: 0.9em; margin-top: 10px; border-left: none; color: inherit;
+}
+.toast-tips strong { color: #667eea; }
+
+.toast button {
+    background: rgba(0,0,0,0.05);
+    border: none;
+    cursor: pointer;
+    color: #888;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 15px;
+    flex-shrink: 0;
+    transition: background-color 0.3s, color 0.3s;
+    position: static; /* 恢复静态定位 */
+}
+
+.toast button:hover {
+    background-color: rgba(0,0,0,0.1);
+    color: #333;
+}
+
+/* 新模型公告的特殊样式 */
+.toast-section .new-model {
+    background: linear-gradient(135deg, #f97794 0%, #623aa2 100%);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(249, 119, 148, 0.4);
+    transform: scale(1.05);
+    transform-origin: left center;
+    display: inline-block;
+    transition: transform 0.3s ease;
+    border: none; /* 移除边框 */
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 1em;
+}
+
+.toast-section .new-model:hover {
+    transform: scale(1.2) rotate(-2deg);
+}
+
+.link-card {
+    background: linear-gradient(to right, #f8f9fa, #e9ecef);
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #2d3748;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    border: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.link-card:hover {
+    background: #fff;
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(102, 126, 234, 0.15);
+}
+
+.wechat-id {
+    font-weight: 800;
+    color: #2d3748;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #f0fff4;
+    border: 1px dashed #9ae6b4;
+    transition: all 0.2s;
+    margin-left: 5px;
+}
+.wechat-id:hover {
+    background: #c6f6d5;
+    border-color: #48bb78;
+}
+.wechat-id:active {
+    transform: scale(0.95);
+}
+
+/* 提示信息 */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 50px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    z-index: 10000; /* 提高到最高层级，确保显示在所有模态框上方 */
+    display: none;
+}
+.toast-notification.show { display: block; animation: fadeInDown 0.3s; }
+.toast-notification.success { background: #48bb78; }
+.toast-notification.error { background: #f56565; }
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translate(-50%, -20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    .action-bar {
+        position: static;
+    }
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #4a5568;
+    cursor: pointer;
+}
+.custom-checkbox input { margin: 0; }

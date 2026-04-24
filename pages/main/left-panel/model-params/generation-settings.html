@@ -1,0 +1,52 @@
+            <div class="param-grid">
+              <!-- Gemini 分辨率选择器 - 第一位 -->
+              <div class="input-group" id="geminiResolutionGroup" style="display:none;">
+                <label for="geminiImageSize">清晰度</label>
+                <select id="geminiImageSize" class="glass-select">
+                  <option value="1K">1K - 标准</option>
+                  <option value="2K">2K - 高清</option>
+                  <option value="4K">4K - 超清</option>
+                </select>
+              </div>
+
+              <!-- 尺寸/宽高比 - 第二位 -->
+              <div class="input-group" id="size-param-group">
+                <label for="size">宽高比</label>
+                <select id="size" class="glass-select">
+                  <option value="1:1">1:1 方形</option>
+                  <option value="16:9">16:9 横向</option>
+                  <option value="9:16">9:16 纵向</option>
+                  <option value="4:3">4:3 横向</option>
+                  <option value="3:4">3:4 纵向</option>
+                  <option value="3:2">3:2 横向</option>
+                  <option value="2:3">2:3 纵向</option>
+                  <option value="5:4">5:4 横向</option>
+                  <option value="4:5">4:5 纵向</option>
+                  <option value="21:9">21:9 超宽</option>
+                </select>
+              </div>
+
+              <!-- 返回格式 - 仅非Gemini模型显示 -->
+              <div class="input-group" id="responseFormatGroup">
+                <label for="response_format">格式</label>
+                <select id="response_format" class="glass-select">
+                  <option value="url">URL (链接)</option>
+                  <option value="b64_json">Base64 (嵌入)</option>
+                </select>
+              </div>
+
+              <!-- 输出个数 - 第三位 -->
+              <div class="input-group">
+                <label for="n">生成数量</label>
+                <select id="n" class="glass-select">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="__custom__">自定义...</option>
+                </select>
+                <input type="number" id="customNInput" placeholder="请输入自定义张数" style="display:none; margin-top:8px;"
+                  min="1" max="10">
+              </div>
+
+            </div>

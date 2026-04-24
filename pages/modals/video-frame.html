@@ -1,0 +1,104 @@
+  <!-- 视频帧提取模态框 -->
+  <div id="videoFrameModal" class="video-frame-modal" style="display: none;">
+    <div class="video-frame-container">
+      <!-- 标题栏 -->
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="icon">🎞️</span>
+          <div>
+            <h3>提取视频帧</h3>
+            <p class="subtitle">支持 30 秒内视频</p>
+          </div>
+        </div>
+        <button class="btn-close" id="videoFrameCloseBtn">×</button>
+      </div>
+
+      <!-- 操作栏 -->
+      <div class="modal-toolbar">
+        <input type="file" id="videoFrameFileInput" accept="video/*" style="display: none;">
+        <button class="btn-toolbar" id="videoFrameUploadBtn">
+          📁 上传视频
+        </button>
+        <input type="text" id="videoFrameUrlInput" placeholder="或输入视频URL" class="url-input">
+        <button class="btn-toolbar" id="videoFrameLoadBtn">
+          🔗 加载
+        </button>
+        <span id="videoFrameDuration" class="duration-display"></span>
+        <span id="videoFrameError" class="error-display"></span>
+      </div>
+
+      <!-- 主内容区 -->
+      <div class="video-preview-section">
+        <!-- 左侧：视频预览和操作 -->
+        <div class="preview-panel">
+          <h4>视频预览</h4>
+          <video id="videoFramePreview" controls class="video-preview"></video>
+
+          <div class="frame-action-buttons">
+            <button class="btn-extract-frame" id="captureFirstFrameBtn">
+              📸 提取首帧
+            </button>
+            <button class="btn-extract-frame" id="captureLastFrameBtn">
+              📸 提取尾帧
+            </button>
+            <button class="btn-extract-frame" id="captureCollageBtn">
+              🎬 视频抽帧
+            </button>
+            <button class="btn-extract-frame" id="clearLastFrameBtn">
+              ↩️ 清除上一帧
+            </button>
+          </div>
+
+          <div class="grid-selector">
+            <span>宫格数量：</span>
+            <button class="grid-option active" data-grid="3">3×3</button>
+            <button class="grid-option" data-grid="5">5×5</button>
+          </div>
+        </div>
+
+        <!-- 右侧：结果展示 -->
+        <div class="result-panel">
+          <h4 id="resultPanelTitle">提取结果</h4>
+
+          <!-- 首帧/尾帧模式 -->
+          <div id="framesResult" class="frames-result">
+            <div class="frame-result-card">
+              <p class="frame-label">首帧</p>
+              <img id="firstFramePreviewImg" class="frame-preview-img" style="display: none;">
+              <div id="firstFrameEmpty" class="frame-preview-empty">暂无</div>
+              <div id="firstFrameActions" class="frame-actions" style="display: none;">
+                <button class="btn-download" id="downloadFirstFrameBtn">
+                  💾 下载
+                </button>
+              </div>
+            </div>
+
+            <div class="frame-result-card">
+              <p class="frame-label">尾帧</p>
+              <img id="lastFramePreviewImg" class="frame-preview-img" style="display: none;">
+              <div id="lastFrameEmpty" class="frame-preview-empty">暂无</div>
+              <div id="lastFrameActions" class="frame-actions" style="display: none;">
+                <button class="btn-download" id="downloadLastFrameBtn">
+                  💾 下载
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 拼贴模式 -->
+          <div id="collageResult" class="collage-result" style="display: none;">
+            <div class="collage-info">
+              <span id="collageProgress">已填充 0/9</span>
+            </div>
+            <div class="collage-preview">
+              <canvas id="collageCanvas" class="collage-canvas"></canvas>
+              <p class="collage-hint">暂停视频后点击「视频抽帧」把当前画面填入宫格</p>
+            </div>
+            <button class="btn-download-collage" id="downloadCollageBtn">
+              💾 下载拼贴图
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

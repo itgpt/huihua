@@ -1,0 +1,96 @@
+  <!-- XHS 灵感实验室模态框 -->
+  <div id="xhsLabModal" class="xhs-lab-modal" style="display: none;">
+    <div class="xhs-lab-container">
+      <div class="modal-header">
+        <div class="header-left">
+          <button id="xhsSidebarToggle" class="btn-icon-sm" title="切换侧边栏">☰</button>
+          <span class="icon">💡</span>
+          <div>
+            <h3>XHS 灵感实验室</h3>
+            <p class="subtitle">爆款笔记创作与视觉设计</p>
+          </div>
+        </div>
+        <button class="btn-close" id="xhsLabCloseBtn">×</button>
+      </div>
+
+      <div class="xhs-layout">
+        <!-- 左侧历史记录 -->
+        <div class="xhs-sidebar">
+          <div class="sidebar-header">
+            <span>历史记录</span>
+            <button class="text-btn-danger" id="xhsHistoryClearBtn">清空</button>
+          </div>
+          <div id="xhsHistoryList" class="history-list">
+            <!-- 历史记录列表 -->
+            <div class="empty-text">暂无记录</div>
+          </div>
+        </div>
+
+        <!-- 中间输入区 -->
+        <div class="xhs-main">
+          <div class="input-card">
+            <div class="card-header">
+              <h4>灵感输入</h4>
+              <div class="provider-switch">
+                <button class="xhs-provider-btn active" data-provider="gemini">Gemini</button>
+                <button class="xhs-provider-btn" data-provider="openai">OpenAI</button>
+              </div>
+            </div>
+            <div class="input-area-wrapper">
+              <textarea id="xhsTopicInput" placeholder="输入你的想法，例如：复古风格城市漫游文案"></textarea>
+            </div>
+
+            <div class="input-actions">
+              <div class="upload-section">
+                <input type="file" id="xhsFileInput" accept="image/*" multiple style="display: none;">
+                <button class="btn-toolbar" id="xhsUploadBtn">📁 上传参考图</button>
+                <div class="image-count-input">
+                  <span>图片数量:</span>
+                  <input type="number" id="xhsImageCount" value="4" min="1" max="9">
+                </div>
+              </div>
+              <button class="btn-primary" id="xhsGenerateBtn">生成方案</button>
+            </div>
+
+            <div id="xhsRefImages" class="ref-images-list"></div>
+          </div>
+
+          <div class="preview-card">
+            <div class="card-header">
+              <h4>文案预览</h4>
+              <div class="actions">
+                <button class="btn-sm" id="xhsCopyTitleBtn">复制标题</button>
+                <button class="btn-sm" id="xhsCopyContentBtn">复制正文</button>
+              </div>
+            </div>
+            <div id="xhsContentPreview" class="content-preview">
+              <div class="empty-text">输入灵感后生成方案</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧结果区 -->
+        <div class="xhs-results">
+          <div class="results-header">
+            <div class="options">
+              <select id="xhsQuality" class="glass-select-sm">
+                <option value="1K">1K</option>
+                <option value="2K" selected>2K</option>
+                <option value="4K">4K</option>
+              </select>
+              <select id="xhsRatio" class="glass-select-sm">
+                <option value="auto">Auto</option>
+                <option value="3:4" selected>3:4</option>
+                <option value="1:1">1:1</option>
+                <option value="16:9">16:9</option>
+              </select>
+              <button class="btn-primary btn-sm" id="xhsBatchGenerateBtn" disabled>⚡ 批量生成</button>
+            </div>
+          </div>
+          <div id="xhsShotGrid" class="shot-grid">
+            <div class="empty-text">等待生成图像卡片</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
