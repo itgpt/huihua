@@ -17,7 +17,6 @@ export class ImageCacheDB {
             };
             request.onsuccess = (event) => {
                 this.db = event.target.result;
-                console.log('IndexedDB is open and ready.');
                 resolve(this.db);
             };
             request.onerror = (event) => {

@@ -1,6 +1,28 @@
-import { showFullImage, showFullVideo } from './components/modal.js';
-import { showError, showSuccess } from './components/toast.js';
-import QuickTimeline from './components/tools/quickTimeline.js';
+import { showFullImage } from './components/modal.js';
+import { showError } from './components/toast.js';
+
+function normalizeImageSrc(src, mimeType = 'image/png') {
+    if (!src || typeof src !== 'string') return '';
+
+    let normalized = src.trim();
+    while (/^data:[^,]+,data:/i.test(normalized)) {
+        normalized = normalized.slice(normalized.indexOf(',') + 1);
+    }
+
+    if (normalized.startsWith('data:') || /^https?:\/\//i.test(normalized) || normalized.startsWith('blob:')) {
+        return normalized;
+    }
+
+    return `data:${mimeType};base64,${normalized}`;
+}
+
+function imageResultToSrc(item) {
+    if (!item) return '';
+    if (item.b64_json) {
+        return normalizeImageSrc(item.b64_json, item.mimeType || item.mime_type || 'image/png');
+    }
+    return normalizeImageSrc(item.url || item.image_url || '');
+}
 
 export function displayImageResults(dom, result, originalPrompt, optimizedPrompt, params) {
     const dataArr = Array.isArray(result?.data) ? result.data : [];
@@ -53,10 +75,7 @@ export function displayImageResults(dom, result, originalPrompt, optimizedPrompt
     }
 
     dataArr.forEach((item) => {
-        let imageSrc = '';
-        if (item.b64_json) imageSrc = `data:image/png;base64,${item.b64_json}`;
-        else if (item.url) imageSrc = item.url;
-        else if (item.image_url) imageSrc = item.image_url;
+        const imageSrc = imageResultToSrc(item);
 
         if (!imageSrc) return;
 
@@ -149,114 +168,6 @@ export function displayImageResults(dom, result, originalPrompt, optimizedPrompt
             img.style.objectFit = 'contain';
         });
     }
-}
-
-export function displayVideoResults(dom, dataArr, originalPrompt, optimizedPrompt, params) {
-    const groupId = `result-group-${params.model.replace(/[^a-zA-Z0-9]/g, '-')}`;
-    let resultGroupContainer = document.getElementById(groupId);
-    let videosGrid;
-    
-    if (!resultGroupContainer) {
-        resultGroupContainer = document.createElement('div');
-        resultGroupContainer.id = groupId;
-        resultGroupContainer.style.marginBottom = '25px';
-        resultGroupContainer.style.border = '1px solid #e9ecef';
-        resultGroupContainer.style.borderRadius = '12px';
-        resultGroupContainer.style.padding = '15px';
-        resultGroupContainer.style.background = '#fff';
-        
-        const modelBar = document.createElement('div');
-        modelBar.style.cssText = `
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color:white; padding:10px 15px; border-radius:10px;
-            margin-bottom:12px; text-align:left; font-size:13px; font-weight:600;
-            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2); display: inline-block;
-        `;
-        modelBar.textContent = `🎬 视频模型: ${params.model}`;
-        
-        const promptInfo = document.createElement('div');
-        promptInfo.className = 'result-prompt-info';
-        promptInfo.innerHTML = `
-            <strong>原始提示词:</strong> ${originalPrompt}<br>
-            <strong>优化后提示词:</strong> ${optimizedPrompt}
-        `;
-        
-        resultGroupContainer.appendChild(modelBar);
-        resultGroupContainer.appendChild(promptInfo);
-        
-        videosGrid = document.createElement('div');
-        videosGrid.className = 'video-grid-container';
-        videosGrid.style.cssText = `
-            display: flex;
-            flex-wrap: wrap; 
-            justify-content: center;
-            gap: 20px; 
-            margin-top: 15px;
-        `;
-        resultGroupContainer.appendChild(videosGrid);
-        dom.resultImages.appendChild(resultGroupContainer);
-    } else {
-        videosGrid = resultGroupContainer.querySelector('.video-grid-container');
-    }
-    
-    dataArr.forEach((item) => {
-        const videoUrl = item.video_url;
-        if (!videoUrl) return;
-        
-        const videoCell = document.createElement('div');
-        videoCell.style.cssText = `
-            text-align: center;
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-        `;
-        
-        const video = document.createElement('video');
-        video.src = videoUrl;
-        video.controls = true;
-        video.style.cssText = `
-            width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            margin-bottom: 15px;
-        `;
-        video.setAttribute('controlsList', 'nodownload');
-        
-        const btnBar = document.createElement('div');
-        btnBar.style.display = 'flex';
-        btnBar.style.gap = '10px';
-        btnBar.style.justifyContent = 'center';
-        
-        const downloadBtn = document.createElement('button');
-        downloadBtn.className = 'btn btn-light btn-result-action';
-        downloadBtn.textContent = '⬇️ 下载视频';
-        downloadBtn.onclick = () => downloadVideo(videoUrl, `ai_video_${Date.now()}.mp4`);
-        
-        const openBtn = document.createElement('button');
-        openBtn.className = 'btn btn-light btn-result-action';
-        openBtn.textContent = '↗️ 新窗口播放';
-        openBtn.onclick = () => window.open(videoUrl, '_blank');
-        
-        btnBar.appendChild(openBtn);
-        btnBar.appendChild(downloadBtn);
-
-        const timelineBtn = document.createElement('button');
-        timelineBtn.className = 'btn btn-light btn-result-action';
-        timelineBtn.textContent = '🎞️ 添加到时间线';
-        timelineBtn.onclick = () => QuickTimeline.addClipFromUrl(videoUrl, `ai_video_${Date.now()}.mp4`);
-        btnBar.appendChild(timelineBtn);
-
-        videoCell.appendChild(video);
-        videoCell.appendChild(btnBar);
-        
-        if (/^https?:\/\//.test(videoUrl)) {
-            const warning = document.createElement('div');
-            warning.style.cssText = `font-size: 11px; color: #dc3545; text-align: center; margin-top: 6px; font-weight: 500;`;
-            warning.textContent = '⚠️ 临时链接, 请尽快下载保存';
-            videoCell.appendChild(warning);
-        }
-        
-        videosGrid.appendChild(videoCell);
-    });
 }
 
 export function createImageGeneratingPlaceholder(dom, modelName, originalPrompt, optimizedPrompt, taskId) {
@@ -390,23 +301,4 @@ function _observeLazyImage(img) {
         }, { rootMargin: '200px 0px' }); // 提前 200px 开始加载，体验更流畅
     }
     _lazyImageObserver.observe(img);
-}
-
-async function downloadVideo(videoUrl, filename) {
-    try {
-        const res = await fetch(videoUrl, { mode: 'cors' });
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        showSuccess('视频下载已开始');
-    } catch (e) {
-        showError('视频下载失败，请尝试右键另存为');
-        window.open(videoUrl, '_blank');
-    }
 }

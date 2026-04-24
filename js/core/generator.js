@@ -8,7 +8,30 @@ import { optimizePrompt } from '../api/optimizer.js';
 import { generateImage, editImage } from '../api/image.js';
 import { createVideoTask } from '../api/video.js';
 import { callGeminiNativeAPI, parseGeminiResponse } from '../api/gemini.js';
-import { displayImageResults, displayVideoResults, createImageGeneratingPlaceholder, removeImageGeneratingPlaceholder } from '../ui/display.js';
+import { displayImageResults, createImageGeneratingPlaceholder, removeImageGeneratingPlaceholder } from '../ui/display.js?v=data-uri-fix-20260424';
+
+function normalizeImageSrc(src, mimeType = 'image/png') {
+    if (!src || typeof src !== 'string') return '';
+
+    let normalized = src.trim();
+    while (/^data:[^,]+,data:/i.test(normalized)) {
+        normalized = normalized.slice(normalized.indexOf(',') + 1);
+    }
+
+    if (normalized.startsWith('data:') || /^https?:\/\//i.test(normalized) || normalized.startsWith('blob:')) {
+        return normalized;
+    }
+
+    return `data:${mimeType};base64,${normalized}`;
+}
+
+function imageResultToSrc(item) {
+    if (!item) return '';
+    if (item.b64_json) {
+        return normalizeImageSrc(item.b64_json, item.mimeType || item.mime_type || 'image/png');
+    }
+    return normalizeImageSrc(item.url || item.image_url || '');
+}
 
 export class Generator {
     constructor(dom, apiClient, modelSelector, historyManager, videoTaskManager, logger, imagePreviewManager) {
@@ -188,9 +211,7 @@ export class Generator {
                 // 注意：Gemini 返回的是数组，这里假设 parsedResult.data 是数组
                 if (parsedResult.data && parsedResult.data.length > 0) {
                     for (const item of parsedResult.data) {
-                        let imageSrc = '';
-                        if (item.b64_json) imageSrc = `data:image/png;base64,${item.b64_json}`;
-                        else if (item.url) imageSrc = item.url;
+                        const imageSrc = imageResultToSrc(item);
                         
                         if (imageSrc) {
                             const meta = {
@@ -339,9 +360,7 @@ export class Generator {
             const dataArr = Array.isArray(result?.data) ? result.data : [];
             if (dataArr.length > 0) {
                 for (const item of dataArr) {
-                    let imageSrc = '';
-                    if (item.b64_json) imageSrc = `data:image/png;base64,${item.b64_json}`;
-                    else if (item.url) imageSrc = item.url;
+                    const imageSrc = imageResultToSrc(item);
                     
                     if (imageSrc) {
                         const meta = {

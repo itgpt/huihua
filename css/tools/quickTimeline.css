@@ -66,88 +66,6 @@
     align-items: center;
 }
 
-.timeline-clip {
-    height: 120px;
-    min-width: 160px;
-    background: #333;
-    border-radius: 8px;
-    border: 2px solid #444;
-    cursor: grab;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.2s;
-    display: flex;
-    flex-direction: column;
-}
-
-.timeline-clip:hover {
-    border-color: #666;
-}
-
-.timeline-clip.active {
-    border-color: #667eea;
-    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
-}
-
-.timeline-clip.dragging {
-    opacity: 0.5;
-    cursor: grabbing;
-}
-
-.timeline-clip.drag-over {
-    border-left: 4px solid #667eea;
-}
-
-.clip-thumb {
-    flex: 1;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-}
-
-.clip-duration {
-    position: absolute;
-    bottom: 4px;
-    right: 4px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    font-size: 0.7rem;
-    padding: 2px 4px;
-    border-radius: 4px;
-}
-
-.clip-info {
-    height: 32px;
-    background: #1f1f1f;
-    padding: 0 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-top: 1px solid #333;
-}
-
-.clip-name {
-    color: #ccc;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
-}
-
-.clip-remove-btn {
-    background: none;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    font-size: 1.2rem;
-    padding: 0 4px;
-}
-
-.clip-remove-btn:hover {
-    color: #e53e3e;
-}
-
 .timeline-empty {
     width: 100%;
     height: 100%;
@@ -296,46 +214,6 @@
     background: #e53e3e;
 }
 
-.timeline-playhead {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: #e53e3e;
-    z-index: 30;
-    pointer-events: none;
-}
-
-.timeline-playhead::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -5px;
-    width: 12px;
-    height: 12px;
-    background: #e53e3e;
-    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
-}
-
-.timeline-add-block {
-    height: 100px;
-    background: #2a2a2a;
-    border: 1px dashed #444;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #666;
-    cursor: pointer;
-    font-size: 24px;
-    transition: background 0.2s;
-}
-
-.timeline-add-block:hover {
-    background: #333;
-    color: #888;
-}
-
 .preview-controls-overlay {
     position: absolute;
     bottom: 0;
@@ -349,13 +227,6 @@
 
 .timeline-preview-area:hover .preview-controls-overlay {
     opacity: 1;
-}
-
-.control-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: white;
 }
 
 .control-btn {

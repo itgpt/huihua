@@ -1,6 +1,4 @@
 import { showSuccess, showError } from '../toast.js';
-import { ModelSelector } from '../../../models/modelSelector.js';
-import { APIClient } from '../../../api/base.js';
 import { loadStylesheet } from '../../../utils/styles.js';
 
 const SHOT_COUNT = 9;

@@ -4,6 +4,16 @@ import { safeStringify } from '../utils/format.js';
 import { HISTORY_PER_PAGE } from '../config/constants.js';
 import QuickTimeline from './components/tools/quickTimeline.js';
 
+function normalizeMediaUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+
+    let normalized = url.trim();
+    while (/^data:[^,]+,data:/i.test(normalized)) {
+        normalized = normalized.slice(normalized.indexOf(',') + 1);
+    }
+    return normalized;
+}
+
 export class HistoryUI {
     constructor(dom, historyManager) {
         this.dom = dom;
@@ -39,8 +49,8 @@ export class HistoryUI {
         historyItem.className = 'history-item';
 
         const isVideo = item.type === 'video';
-        const mediaUrl = isVideo ? item.videoUrl : (item.imageData || item.imageUrl || '');
-        const thumbnailDataUrl = item.thumbnailDataUrl || '';
+        const mediaUrl = normalizeMediaUrl(isVideo ? item.videoUrl : (item.imageData || item.imageUrl || ''));
+        const thumbnailDataUrl = normalizeMediaUrl(item.thumbnailDataUrl || '');
         const originalPrompt = item.originalPrompt || item.prompt || '无提示词';
         const optimizedPrompt = item.optimizedPrompt || '';
         const modelName = (item.params && item.params.model) || (item.meta && item.meta.model) || '未知';
@@ -376,7 +386,7 @@ export class HistoryUI {
                 // 保留原图 key 供点击放大时使用（加载原图）
                 img.dataset.originalKey = keyOrUrl;
             } else if (keyOrUrl.startsWith('data:') || keyOrUrl.startsWith('http')) {
-                img.src = keyOrUrl;
+                img.src = normalizeMediaUrl(keyOrUrl);
             } else {
                 img.alt = '图片加载失败';
                 console.warn(`在IndexedDB中找不到键的图像: ${keyOrUrl}`);

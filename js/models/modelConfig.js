@@ -13,7 +13,7 @@ export function isVideoModel(modelName) {
 }
 
 // 判断模型是否需要强制传图
-export function modelRequiresImage(modelName) {
+function modelRequiresImage(modelName) {
     const config = MODEL_CONFIGS[modelName];
     // 如果没有配置，默认不需要传图
     return config ? config.requiresImage : false;
@@ -43,12 +43,6 @@ export function isGemini3ProImage(modelName) {
     return modelName.toLowerCase().includes('gemini-3-pro-image');
 }
 
-// 判断是否为豆包视频模型
-export function isDoubaoVideoModel(modelName) {
-    if (!modelName) return false;
-    return modelName.toLowerCase().includes('doubao');
-}
-
 // 判断是否为 GPT 绘画模型
 export function isGPTImageModel(modelName) {
     if (!modelName) return false;
@@ -59,12 +53,6 @@ export function isGPTImageModel(modelName) {
 export function isGrokImageModel(modelName) {
     if (!modelName) return false;
     return modelName.toLowerCase().startsWith('grok-') && modelName.toLowerCase().includes('image');
-}
-
-// 判断是否为豆包绘画模型
-export function isDoubaoImageModel(modelName) {
-    if (!modelName) return false;
-    return modelName.toLowerCase().includes('doubao') && modelName.toLowerCase().includes('seedream');
 }
 
 // 验证模型的必需条件

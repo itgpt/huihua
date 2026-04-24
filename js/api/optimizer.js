@@ -1,5 +1,3 @@
-import { fetchWithTimeout } from '../utils/http.js';
-
 export async function optimizePrompt(client, prompt, optimizerModel, systemPrompt, log) {
     const endpoint = '/v1/chat/completions';
     log.add('info', `开始使用模型 [${optimizerModel}] 优化提示词...`);

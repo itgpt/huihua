@@ -1,6 +1,5 @@
 import { normalizeUrl } from '../utils/format.js';
 import { updateApiKeyStatus, updateApiBaseUrlStatus, updatePromptStatus } from './status.js';
-import { showSuccess, showError, showAnnouncement } from './components/toast.js';
 
 export class EventManager {
     constructor(dom, handlers) {
@@ -122,12 +121,6 @@ export class EventManager {
             }
         });
 
-        if (this.dom.imageModels) {
-            this.dom.imageModels.addEventListener('change', () => {
-                if (this.handlers.onImageModelChange) this.handlers.onImageModelChange();
-            });
-        }
-
         if (this.dom.useCustomImageModel) {
             this.dom.useCustomImageModel.addEventListener('change', () => {
                 if (this.handlers.onCustomImageModelToggle) this.handlers.onCustomImageModelToggle();
@@ -140,11 +133,6 @@ export class EventManager {
             });
         }
 
-        if (this.dom.videoModels) { // 注意：这里可能需要检查具体的 select ID
-            // 实际上 videoModels 是由 switchVideoPlatform 控制的，这里可能是个统称
-            // 原代码中并没有 videoModels 这个 ID，只有各个平台的 select
-        }
-
         if (this.dom.useCustomVideoModel) {
             this.dom.useCustomVideoModel.addEventListener('change', () => {
                 if (this.handlers.onCustomVideoModelToggle) this.handlers.onCustomVideoModelToggle();
@@ -154,30 +142,6 @@ export class EventManager {
         if (this.dom.customVideoModelInput) {
             this.dom.customVideoModelInput.addEventListener('input', () => {
                 if (this.handlers.onCustomVideoModelInput) this.handlers.onCustomVideoModelInput();
-            });
-        }
-
-        if (this.dom.n) {
-            this.dom.n.addEventListener('change', () => {
-                if (this.handlers.onNChange) this.handlers.onNChange();
-            });
-        }
-
-        if (this.dom.customNInput) {
-            this.dom.customNInput.addEventListener('input', () => {
-                if (this.handlers.onCustomNInput) this.handlers.onCustomNInput();
-            });
-        }
-
-        if (this.dom.size) {
-            this.dom.size.addEventListener('change', () => {
-                if (this.handlers.onSizeChange) this.handlers.onSizeChange();
-            });
-        }
-
-        if (this.dom.response_format) {
-            this.dom.response_format.addEventListener('change', () => {
-                if (this.handlers.onFormatChange) this.handlers.onFormatChange();
             });
         }
 

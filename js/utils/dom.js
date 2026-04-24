@@ -15,8 +15,6 @@ export class DOMManager {
             customOptimizerModelInput: 'customOptimizerModelInput',
             optimizerSystemPrompt: 'optimizerSystemPrompt',
             prompt: 'prompt',
-            imageModels: 'imageModels',
-            videoModels: 'videoModels',
             customImageModelInput: 'customImageModelInput',
             customVideoModelInput: 'customVideoModelInput',
             useCustomImageModel: 'useCustomImageModel',

@@ -1,4 +1,4 @@
-import { isGemini25Flash, isGemini31FlashImage, isGemini3ProImage, isGeminiModel, isVideoModel } from './modelConfig.js';
+import { isGemini25Flash, isGemini31FlashImage, isGemini3ProImage, isGeminiModel } from './modelConfig.js';
 import { GEMINI_25_FLASH_ASPECTS, GEMINI_3_PRO_ASPECTS } from '../config/constants.js';
 
 export class ModelSelector {

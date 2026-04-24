@@ -46,8 +46,6 @@ export class VideoTaskManager {
      * @param {Object} params - 任务参数
      */
     createTask(taskId, params) {
-        console.log(`[诊断] 创建任务: ${taskId}`, params);
-
         const task = {
             // 基础信息
             id: taskId,

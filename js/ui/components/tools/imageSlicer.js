@@ -1,4 +1,3 @@
-import { showSuccess, showError } from '../toast.js';
 import { loadStylesheet } from '../../../utils/styles.js';
 
 const STYLE_PATHS = ['css/tools/shared.css', 'css/tools/imageSlicer.css'];

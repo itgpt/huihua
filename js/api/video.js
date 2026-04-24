@@ -1,5 +1,4 @@
 import { fileToBase64 } from '../utils/file.js';
-import { isDoubaoVideoModel } from '../models/modelConfig.js';
 
 /**
  * 从API响应中提取视频URL（兼容多种返回格式）
@@ -11,73 +10,42 @@ export function extractVideoUrlFromResult(result) {
 
     // 方式1: Grok新API在data.data.url (new-api包装后)
     if (result.data?.data?.url) {
-        console.log('[视频URL提取] 从 result.data.data.url 提取:', result.data.data.url);
         return result.data.data.url;
     }
 
     // 方式2: Grok新API在data.url
     if (result.data?.url) {
-        console.log('[视频URL提取] 从 result.data.url 提取:', result.data.url);
         return result.data.url;
     }
 
     // 方式3: 直接在顶层
     if (result.url) {
-        console.log('[视频URL提取] 从 result.url 提取:', result.url);
         return result.url;
     }
 
     // 方式4: 直接在顶层
     if (result.video_url) {
-        console.log('[视频URL提取] 从 result.video_url 提取:', result.video_url);
         return result.video_url;
     }
 
     // 方式5: 在content对象中 (即梦等模型)
     if (result.content?.video_url) {
-        console.log('[视频URL提取] 从 result.content.video_url 提取:', result.content.video_url);
         return result.content.video_url;
     }
 
     // 方式6: 在data对象中
     if (result.data?.video_url) {
-        console.log('[视频URL提取] 从 result.data.video_url 提取:', result.data.video_url);
         return result.data.video_url;
     }
 
     // 方式7: 在output对象中
     if (result.output?.video_url) {
-        console.log('[视频URL提取] 从 result.output.video_url 提取:', result.output.video_url);
         return result.output.video_url;
     }
 
     console.warn('[视频URL提取] 未找到视频URL，返回格式:', JSON.stringify(result, null, 2).substring(0, 500));
     return null;
 }
-
-// 从返回内容中提取视频URL (Markdown或HTML)
-export function extractVideoUrl(content) {
-    if (!content) return null;
-    
-    // 尝试多种视频标签格式
-    const patterns = [
-        /!\[[^\]]*\]\((https?:\/\/[^\s)'"]+\.mp4[^\s)'"]*)\)/i, // For ![Generated Video](URL) - 排除引号
-        /\[[^\]]*\]\((https?:\/\/[^\s)'"]+\.mp4[^\s)'"]*)\)/i, // For [download video](URL) - 排除引号
-        /<video[^>]*src=["']([^"']+)["'][^>]*>/i,
-        /<video[^>]*>\s*<source[^>]*src=["']([^"']+)["'][^>]*>/i,
-        /https?:\/\/[^\s<>"']+\.mp4[^\s<>"']*/i  // 排除引号
-    ];
-    
-    for (const pattern of patterns) {
-        const match = content.match(pattern);
-        if (match) {
-            return match[1] || match[0];
-        }
-    }
-    
-    return null;
-}
-
 
 export async function createVideoTask(client, params, imageFiles, log) {
     const requestBody = {
@@ -187,31 +155,6 @@ export async function createVideoTask(client, params, imageFiles, log) {
         return { ...result, _imageBase64: imageBase64 };
     } catch (error) {
         log.add('error', '请求失败', error.message);
-        throw error;
-    }
-}
-
-export async function getVideoTaskStatus(client, taskId, log, model) {
-    const isGrokVideo = model === 'grok-video';
-    const endpoint = isGrokVideo ? `/v1/video/generations/${taskId}` : `/v1/videos/${taskId}`;
-    const fullUrl = `${client.baseUrl}${endpoint}`;
-
-    log.add('info', `GET ${fullUrl}`);
-
-    try {
-        const response = await client.get(endpoint, 600000);
-
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`HTTP ${response.status}: ${text}`);
-        }
-
-        const result = await response.json();
-
-        log.add('info', `Response ${response.status}`, result);
-
-        return result;
-    } catch (error) {
         throw error;
     }
 }

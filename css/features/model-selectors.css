@@ -1,67 +1,4 @@
 /* 模型选择 */
-.model-selection-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-/* 自适应高度的多选框 */
-#imageModels {
-    min-height: 130px;
-    max-height: 190px;
-    height: auto;
-    background: #fff;
-    padding: 8px;
-    line-height: 1.5;
-}
-#videoModels {
-    min-height: 130px;
-    max-height: 240px;
-    height: auto;
-    background: #fff;
-    padding: 8px;
-    line-height: 1.5;
-}
-
-/* 优化选项样式 */
-#imageModels option,
-#videoModels option {
-    padding: 4px 6px;
-    color: #2d3748;
-}
-
-/* 选中状态的样式 */
-#imageModels option:checked,
-#videoModels option:checked {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    font-weight: 600;
-}
-
-/* 悬停状态 - 未选中时 */
-#imageModels option:hover:not(:checked),
-#videoModels option:hover:not(:checked) {
-    background: #f7f9fc;
-    color: #2d3748;
-}
-
-/* 悬停状态 - 已选中时（保持选中样式，稍微加深） */
-#imageModels option:checked:hover,
-#videoModels option:checked:hover {
-    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-    color: white;
-    font-weight: 600;
-}
-
-.model-column {
-    display: flex;
-    flex-direction: column;
-}
-.model-column label {
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #333;
-}
-
 /* ========== 选择器标题样式 ========== */
 .selector-header {
     margin-bottom: 12px;
@@ -226,14 +163,6 @@
 
 .model-type-option:has(input[type="radio"]:checked) .option-icon {
     transform: scale(1.1);
-}
-
-/* 保持旧的type-label样式以防万一 */
-.type-label {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #4a5568;
-    transition: all 0.3s ease;
 }
 
 /* 视频平台选择器样式 - 增强版（缩小版） */

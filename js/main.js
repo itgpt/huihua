@@ -6,9 +6,9 @@ import { HistoryManager } from './storage/history.js';
 import { APIClient } from './api/base.js';
 import { ModelSelector } from './models/modelSelector.js';
 import { VideoTaskManager } from './models/videoTask.js';
-import { Generator } from './core/generator.js';
+import { Generator } from './core/generator.js?v=data-uri-fix-20260424';
 import { EventManager } from './ui/events.js';
-import { HistoryUI } from './ui/history.js';
+import { HistoryUI } from './ui/history.js?v=data-uri-fix-20260424';
 import { ImagePreviewManager } from './ui/components/imagePreview.js';
 import { showAnnouncement, showSuccess, showError } from './ui/components/toast.js';
 import { validateInputs } from './core/validator.js';
@@ -385,10 +385,6 @@ class App {
                 updateModeIndicator(this.dom, this.imagePreviewManager.getFiles().length > 0, this.modelSelector.getSelectedModels());
             },
             
-            onNChange: () => {},
-            onCustomNInput: () => {},
-            onSizeChange: () => {},
-            onFormatChange: () => {},
             onGeminiSizeChange: () => this.modelSelector.updateAspectRatioOptions(this.modelSelector.getSelectedModels()),
             onJimengParamChange: () => {
                 if (this.dom.jimengSeconds) this.storage.set('aiPaintingJimengSeconds', this.dom.jimengSeconds.value);

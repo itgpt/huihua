@@ -11,32 +11,17 @@ import Storyboard from './tools/storyboard.js';
 import XhsLab from './tools/xhsLab.js';
 
 const ToolsBar = {
-    // 工具模块缓存
-    tools: {
-        promptLibrary: null,
-        imageSlicer: null,
-        videoFrames: null,
-        timeline: null,
-        storyboard: null,
-        xhsLab: null
-    },
-    
     /**
      * 初始化工具栏
      */
     init() {
-        console.log('[ToolsBar] 初始化工具栏...');
         this.setupButtons();
         
         // 预初始化已实现的工具
         VideoFrameExtractor.init();
         PromptLibrary.init();
-        // ImageSlicer.init(); // 可以在这里添加其他工具的初始化
-        // QuickTimeline.init();
         Storyboard.init();
         XhsLab.init();
-        
-        console.log('[ToolsBar] 工具栏初始化完成');
     },
     
     /**
@@ -63,7 +48,6 @@ const ToolsBar = {
             });
         });
         
-        console.log(`[ToolsBar] 已绑定 ${buttons.length} 个工具按钮`);
     },
     
     /**
@@ -71,8 +55,6 @@ const ToolsBar = {
      * @param {string} toolName - 工具名称
      */
     openTool(toolName) {
-        console.log(`[ToolsBar] 打开工具: ${toolName}`);
-        
         switch(toolName) {
             case 'videoFrames':
                 VideoFrameExtractor.open();

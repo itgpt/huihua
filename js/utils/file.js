@@ -13,8 +13,32 @@ export async function uploadToCatbox(file) {
     return url;
 }
 
+export function imageResultToSrc(item) {
+    if (!item) return '';
+    if (item.b64_json) {
+        return normalizeImageSrc(item.b64_json, item.mimeType || item.mime_type || 'image/png');
+    }
+    return normalizeImageSrc(item.url || item.image_url || '');
+}
+
+export function normalizeImageSrc(src, mimeType = 'image/png') {
+    if (!src || typeof src !== 'string') return '';
+
+    let normalized = src.trim();
+    while (/^data:[^,]+,data:/i.test(normalized)) {
+        normalized = normalized.slice(normalized.indexOf(',') + 1);
+    }
+
+    if (normalized.startsWith('data:') || /^https?:\/\//i.test(normalized) || normalized.startsWith('blob:')) {
+        return normalized;
+    }
+
+    return `data:${mimeType};base64,${normalized}`;
+}
+
 export function dataURIToBlob(dataURI) {
-    const splitDataURI = dataURI.split(',');
+    const normalizedDataURI = normalizeImageSrc(dataURI);
+    const splitDataURI = normalizedDataURI.split(',');
     const byteString = splitDataURI[0].indexOf('base64') >= 0 ? atob(splitDataURI[1]) : decodeURI(splitDataURI[1]);
     const mimeString = splitDataURI[0].split(':')[1].split(';')[0];
     const ia = new Uint8Array(byteString.length);

@@ -32,7 +32,6 @@ const VideoFrameExtractor = {
     },
 
     init() {
-        console.log('[VideoFrameExtractor] 初始化...');
         // 确保模态框事件绑定
         this.cacheElements();
         this.bindEvents();

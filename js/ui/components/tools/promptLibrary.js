@@ -335,7 +335,6 @@ const PromptLibrary = {
         if (previewImg) {
             previewImg.addEventListener('click', (e) => {
                 e.stopPropagation();
-                console.log('图片被点击，准备显示预览:', item.title);
                 this.showImagePreview(item);
             });
             // 添加鼠标样式提示
@@ -503,8 +502,6 @@ const PromptLibrary = {
 
     // 显示图片预览
     showImagePreview(item) {
-        console.log('showImagePreview 被调用:', item);
-        
         const modal = document.getElementById('imagePreviewModal');
         const img = document.getElementById('imagePreviewImg');
         const title = document.getElementById('imagePreviewTitle');
@@ -600,7 +597,6 @@ const PromptLibrary = {
         const backdrop = modal.querySelector('.image-preview-backdrop');
         
         const closeModal = () => {
-            console.log('关闭图片预览');
             modal.style.display = 'none';
             // 清理事件监听
             window.removeEventListener('mousemove', onMouseMove);

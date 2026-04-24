@@ -147,6 +147,5 @@ export const GEMINI_3_PRO_ASPECTS = [
     { value: '21:9', label: '21:9 超宽', resolutions: { '1K': '1584x672', '2K': '3168x1344', '4K': '6336x2688' } }
 ];
 
-export const DEFAULT_API_BASE_URL = 'https://api.wanwuhuanxin.cn';
 export const HISTORY_MAX_ITEMS = 50;
 export const HISTORY_PER_PAGE = 20;

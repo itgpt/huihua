@@ -12,8 +12,6 @@ const ApiConfig = {
      * 初始化API配置模块
      */
     init() {
-        console.log('[ApiConfig] 初始化API配置模块...');
-        
         // 设置折叠/展开事件
         this.setupToggle();
         
@@ -25,8 +23,6 @@ const ApiConfig = {
         
         // 监听输入变化
         this.setupInputListeners();
-        
-        console.log('[ApiConfig] API配置模块初始化完成');
     },
     
     /**
@@ -121,8 +117,6 @@ const ApiConfig = {
         card.classList.add('collapsed');
         this.isCollapsed = true;
         this.saveCollapseState();
-        
-        console.log('[ApiConfig] API配置已折叠');
     },
     
     /**
@@ -135,8 +129,6 @@ const ApiConfig = {
         card.classList.remove('collapsed');
         this.isCollapsed = false;
         this.saveCollapseState();
-        
-        console.log('[ApiConfig] API配置已展开');
     },
     
     /**
