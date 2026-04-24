@@ -74,6 +74,8 @@ export function displayImageResults(dom, result, originalPrompt, optimizedPrompt
         imagesGrid = resultGroupContainer.querySelector('.image-grid-container');
     }
 
+    const newImageCells = [];
+
     dataArr.forEach((item) => {
         const imageSrc = imageResultToSrc(item);
 
@@ -142,7 +144,12 @@ export function displayImageResults(dom, result, originalPrompt, optimizedPrompt
             imageCell.appendChild(warning);
         }
         
-        imagesGrid.appendChild(imageCell);
+        newImageCells.push(imageCell);
+    });
+
+    const firstExistingCell = imagesGrid.firstChild;
+    newImageCells.forEach((imageCell) => {
+        imagesGrid.insertBefore(imageCell, firstExistingCell);
     });
 
     // 调整网格样式
@@ -242,7 +249,7 @@ export function createImageGeneratingPlaceholder(dom, modelName, originalPrompt,
         </div>
     `;
     
-    imagesGrid.appendChild(placeholderCard);
+    imagesGrid.insertBefore(placeholderCard, imagesGrid.firstChild);
 }
 
 export function removeImageGeneratingPlaceholder(taskId) {
