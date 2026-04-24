@@ -5,7 +5,6 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(scriptDir, '..');
 const templatePath = resolve(projectRoot, 'pages/index.template.html');
-const indexPath = resolve(projectRoot, 'index.html');
 const includePattern = /^[ \t]*<!--\s*include:\s*([^>]+?)\s*-->[ \t]*(?:\r?\n)?/gm;
 
 function renderFile(filePath, stack = []) {
@@ -31,9 +30,12 @@ function renderFile(filePath, stack = []) {
 }
 
 const output = renderFile(templatePath);
+const outArg = process.argv.find((arg) => arg.startsWith('--out='));
 
 if (process.argv.includes('--stdout')) {
   process.stdout.write(output);
+} else if (outArg) {
+  writeFileSync(resolve(projectRoot, outArg.slice('--out='.length)), output);
 } else {
-  writeFileSync(indexPath, output);
+  process.stdout.write(output);
 }

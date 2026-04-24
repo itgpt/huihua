@@ -11,6 +11,27 @@ body {
     line-height: 1.6;
 }
 
+.page-loading,
+.page-load-error {
+    min-height: calc(100vh - 40px);
+    display: grid;
+    place-items: center;
+    text-align: center;
+}
+
+.page-load-error {
+    align-content: center;
+    gap: 8px;
+}
+
+.page-load-error h1 {
+    font-size: 1.4rem;
+}
+
+.page-load-error p {
+    color: #718096;
+}
+
 .container {
     max-width: 1280px; /* 缩小最大宽度，留出更多空白 */
     margin: 0 auto;
