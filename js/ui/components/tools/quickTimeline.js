@@ -2,6 +2,12 @@ import { showSuccess, showError } from '../toast.js';
 import { VideoFrameUtils } from '../../../utils/videoFrame.js';
 import { formatTime } from '../../../utils/format.js';
 
+const FFMPEG_MODULE_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/esm/index.js';
+const FFMPEG_CORE_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js';
+const FFMPEG_WASM_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm';
+
+let ffmpegModuleLoadPromise = null;
+
 function showExportDialog() {
     return new Promise((resolve) => {
         const overlay = document.createElement('div');
@@ -31,23 +37,25 @@ function showExportDialog() {
     });
 }
 
-async function convertToMp4(webmBlob, onProgress) {
-    // 动态加载 UMD 版 ffmpeg（只加载一次）
-    if (!window.FFmpegWASM) {
-        await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = '/vendor/ffmpeg/ffmpeg.js';
-            s.onload = resolve;
-            s.onerror = reject;
-            document.head.appendChild(s);
+function loadFFmpegModule() {
+    if (!ffmpegModuleLoadPromise) {
+        ffmpegModuleLoadPromise = import(FFMPEG_MODULE_URL).catch((error) => {
+            ffmpegModuleLoadPromise = null;
+            console.warn('FFmpeg CDN 加载失败:', error);
+            throw new Error('FFmpeg CDN 加载失败，请检查网络后重试');
         });
     }
-    const { FFmpeg } = window.FFmpegWASM;
+
+    return ffmpegModuleLoadPromise;
+}
+
+async function convertToMp4(webmBlob, onProgress) {
+    const { FFmpeg } = await loadFFmpegModule();
     const ffmpeg = new FFmpeg();
     if (onProgress) ffmpeg.on('progress', ({ progress }) => onProgress(Math.round(progress * 100)));
     await ffmpeg.load({
-        coreURL: '/vendor/ffmpeg/ffmpeg-core.js',
-        wasmURL: '/vendor/ffmpeg/ffmpeg-core.wasm',
+        coreURL: FFMPEG_CORE_URL,
+        wasmURL: FFMPEG_WASM_URL,
     });
 
     const inputName = 'input.webm';
