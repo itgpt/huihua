@@ -8,7 +8,7 @@ import { optimizePrompt } from '../api/optimizer.js';
 import { generateImage, editImage } from '../api/image.js';
 import { createVideoTask } from '../api/video.js';
 import { callGeminiNativeAPI, parseGeminiResponse } from '../api/gemini.js';
-import { displayImageResults, createImageGeneratingPlaceholder, removeImageGeneratingPlaceholder } from '../ui/display.js?v=timeline-undo-20260424';
+import { displayImageResults, createImageGeneratingPlaceholder, removeImageGeneratingPlaceholder } from '../ui/display.js?v=timeline-preview-fit-20260424';
 
 function normalizeImageSrc(src, mimeType = 'image/png') {
     if (!src || typeof src !== 'string') return '';

@@ -6,7 +6,7 @@ import { loadStylesheet } from '../../../utils/styles.js';
 const FFMPEG_MODULE_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/esm/index.js';
 const FFMPEG_CORE_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js';
 const FFMPEG_WASM_URL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm';
-const STYLE_PATHS = ['css/tools/shared.css', 'css/tools/quickTimeline.css'];
+const STYLE_PATHS = ['css/tools/shared.css', 'css/tools/quickTimeline.css?v=timeline-preview-fit-20260424'];
 
 let ffmpegModuleLoadPromise = null;
 

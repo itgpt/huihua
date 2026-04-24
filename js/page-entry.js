@@ -18,7 +18,7 @@ function showLoadError(error) {
 
 try {
     await loadPageInto(document.body, 'pages/main/layout.html');
-    await import('./main.js?v=timeline-undo-20260424');
+    await import('./main.js?v=timeline-preview-fit-20260424');
 } catch (error) {
     showLoadError(error);
 }

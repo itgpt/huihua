@@ -2,7 +2,7 @@ import { showFullImage, showFullVideo } from './components/modal.js';
 import { showError, showSuccess } from './components/toast.js';
 import { safeStringify } from '../utils/format.js';
 import { HISTORY_PER_PAGE } from '../config/constants.js';
-import QuickTimeline from './components/tools/quickTimeline.js?v=timeline-undo-20260424';
+import QuickTimeline from './components/tools/quickTimeline.js?v=timeline-preview-fit-20260424';
 
 function normalizeMediaUrl(url) {
     if (!url || typeof url !== 'string') return '';
