@@ -5,7 +5,7 @@ import { LocalStorageManager } from './storage/localStorage.js';
 import { HistoryManager } from './storage/history.js';
 import { APIClient } from './api/base.js';
 import { ModelSelector } from './models/modelSelector.js';
-import { VideoTaskManager } from './models/videoTask.js';
+import { VideoTaskManager } from './models/videoTask.js?v=grok-task-restore-20260428';
 import { Generator } from './core/generator.js?v=scdn-image-host-20260428';
 import { EventManager } from './ui/events.js';
 import { HistoryUI } from './ui/history.js?v=scdn-image-host-20260428';

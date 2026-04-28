@@ -18,7 +18,7 @@ function showLoadError(error) {
 
 try {
     await loadPageInto(document.body, 'pages/main/layout.html');
-    await import('./main.js?v=scdn-image-host-20260428');
+    await import('./main.js?v=grok-task-restore-20260428');
 } catch (error) {
     showLoadError(error);
 }

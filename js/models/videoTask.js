@@ -3,6 +3,22 @@ import { fetchWithTimeout } from '../utils/http.js';
 import { normalizeUrl } from '../utils/format.js';
 import { showSuccess, showError } from '../ui/components/toast.js';
 
+const ACTIVE_VIDEO_STATUSES = new Set(['queued', 'in_progress', 'pending', 'processing', 'running', 'created', 'submitted']);
+const COMPLETED_VIDEO_STATUSES = new Set(['completed', 'succeeded', 'success', 'finished', 'done']);
+const FAILED_VIDEO_STATUSES = new Set(['failed', 'error', 'cancelled', 'canceled', 'timeout']);
+
+function normalizeVideoTaskStatus(status, videoUrl = '') {
+    const normalized = String(status || '').trim().toLowerCase();
+    if (COMPLETED_VIDEO_STATUSES.has(normalized) || (videoUrl && !FAILED_VIDEO_STATUSES.has(normalized))) return 'completed';
+    if (FAILED_VIDEO_STATUSES.has(normalized)) return 'failed';
+    if (ACTIVE_VIDEO_STATUSES.has(normalized)) return normalized === 'queued' ? 'queued' : 'in_progress';
+    return videoUrl ? 'completed' : 'in_progress';
+}
+
+function shouldResumeVideoTask(task) {
+    return task.status === 'queued' || task.status === 'in_progress';
+}
+
 /**
  * 视频任务管理器类
  * 负责管理异步视频生成任务的创建、轮询、状态更新和持久化
@@ -49,7 +65,7 @@ export class VideoTaskManager {
         const task = {
             // 基础信息
             id: taskId,
-            status: params.status || 'queued',
+            status: normalizeVideoTaskStatus(params.status || 'queued', params.video_url),
             progress: params.progress || 0,
 
             // 请求参数
@@ -64,7 +80,7 @@ export class VideoTaskManager {
             completed_at: null,
 
             // 结果
-            video_url: null,
+            video_url: params.video_url || null,
             share_id: params.share_id || null,
 
             // 元数据
@@ -189,8 +205,9 @@ export class VideoTaskManager {
 
             // 更新任务信息
             const extractedVideoUrl = extractVideoUrlFromResult(result);
+            const normalizedStatus = normalizeVideoTaskStatus(taskData.status, extractedVideoUrl || task.video_url);
             const updateData = {
-                status: taskData.status,
+                status: normalizedStatus,
                 progress: taskData.progress || task.progress,
                 video_url: extractedVideoUrl || task.video_url,
                 share_id: taskData.share_id || task.share_id,
@@ -201,9 +218,9 @@ export class VideoTaskManager {
             this.updateTask(taskId, updateData);
 
             // 根据状态决定下一步
-            if (taskData.status === 'completed') {
+            if (normalizedStatus === 'completed') {
                 this.handleTaskCompleted(taskId, result);
-            } else if (taskData.status === 'failed') {
+            } else if (normalizedStatus === 'failed') {
                 this.handleTaskFailed(taskId, result);
             } else {
                 this.scheduleNextPoll(taskId);
@@ -429,7 +446,9 @@ export class VideoTaskManager {
 
             tasks.forEach(task => {
                 // 超时检查逻辑
-                if (task.status !== 'completed' && task.status !== 'failed') {
+                task.status = normalizeVideoTaskStatus(task.status, task.video_url);
+
+                if (shouldResumeVideoTask(task)) {
                     const elapsed = Date.now() - task.created_at;
                     if (elapsed > this.config.timeout) {
                         task.status = 'failed';
@@ -451,9 +470,7 @@ export class VideoTaskManager {
             });
 
             // 恢复轮询
-            const unfinishedTasks = tasks.filter(t =>
-                t.status === 'queued' || t.status === 'in_progress'
-            );
+            const unfinishedTasks = tasks.filter(shouldResumeVideoTask);
 
             if (unfinishedTasks.length > 0) {
                 this.logger.append('info', `🔄 [诊断] 恢复 ${unfinishedTasks.length} 个未完成任务的轮询`);
