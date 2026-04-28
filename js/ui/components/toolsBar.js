@@ -6,7 +6,7 @@
 import VideoFrameExtractor from './tools/videoFrameExtractor.js';
 import PromptLibrary from './tools/promptLibrary.js';
 import ImageSlicer from './tools/imageSlicer.js';
-import QuickTimeline from './tools/quickTimeline.js?v=timeline-preview-fit-20260424';
+import QuickTimeline from './tools/quickTimeline.js?v=scdn-image-host-20260428';
 import Storyboard from './tools/storyboard.js';
 import XhsLab from './tools/xhsLab.js';
 

@@ -1,4 +1,4 @@
-import { uploadToCatbox } from '../utils/file.js';
+import { uploadToImageHost } from '../utils/file.js';
 import { createCallLogger } from '../utils/logger.js';
 import { maskApiKey } from '../utils/format.js';
 import { showSuccess, showError, showVideoSuccessToast } from '../ui/components/toast.js';
@@ -8,7 +8,7 @@ import { optimizePrompt } from '../api/optimizer.js';
 import { generateImage, editImage } from '../api/image.js';
 import { createVideoTask } from '../api/video.js';
 import { callGeminiNativeAPI, parseGeminiResponse } from '../api/gemini.js';
-import { displayImageResults, createImageGeneratingPlaceholder, removeImageGeneratingPlaceholder } from '../ui/display.js?v=timeline-preview-fit-20260424';
+import { displayImageResults, createImageGeneratingPlaceholder, removeImageGeneratingPlaceholder } from '../ui/display.js?v=scdn-image-host-20260428';
 
 function normalizeImageSrc(src, mimeType = 'image/png') {
     if (!src || typeof src !== 'string') return '';
@@ -89,12 +89,12 @@ export class Generator {
         const baseLog = createCallLogger(this.logger);
         baseLog.add('info', `任务开始，Base URL: ${this.apiClient.baseUrl}`);
 
-        // 将本地文件上传到 catbox.moe，获取公网 URL 作为模型输入
+        // 将本地文件上传到中国大陆可访问的图床，获取公网 URL 作为模型输入
         this.dom.generateBtnText.textContent = '上传参考素材...';
         const imageFiles = await Promise.all(rawImageFiles.map(async (file) => {
             if (file.isFromUrl) return file;
             try {
-                const url = await uploadToCatbox(file);
+                const url = await uploadToImageHost(file);
                 baseLog.add('info', `参考素材已上传: ${file.name} → ${url}`);
                 return { name: file.name, size: file.size, type: file.type, isFromUrl: true, originalUrl: url };
             } catch (err) {

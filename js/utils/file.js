@@ -1,15 +1,18 @@
-export async function uploadToCatbox(file) {
+const SCDN_UPLOAD_URL = 'https://img.scdn.io/api/v1.php';
+const SCDN_CDN_DOMAIN = 'cloudflarecnimg.scdn.io';
+
+export async function uploadToImageHost(file) {
     const formData = new FormData();
-    formData.append('reqtype', 'fileupload');
-    formData.append('time', '12h');
-    formData.append('fileToUpload', file, file.name);
-    const response = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', {
+    formData.append('cdn_domain', SCDN_CDN_DOMAIN);
+    formData.append('image', file, file.name);
+    const response = await fetch(SCDN_UPLOAD_URL, {
         method: 'POST',
         body: formData
     });
-    if (!response.ok) throw new Error(`Catbox upload failed: ${response.status}`);
-    const url = (await response.text()).trim();
-    if (!url.startsWith('http')) throw new Error(`Catbox returned invalid URL: ${url}`);
+    if (!response.ok) throw new Error(`SCDN upload failed: ${response.status}`);
+    const result = await response.json();
+    const url = String(result?.url || result?.data?.url || '').trim();
+    if (!url.startsWith('http')) throw new Error('SCDN returned invalid URL');
     return url;
 }
 
