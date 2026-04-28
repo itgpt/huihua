@@ -1,4 +1,4 @@
-import { showFullVideo } from './modal.js';
+import { bindVideoLoadFallback, showFullVideo } from './modal.js';
 import VideoFrameExtractor from './tools/videoFrameExtractor.js';
 
 export function createTaskCard(task, callbacks = {}) {
@@ -103,8 +103,24 @@ function updateCardContent(card, task, callbacks, statusText) {
             const video = document.createElement('video');
             video.className = 'task-video';
             video.src = task.video_url;
+            video.preload = 'metadata';
+            video.playsInline = true;
             video.style.cursor = 'pointer';
             video.onclick = () => showFullVideo(task.video_url);
+            bindVideoLoadFallback(video, task.video_url, {
+                onError: () => {
+                    preview.innerHTML = `
+                        <div class="task-error-placeholder">
+                            <div class="error-icon">⚠️</div>
+                            <p>视频预览加载失败</p>
+                            <div style="display:flex; gap:8px; justify-content:center; margin-top:10px;">
+                                <button type="button" class="btn-task-action btn-open-video-direct">↗ 打开原视频</button>
+                            </div>
+                        </div>
+                    `;
+                    preview.querySelector('.btn-open-video-direct')?.addEventListener('click', () => showFullVideo(task.video_url));
+                }
+            });
             
             const overlay = document.createElement('div');
             overlay.className = 'task-play-overlay';

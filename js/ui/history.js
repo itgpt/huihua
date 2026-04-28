@@ -1,4 +1,4 @@
-import { showFullImage, showFullVideo } from './components/modal.js';
+import { bindVideoLoadFallback, showFullImage, showFullVideo } from './components/modal.js';
 import { showError, showSuccess } from './components/toast.js';
 import { safeStringify } from '../utils/format.js';
 import { HISTORY_PER_PAGE } from '../config/constants.js';
@@ -171,6 +171,24 @@ export class HistoryUI {
             const thumbnail = historyItem.querySelector('.history-video-thumbnail');
             if (thumbnail) {
                 thumbnail.addEventListener('click', () => showFullVideo(mediaUrl));
+            }
+            const inlineVideo = historyItem.querySelector('.history-video-thumbnail video');
+            if (inlineVideo) {
+                bindVideoLoadFallback(inlineVideo, mediaUrl, {
+                    onError: () => {
+                        if (!thumbnail) return;
+                        thumbnail.innerHTML = `
+                            <div style="min-height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#fff; text-align:center; padding:16px;">
+                                <div style="font-size:14px; font-weight:600;">视频缩略图加载失败</div>
+                                <button type="button" class="btn btn-sm btn-light history-open-video-direct">↗ 打开原视频</button>
+                            </div>
+                        `;
+                        thumbnail.querySelector('.history-open-video-direct')?.addEventListener('click', (event) => {
+                            event.stopPropagation();
+                            showFullVideo(mediaUrl);
+                        });
+                    }
+                });
             }
             // 添加到时间线按钮
             const timelineBtn = document.createElement('button');
