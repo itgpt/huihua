@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suno 音乐生成器</title>
+    <link rel="icon" type="image/png" href="./favicon.png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #19b24b;
+            --primary-hover: #24cf5c;
+            --success: #00b42a;
+            --warning: #ff7d00;
+            --danger: #f53f3f;
+            --bg: #f3f9f4;
+            --card-bg: #ffffff;
+            --border: #d4e8d8;
+            --text: #132018;
+            --text-secondary: #4f6a58;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --header-grad-start: #0f7f36;
+            --header-grad-end: #1ec85a;
+            --input-bg: #ffffff;
+            --muted-bg: #eef7ef;
+            --hover-bg: #e2f5e6;
+            --radius: 8px;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            line-height: 1.5;
+        }
+
+        header {
+            min-height: 74px;
+            padding: 18px 28px;
+            background: linear-gradient(135deg, var(--header-grad-start), var(--header-grad-end));
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            line-height: 1.2;
+            letter-spacing: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 28px;
+        }
+
+        .workspace-shell {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 360px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+            font-size: 1.08rem;
+            font-weight: 700;
+        }
+
+        .subtle {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: minmax(220px, 1.1fr) minmax(260px, 1.2fr) minmax(220px, 1fr) 150px;
+            gap: 14px;
+            align-items: end;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        input[type="url"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--input-bg);
+            color: var(--text);
+            font: inherit;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 156px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(25, 178, 75, 0.12);
+        }
+
+        select {
+            appearance: none;
+            border-left: 3px solid var(--primary);
+            padding-right: 32px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 40px;
+            padding: 9px 16px;
+            border: 0;
+            border-radius: var(--radius);
+            font: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.58;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-wide {
+            width: 100%;
+        }
+
+        .mode-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--muted-bg);
+        }
+
+        .mode-tab {
+            min-height: 42px;
+            border: 0;
+            border-radius: var(--radius);
+            background: transparent;
+            color: var(--text-secondary);
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .mode-tab.active {
+            background: #fff;
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .mode-panel {
+            display: none;
+        }
+
+        .mode-panel.active {
+            display: block;
+        }
+
+        .toggle-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: center;
+            margin: 10px 0 18px;
+        }
+
+        .check-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .check-item input {
+            width: 17px;
+            height: 17px;
+            accent-color: var(--primary);
+        }
+
+        .remember-key-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .status-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .metric {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--muted-bg);
+        }
+
+        .metric strong {
+            display: block;
+            font-size: 1.25rem;
+        }
+
+        .task-list,
+        .history-list,
+        .log-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-list {
+            margin-top: 14px;
+        }
+
+        .sidebar-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-stack .card {
+            margin-bottom: 0;
+        }
+
+        .empty-state {
+            padding: 34px 12px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .task-item,
+        .history-item,
+        .log-item {
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: var(--radius);
+            background: var(--card-bg);
+            padding: 12px;
+        }
+
+        .task-item.status-success,
+        .history-item.status-success {
+            border-left-color: var(--success);
+        }
+
+        .task-item.status-fail,
+        .history-item.status-fail {
+            border-left-color: var(--danger);
+        }
+
+        .item-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .item-title {
+            min-width: 0;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: rgba(25, 178, 75, 0.12);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge.fail {
+            background: rgba(245, 63, 63, 0.12);
+            color: var(--danger);
+        }
+
+        .badge.success {
+            background: rgba(0, 180, 42, 0.12);
+            color: var(--success);
+        }
+
+        .muted-line {
+            margin-top: 6px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            word-break: break-word;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .song-result {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--muted-bg);
+        }
+
+        .song-cover {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: linear-gradient(135deg, rgba(15, 127, 54, 0.18), rgba(30, 200, 90, 0.1));
+            object-fit: cover;
+            display: block;
+        }
+
+        .song-body {
+            padding: 12px;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .lyrics-text,
+        .log-text {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: var(--radius);
+            background: var(--muted-bg);
+            color: var(--text);
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .log-box {
+            max-height: 460px;
+            overflow: auto;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: rgba(238, 247, 239, 0.45);
+        }
+
+        .log-summary {
+            margin-top: 8px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            word-break: break-word;
+        }
+
+        .log-details {
+            margin-top: 10px;
+            max-height: 260px;
+            overflow: auto;
+        }
+
+        .log-details summary {
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .log-details .log-text {
+            max-height: 220px;
+            overflow: auto;
+        }
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .record-actions,
+        .song-actions {
+            margin-top: 10px;
+        }
+
+        .query-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 112px 82px;
+            gap: 10px;
+        }
+
+        .toast {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 20;
+            max-width: min(420px, calc(100vw - 44px));
+            padding: 12px 14px;
+            border-radius: var(--radius);
+            background: var(--text);
+            color: #fff;
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+            transform: translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 1100px) {
+            .workspace-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .settings-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 760px) {
+            header {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 16px;
+            }
+
+            header h1 {
+                font-size: 1.35rem;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .mode-tabs,
+            .status-strip {
+                grid-template-columns: 1fr;
+            }
+
+            .settings-grid,
+            .query-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎵 Suno 音乐生成器</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" type="button" id="clearAllButton">清空全部记录</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card" aria-labelledby="configTitle">
+            <div class="card-title" id="configTitle">
+                <span>🔐 接口配置</span>
+                <span class="subtle">API Key 必填，可选择记住到浏览器本地</span>
+            </div>
+            <div class="settings-grid">
+                <div class="form-group">
+                    <label for="apiBaseUrl">API 地址</label>
+                    <input id="apiBaseUrl" type="url" value="https://api.wanwuhuanxin.cn" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="sunoApiKey">API Key <span style="color: var(--danger);">*</span></label>
+                    <input id="sunoApiKey" type="password" placeholder="sk-... / ark-..." autocomplete="off" required>
+                    <label class="check-item remember-key-row" for="rememberApiKey">
+                        <input id="rememberApiKey" type="checkbox" checked>
+                        记住 API Key
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="notifyHook">回调地址</label>
+                    <input id="notifyHook" type="url" placeholder="https://example.com/suno-callback">
+                </div>
+                <div class="form-group">
+                    <label for="pollInterval">轮询间隔（秒）</label>
+                    <input id="pollInterval" type="number" min="2" max="30" step="1" value="3">
+                </div>
+            </div>
+        </section>
+
+        <div class="workspace-shell">
+            <section>
+                <section class="card" aria-labelledby="generatorTitle">
+                    <div class="card-title" id="generatorTitle">
+                        <span>🎼 生成任务</span>
+                        <span class="subtle" id="activeModeHint">灵感模式</span>
+                    </div>
+
+                    <div class="mode-tabs" role="tablist" aria-label="Suno 生成模式">
+                        <button class="mode-tab active" id="modeInspiration" type="button" data-mode="inspiration">灵感歌曲</button>
+                        <button class="mode-tab" id="modeCustom" type="button" data-mode="custom">自定义歌词</button>
+                        <button class="mode-tab" id="modeContinue" type="button" data-mode="continue">续写歌曲</button>
+                        <button class="mode-tab" id="modeLyrics" type="button" data-mode="lyrics">生成歌词</button>
+                    </div>
+
+                    <form id="sunoForm">
+                        <div class="mode-panel active" id="panelInspiration" data-panel="inspiration">
+                            <div class="form-group">
+                                <label for="inspirationPrompt">灵感描述 <span style="color: var(--danger);">*</span></label>
+                                <textarea id="inspirationPrompt" placeholder="例如：夜晚城市、复古合成器、女声流行、带一点忧郁和舞曲律动"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mode-panel" id="panelCustom" data-panel="custom">
+                            <div class="form-group">
+                                <label for="customLyrics">歌词内容 <span style="color: var(--danger);">*</span></label>
+                                <textarea id="customLyrics" placeholder="[Verse]\n...\n\n[Chorus]\n..."></textarea>
+                            </div>
+                            <div class="input-row">
+                                <div class="form-group">
+                                    <label for="customTitle">歌曲标题 <span style="color: var(--danger);">*</span></label>
+                                    <input id="customTitle" type="text" placeholder="City Lights">
+                                </div>
+                                <div class="form-group">
+                                    <label for="customTags">风格标签 <span style="color: var(--danger);">*</span></label>
+                                    <input id="customTags" type="text" placeholder="pop, synthwave, female vocal">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mode-panel" id="panelContinue" data-panel="continue">
+                            <div class="input-row">
+                                <div class="form-group">
+                                    <label for="continueTaskId">原任务 ID <span style="color: var(--danger);">*</span></label>
+                                    <input id="continueTaskId" type="text" placeholder="task_id">
+                                </div>
+                                <div class="form-group">
+                                    <label for="continueClipId">Clip ID <span style="color: var(--danger);">*</span></label>
+                                    <input id="continueClipId" type="text" placeholder="clip_id">
+                                </div>
+                                <div class="form-group">
+                                    <label for="continueAt">续写秒数 <span style="color: var(--danger);">*</span></label>
+                                    <input id="continueAt" type="number" min="0" step="0.1" placeholder="60">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="continueLyrics">续写歌词</label>
+                                <textarea id="continueLyrics" placeholder="可选：填入希望续写的歌词方向"></textarea>
+                            </div>
+                            <div class="input-row">
+                                <div class="form-group">
+                                    <label for="continueTitle">歌曲标题</label>
+                                    <input id="continueTitle" type="text" placeholder="可选">
+                                </div>
+                                <div class="form-group">
+                                    <label for="continueTags">风格标签</label>
+                                    <input id="continueTags" type="text" placeholder="可选">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mode-panel" id="panelLyrics" data-panel="lyrics">
+                            <div class="form-group">
+                                <label for="lyricsPrompt">歌词主题 <span style="color: var(--danger);">*</span></label>
+                                <textarea id="lyricsPrompt" placeholder="例如：一首关于夏夜、朋友重逢和电子流行节拍的中文歌词"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="input-row" id="musicOptions">
+                            <div class="form-group">
+                                <label for="musicModel">模型版本</label>
+                                <select id="musicModel">
+                                    <option value="chirp-v4">chirp-v4</option>
+                                    <option value="chirp-v3-5">chirp-v3-5</option>
+                                    <option value="chirp-v3-0">chirp-v3-0</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="toggle-row">
+                            <label class="check-item" for="makeInstrumental" id="musicOnlyToggles">
+                                <input id="makeInstrumental" type="checkbox">
+                                纯音乐
+                            </label>
+                            <label class="check-item" for="autoPoll">
+                                <input id="autoPoll" type="checkbox" checked>
+                                自动轮询
+                            </label>
+                        </div>
+
+                        <button class="btn btn-primary btn-wide" type="submit" id="submitButton">🎧 提交 Suno 任务</button>
+                    </form>
+                </section>
+
+                <section class="card" aria-labelledby="historyTitle">
+                    <div class="card-title" id="historyTitle">
+                        <span>📜 生成历史</span>
+                        <button class="btn btn-danger" type="button" id="clearHistoryButton">清空历史</button>
+                    </div>
+                    <div class="status-strip">
+                        <div class="metric">
+                            <span class="subtle">全部任务</span>
+                            <strong id="metricTotal">0</strong>
+                        </div>
+                        <div class="metric">
+                            <span class="subtle">进行中</span>
+                            <strong id="metricRunning">0</strong>
+                        </div>
+                        <div class="metric">
+                            <span class="subtle">已完成</span>
+                            <strong id="metricDone">0</strong>
+                        </div>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-state">暂无生成记录</div>
+                    </div>
+                </section>
+            </section>
+
+            <aside class="sidebar-stack">
+                <section class="card" aria-labelledby="taskTitle">
+                    <div class="card-title" id="taskTitle">
+                        <span>📋 任务 / 查询</span>
+                    </div>
+                    <div class="query-grid">
+                        <input id="manualTaskId" type="text" placeholder="输入 task_id 查询">
+                        <select id="manualAction" aria-label="查询类型">
+                            <option value="MUSIC">MUSIC</option>
+                            <option value="LYRICS">LYRICS</option>
+                        </select>
+                        <button class="btn btn-primary" type="button" id="fetchTaskButton">查询</button>
+                    </div>
+                    <div class="task-list" id="taskList">
+                        <div class="empty-state">暂无任务</div>
+                    </div>
+                </section>
+
+                <section class="card" aria-labelledby="logTitle">
+                    <div class="card-title" id="logTitle">
+                        <span>🧾 请求日志</span>
+                        <button class="btn btn-danger" type="button" id="clearLogsButton">清空</button>
+                    </div>
+                    <div class="log-box">
+                        <div class="log-list" id="logList">
+                            <div class="empty-state">暂无日志</div>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const DEFAULT_API_BASE = 'https://api.wanwuhuanxin.cn';
+        const STORAGE_CONFIG_KEY = 'suno_app_config';
+        const STORAGE_API_KEY = 'suno_app_api_key';
+        const STORAGE_HISTORY_KEY = 'suno_app_history';
+        const STORAGE_LOGS_KEY = 'suno_app_logs';
+        const MAX_HISTORY = 80;
+        const MAX_LOGS = 120;
+        const MAX_LOG_TEXT = 900;
+
+        const state = {
+            activeMode: 'inspiration',
+            history: [],
+            logs: [],
+            pollers: new Map()
+        };
+
+        const elements = {
+            apiBaseUrl: document.getElementById('apiBaseUrl'),
+            sunoApiKey: document.getElementById('sunoApiKey'),
+            rememberApiKey: document.getElementById('rememberApiKey'),
+            notifyHook: document.getElementById('notifyHook'),
+            pollInterval: document.getElementById('pollInterval'),
+            sunoForm: document.getElementById('sunoForm'),
+            inspirationPrompt: document.getElementById('inspirationPrompt'),
+            customLyrics: document.getElementById('customLyrics'),
+            customTitle: document.getElementById('customTitle'),
+            customTags: document.getElementById('customTags'),
+            continueTaskId: document.getElementById('continueTaskId'),
+            continueClipId: document.getElementById('continueClipId'),
+            continueAt: document.getElementById('continueAt'),
+            continueLyrics: document.getElementById('continueLyrics'),
+            continueTitle: document.getElementById('continueTitle'),
+            continueTags: document.getElementById('continueTags'),
+            lyricsPrompt: document.getElementById('lyricsPrompt'),
+            musicModel: document.getElementById('musicModel'),
+            musicOptions: document.getElementById('musicOptions'),
+            manualAction: document.getElementById('manualAction'),
+            makeInstrumental: document.getElementById('makeInstrumental'),
+            musicOnlyToggles: document.getElementById('musicOnlyToggles'),
+            autoPoll: document.getElementById('autoPoll'),
+            submitButton: document.getElementById('submitButton'),
+            activeModeHint: document.getElementById('activeModeHint'),
+            historyList: document.getElementById('historyList'),
+            taskList: document.getElementById('taskList'),
+            logList: document.getElementById('logList'),
+            metricTotal: document.getElementById('metricTotal'),
+            metricRunning: document.getElementById('metricRunning'),
+            metricDone: document.getElementById('metricDone'),
+            manualTaskId: document.getElementById('manualTaskId'),
+            fetchTaskButton: document.getElementById('fetchTaskButton'),
+            clearHistoryButton: document.getElementById('clearHistoryButton'),
+            clearLogsButton: document.getElementById('clearLogsButton'),
+            clearAllButton: document.getElementById('clearAllButton'),
+            toast: document.getElementById('toast')
+        };
+
+        function normalizeBaseUrl(url) {
+            const trimmed = String(url || DEFAULT_API_BASE).trim();
+            return trimmed.replace(/\/+$/, '') || DEFAULT_API_BASE;
+        }
+
+        function safeSetLocalStorage(key, value, fallback) {
+            try {
+                localStorage.setItem(key, value);
+                return true;
+            } catch (error) {
+                if (typeof fallback === 'function') {
+                    const fallbackValue = fallback(error);
+                    try {
+                        if (typeof fallbackValue === 'string') {
+                            localStorage.setItem(key, fallbackValue);
+                            return true;
+                        }
+                        if (fallbackValue === true) {
+                            localStorage.setItem(key, value);
+                            return true;
+                        }
+                    } catch (retryError) {
+                        console.warn('localStorage retry failed', retryError);
+                    }
+                }
+                console.warn('localStorage write failed', error);
+                return false;
+            }
+        }
+
+        function maskSecret(value) {
+            const text = String(value || '');
+            if (text.length <= 10) return text ? '***' : '';
+            return `${text.slice(0, 4)}...${text.slice(-4)}`;
+        }
+
+        function compactLogText(value, limit = MAX_LOG_TEXT) {
+            const text = String(value ?? '');
+            if (text.length <= limit) return text;
+            return `${text.slice(0, limit)}\n... 已截断 ${text.length - limit} 个字符`;
+        }
+
+        function safeStringify(value) {
+            try {
+                return JSON.stringify(value, null, 2);
+            } catch (error) {
+                return String(value);
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function escapeAttr(value) {
+            return escapeHtml(value).replace(/`/g, '&#96;');
+        }
+
+        function showToast(message) {
+            elements.toast.textContent = message;
+            elements.toast.classList.add('show');
+            clearTimeout(showToast.timer);
+            showToast.timer = setTimeout(() => {
+                elements.toast.classList.remove('show');
+            }, 2600);
+        }
+
+        function addLog(type, message, details = null) {
+            const apiKey = elements.sunoApiKey.value.trim();
+            const rawDetails = details == null ? '' : safeStringify(details);
+            const maskedDetails = apiKey ? rawDetails.replaceAll(apiKey, maskSecret(apiKey)) : rawDetails;
+            const entry = {
+                id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                type,
+                message,
+                details: compactLogText(maskedDetails),
+                time: new Date().toISOString()
+            };
+            state.logs.unshift(entry);
+            state.logs = state.logs.slice(0, MAX_LOGS);
+            saveLogs();
+            renderLogs();
+        }
+
+        function saveLogs() {
+            const compact = state.logs.map((log) => ({
+                ...log,
+                details: compactLogText(log.details)
+            })).slice(0, MAX_LOGS);
+            safeSetLocalStorage(STORAGE_LOGS_KEY, JSON.stringify(compact), () => {
+                state.logs = compact.slice(0, Math.floor(MAX_LOGS / 2));
+                return JSON.stringify(state.logs);
+            });
+        }
+
+        function saveHistory() {
+            const compact = state.history.map(compactHistoryRecord).slice(0, MAX_HISTORY);
+            state.history = compact;
+            safeSetLocalStorage(STORAGE_HISTORY_KEY, JSON.stringify(compact), () => {
+                state.history = compact.slice(0, Math.floor(MAX_HISTORY / 2));
+                return JSON.stringify(state.history);
+            });
+        }
+
+        function compactHistoryRecord(record) {
+            const cloned = {
+                ...record,
+                prompt: compactLogText(record.prompt || '', 900),
+                payload: compactPayload(record.payload),
+                response: compactPayload(record.response)
+            };
+            return cloned;
+        }
+
+        function compactPayload(payload) {
+            if (!payload) return payload;
+            const text = compactLogText(safeStringify(payload), 3200);
+            try {
+                return JSON.parse(text);
+            } catch (error) {
+                return text;
+            }
+        }
+
+        function loadState() {
+            try {
+                const config = JSON.parse(localStorage.getItem(STORAGE_CONFIG_KEY) || '{}');
+                elements.apiBaseUrl.value = config.apiBaseUrl || DEFAULT_API_BASE;
+                elements.notifyHook.value = config.notifyHook || '';
+                elements.pollInterval.value = config.pollInterval || '3';
+                elements.musicModel.value = config.musicModel || 'chirp-v4';
+                elements.autoPoll.checked = config.autoPoll !== false;
+                elements.makeInstrumental.checked = Boolean(config.makeInstrumental);
+                elements.rememberApiKey.checked = config.rememberApiKey !== false;
+                if (elements.rememberApiKey.checked) {
+                    elements.sunoApiKey.value = localStorage.getItem(STORAGE_API_KEY) || '';
+                }
+            } catch (error) {
+                console.warn('config load failed', error);
+            }
+
+            try {
+                state.history = JSON.parse(localStorage.getItem(STORAGE_HISTORY_KEY) || '[]')
+                    .map(compactHistoryRecord)
+                    .slice(0, MAX_HISTORY);
+                saveHistory();
+            } catch (error) {
+                state.history = [];
+            }
+
+            try {
+                state.logs = JSON.parse(localStorage.getItem(STORAGE_LOGS_KEY) || '[]')
+                    .map((log) => ({ ...log, details: compactLogText(log.details || '') }))
+                    .slice(0, MAX_LOGS);
+                saveLogs();
+            } catch (error) {
+                state.logs = [];
+            }
+        }
+
+        function saveConfig() {
+            const config = {
+                apiBaseUrl: normalizeBaseUrl(elements.apiBaseUrl.value),
+                notifyHook: elements.notifyHook.value.trim(),
+                pollInterval: getPollIntervalSeconds(),
+                musicModel: elements.musicModel.value,
+                autoPoll: elements.autoPoll.checked,
+                makeInstrumental: elements.makeInstrumental.checked,
+                rememberApiKey: elements.rememberApiKey.checked
+            };
+            safeSetLocalStorage(STORAGE_CONFIG_KEY, JSON.stringify(config), () => false);
+            saveApiKeyPreference();
+        }
+
+        function saveApiKeyPreference() {
+            if (!elements.rememberApiKey.checked) {
+                localStorage.removeItem(STORAGE_API_KEY);
+                return;
+            }
+            safeSetLocalStorage(STORAGE_API_KEY, elements.sunoApiKey.value.trim(), () => false);
+        }
+
+        function setActiveMode(mode) {
+            state.activeMode = mode;
+            document.querySelectorAll('.mode-tab').forEach((tab) => {
+                tab.classList.toggle('active', tab.dataset.mode === mode);
+            });
+            document.querySelectorAll('.mode-panel').forEach((panel) => {
+                panel.classList.toggle('active', panel.dataset.panel === mode);
+            });
+            elements.activeModeHint.textContent = {
+                inspiration: '灵感模式',
+                custom: '自定义模式',
+                continue: '续写模式',
+                lyrics: '歌词模式'
+            }[mode] || '生成模式';
+            elements.manualAction.value = mode === 'lyrics' ? 'LYRICS' : 'MUSIC';
+            elements.musicOptions.style.display = mode === 'lyrics' ? 'none' : '';
+            elements.musicOnlyToggles.style.display = mode === 'lyrics' ? 'none' : 'inline-flex';
+            elements.submitButton.textContent = mode === 'lyrics' ? '✍️ 提交歌词任务' : '🎧 提交 Suno 任务';
+        }
+
+        function requireValue(input, label) {
+            const value = String(input.value || '').trim();
+            if (!value) {
+                input.focus();
+                throw new Error(`${label}不能为空`);
+            }
+            return value;
+        }
+
+        function addOptionalPayloadValue(payload, key, value) {
+            const text = String(value || '').trim();
+            if (text) payload[key] = text;
+        }
+
+        function buildMusicPayload() {
+            const payload = {};
+            const notifyHook = elements.notifyHook.value.trim();
+            const model = elements.musicModel.value.trim();
+
+            if (model) payload.mv = model;
+            if (elements.makeInstrumental.checked) payload.make_instrumental = true;
+            if (notifyHook) payload.notify_hook = notifyHook;
+
+            if (state.activeMode === 'inspiration') {
+                payload.gpt_description_prompt = requireValue(elements.inspirationPrompt, '灵感描述');
+            }
+
+            if (state.activeMode === 'custom') {
+                payload.prompt = requireValue(elements.customLyrics, '歌词内容');
+                payload.title = requireValue(elements.customTitle, '歌曲标题');
+                payload.tags = requireValue(elements.customTags, '风格标签');
+            }
+
+            if (state.activeMode === 'continue') {
+                payload.task_id = requireValue(elements.continueTaskId, '原任务 ID');
+                payload.continue_clip_id = requireValue(elements.continueClipId, 'Clip ID');
+                payload.continue_at = Number(requireValue(elements.continueAt, '续写秒数'));
+                addOptionalPayloadValue(payload, 'prompt', elements.continueLyrics.value);
+                addOptionalPayloadValue(payload, 'title', elements.continueTitle.value);
+                addOptionalPayloadValue(payload, 'tags', elements.continueTags.value);
+            }
+
+            return payload;
+        }
+
+        function buildLyricsPayload() {
+            const payload = {
+                prompt: requireValue(elements.lyricsPrompt, '歌词主题')
+            };
+            const notifyHook = elements.notifyHook.value.trim();
+            if (notifyHook) payload.notify_hook = notifyHook;
+            return payload;
+        }
+
+        async function requestJson(path, options = {}) {
+            const apiKey = requireValue(elements.sunoApiKey, 'API Key');
+            const method = options.method || 'GET';
+            const body = options.body;
+            const baseUrl = normalizeBaseUrl(elements.apiBaseUrl.value);
+            const url = `${baseUrl}${path}`;
+
+            addLog('request', `${method} ${path}`, {
+                url,
+                headers: {
+                    Authorization: `Bearer ${maskSecret(apiKey)}`,
+                    'Content-Type': body ? 'application/json' : undefined
+                },
+                body: body || null
+            });
+
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    ...(body ? { 'Content-Type': 'application/json' } : {}),
+                    Authorization: `Bearer ${apiKey}`
+                },
+                body: body ? JSON.stringify(body) : undefined
+            });
+
+            const text = await response.text();
+            let result = null;
+            try {
+                result = text ? JSON.parse(text) : {};
+            } catch (error) {
+                result = { message: text || response.statusText };
+            }
+
+            addLog('response', `${response.status} ${path}`, result);
+
+            if (!response.ok) {
+                throw new Error(result.message || result.error?.message || `HTTP ${response.status}`);
+            }
+            if (result.code && result.code !== 'success') {
+                throw new Error(result.message || `接口返回 ${result.code}`);
+            }
+            return result;
+        }
+
+        async function submitMusicTask(payload) {
+            return requestJson('/suno/submit/music', {
+                method: 'POST',
+                body: payload
+            });
+        }
+
+        async function submitLyricsTask(payload) {
+            return requestJson('/suno/submit/lyrics', {
+                method: 'POST',
+                body: payload
+            });
+        }
+
+        async function fetchSingleTask(taskId) {
+            return requestJson(`/suno/fetch/${encodeURIComponent(taskId)}`, {
+                method: 'GET'
+            });
+        }
+
+        async function fetchBatchTasks(ids, action) {
+            return requestJson('/suno/fetch', {
+                method: 'POST',
+                body: { ids, action }
+            });
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            elements.submitButton.disabled = true;
+
+            try {
+                saveConfig();
+                const isLyrics = state.activeMode === 'lyrics';
+                const payload = isLyrics ? buildLyricsPayload() : buildMusicPayload();
+                const result = isLyrics ? await submitLyricsTask(payload) : await submitMusicTask(payload);
+                const taskId = extractTaskId(result);
+                if (!taskId) throw new Error('接口未返回任务 ID');
+
+                const action = isLyrics ? 'LYRICS' : 'MUSIC';
+                const record = upsertTaskRecord({
+                    task_id: taskId,
+                    action,
+                    mode: state.activeMode,
+                    status: 'IN_PROGRESS',
+                    progress: '0%',
+                    prompt: extractPromptForHistory(payload),
+                    payload,
+                    response: result,
+                    createdAt: new Date().toISOString()
+                });
+
+                addLog('task', `任务已提交 ${taskId}`, record);
+                showToast('任务已提交');
+                renderAll();
+
+                if (elements.autoPoll.checked) {
+                    startTaskPolling(taskId, action);
+                }
+            } catch (error) {
+                addLog('error', '提交失败', { message: error.message });
+                showToast(`提交失败：${error.message}`);
+            } finally {
+                elements.submitButton.disabled = false;
+            }
+        }
+
+        function extractTaskId(result) {
+            if (!result) return '';
+            if (typeof result.data === 'string') return result.data;
+            if (result.data?.task_id) return result.data.task_id;
+            if (result.task_id) return result.task_id;
+            return '';
+        }
+
+        function extractPromptForHistory(payload) {
+            return payload.gpt_description_prompt || payload.prompt || payload.title || '';
+        }
+
+        function upsertTaskRecord(record) {
+            const taskId = record.task_id || record.id;
+            const existingIndex = state.history.findIndex((item) => item.task_id === taskId);
+            const nextRecord = compactHistoryRecord({
+                ...(existingIndex >= 0 ? state.history[existingIndex] : {}),
+                ...record,
+                updatedAt: new Date().toISOString()
+            });
+            if (existingIndex >= 0) {
+                state.history.splice(existingIndex, 1);
+            }
+            state.history.unshift(nextRecord);
+            state.history = state.history.slice(0, MAX_HISTORY);
+            saveHistory();
+            return nextRecord;
+        }
+
+        function getPollIntervalSeconds() {
+            const value = Number(elements.pollInterval.value);
+            if (!Number.isFinite(value)) return 3;
+            return Math.max(2, Math.min(30, Math.round(value)));
+        }
+
+        function startTaskPolling(taskId, action) {
+            if (!taskId || state.pollers.has(taskId)) return;
+            const poller = { taskId, action, timer: null, busy: false };
+            state.pollers.set(taskId, poller);
+
+            const tick = async () => {
+                if (!state.pollers.has(taskId)) return;
+                if (poller.busy) return;
+                poller.busy = true;
+                try {
+                    const task = await pollTaskStatus(taskId, action);
+                    if (isTerminalStatus(task?.status)) {
+                        stopTaskPolling(taskId);
+                        return;
+                    }
+                } catch (error) {
+                    addLog('error', `轮询失败 ${taskId}`, { message: error.message });
+                } finally {
+                    poller.busy = false;
+                }
+                if (state.pollers.has(taskId)) {
+                    poller.timer = setTimeout(tick, getPollIntervalSeconds() * 1000);
+                }
+            };
+
+            tick();
+            renderAll();
+        }
+
+        function stopTaskPolling(taskId) {
+            const poller = state.pollers.get(taskId);
+            if (poller?.timer) clearTimeout(poller.timer);
+            state.pollers.delete(taskId);
+            renderAll();
+        }
+
+        async function pollTaskStatus(taskId, action = 'MUSIC') {
+            const result = await fetchSingleTask(taskId);
+            const task = normalizeTaskResult(result, action);
+            upsertTaskRecord({
+                ...task,
+                action: task.action || action,
+                response: result
+            });
+            renderAll();
+            return task;
+        }
+
+        function normalizeTaskResult(result, action) {
+            const data = Array.isArray(result?.data) ? result.data[0] : result?.data;
+            if (!data || typeof data !== 'object') {
+                return {
+                    task_id: extractTaskId(result),
+                    action,
+                    status: 'UNKNOWN',
+                    progress: ''
+                };
+            }
+            return {
+                ...data,
+                task_id: data.task_id || data.id || extractTaskId(result),
+                action: data.action || action
+            };
+        }
+
+        function isTerminalStatus(status) {
+            return ['SUCCESS', 'FAIL', 'FAILED', 'ERROR'].includes(String(status || '').toUpperCase());
+        }
+
+        function statusClass(status) {
+            const normalized = String(status || '').toUpperCase();
+            if (normalized === 'SUCCESS') return 'status-success';
+            if (['FAIL', 'FAILED', 'ERROR'].includes(normalized)) return 'status-fail';
+            return '';
+        }
+
+        function statusBadge(status) {
+            const normalized = String(status || 'IN_PROGRESS').toUpperCase();
+            const kind = normalized === 'SUCCESS' ? 'success' : ['FAIL', 'FAILED', 'ERROR'].includes(normalized) ? 'fail' : '';
+            return `<span class="badge ${kind}">${escapeHtml(normalized)}</span>`;
+        }
+
+        function renderAll() {
+            renderHistory();
+            renderTasks();
+            renderLogs();
+            renderMetrics();
+        }
+
+        function renderMetrics() {
+            const total = state.history.length;
+            const running = state.history.filter((item) => !isTerminalStatus(item.status)).length;
+            const done = state.history.filter((item) => String(item.status || '').toUpperCase() === 'SUCCESS').length;
+            elements.metricTotal.textContent = String(total);
+            elements.metricRunning.textContent = String(running);
+            elements.metricDone.textContent = String(done);
+        }
+
+        function renderTasks() {
+            const activeTasks = state.history.slice(0, 12);
+            if (!activeTasks.length) {
+                elements.taskList.innerHTML = '<div class="empty-state">暂无任务</div>';
+                return;
+            }
+
+            elements.taskList.innerHTML = activeTasks.map((task) => {
+                const polling = state.pollers.has(task.task_id);
+                return `
+                    <article class="task-item ${statusClass(task.status)}">
+                        <div class="item-head">
+                            <div class="item-title">${escapeHtml(task.task_id || '未知任务')}</div>
+                            ${statusBadge(task.status)}
+                        </div>
+                        <div class="muted-line">${escapeHtml(task.action || 'MUSIC')} · ${escapeHtml(task.progress || '0%')} ${polling ? '· 轮询中' : ''}</div>
+                        <div class="action-row record-actions">
+                            <button class="btn btn-secondary" type="button" data-action="fetch" data-task-id="${escapeAttr(task.task_id || '')}" data-task-action="${escapeAttr(task.action || 'MUSIC')}">查询</button>
+                            <button class="btn btn-secondary" type="button" data-action="poll" data-task-id="${escapeAttr(task.task_id || '')}" data-task-action="${escapeAttr(task.action || 'MUSIC')}">${polling ? '停止' : '轮询'}</button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function renderHistory() {
+            if (!state.history.length) {
+                elements.historyList.innerHTML = '<div class="empty-state">暂无生成记录</div>';
+                return;
+            }
+
+            elements.historyList.innerHTML = state.history.map((task) => `
+                <article class="history-item ${statusClass(task.status)}">
+                    <div class="item-head">
+                        <div class="item-title">${escapeHtml(getHistoryTitle(task))}</div>
+                        ${statusBadge(task.status)}
+                    </div>
+                    <div class="muted-line">${escapeHtml(task.task_id || '')}</div>
+                    <div class="muted-line">${escapeHtml(formatTime(task.createdAt || task.submit_time))} · ${escapeHtml(task.action || '')} · ${escapeHtml(task.progress || '')}</div>
+                    ${task.fail_reason ? `<div class="muted-line" style="color: var(--danger);">${escapeHtml(task.fail_reason)}</div>` : ''}
+                    ${renderTaskData(task)}
+                </article>
+            `).join('');
+        }
+
+        function getHistoryTitle(task) {
+            if (task.action === 'LYRICS') return task.data?.title || '歌词任务';
+            const firstSong = Array.isArray(task.data) ? task.data[0] : null;
+            return firstSong?.title || task.payload?.title || task.payload?.gpt_description_prompt || '音乐任务';
+        }
+
+        function renderTaskData(task) {
+            if (task.action === 'LYRICS') return renderLyricsResult(task.data);
+            if (Array.isArray(task.data)) return renderMusicResults(task.data);
+            return '';
+        }
+
+        function renderMusicResults(songs) {
+            if (!Array.isArray(songs) || !songs.length) return '';
+            return `
+                <div class="result-grid">
+                    ${songs.map((song) => {
+                        const cover = song.image_large_url || song.image_url || '';
+                        const title = song.title || song.id || 'Suno Song';
+                        const tags = song.metadata?.tags || song.metadata?.gpt_description_prompt || '';
+                        return `
+                            <div class="song-result">
+                                ${cover ? `<img class="song-cover" src="${escapeAttr(cover)}" alt="${escapeAttr(title)}">` : '<div class="song-cover"></div>'}
+                                <div class="song-body">
+                                    <strong>${escapeHtml(title)}</strong>
+                                    <div class="muted-line">${escapeHtml(song.status || '')}</div>
+                                    ${tags ? `<div class="muted-line">${escapeHtml(tags)}</div>` : ''}
+                                    ${song.audio_url ? `<audio controls src="${escapeAttr(song.audio_url)}"></audio>` : ''}
+                                    <div class="action-row song-actions">
+                                        ${song.audio_url ? `<a class="btn btn-secondary" href="${escapeAttr(song.audio_url)}" target="_blank" rel="noopener">音频</a>` : ''}
+                                        ${song.video_url ? `<a class="btn btn-secondary" href="${escapeAttr(song.video_url)}" target="_blank" rel="noopener">视频</a>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderLyricsResult(lyrics) {
+            if (!lyrics || typeof lyrics !== 'object') return '';
+            return `
+                <div class="lyrics-text">${escapeHtml(lyrics.text || safeStringify(lyrics))}</div>
+            `;
+        }
+
+            function renderLogs() {
+                if (!state.logs.length) {
+                    elements.logList.innerHTML = '<div class="empty-state">暂无日志</div>';
+                    return;
+                }
+
+                elements.logList.innerHTML = state.logs.slice(0, 80).map((log) => `
+                    <article class="log-item">
+                        <div class="item-head">
+                            <div class="item-title">${escapeHtml(log.message)}</div>
+                            <span class="badge">${escapeHtml(log.type)}</span>
+                        </div>
+                        <div class="muted-line">${escapeHtml(formatTime(log.time))}</div>
+                        ${log.details ? `<div class="log-summary">${escapeHtml(renderLogSummary(log.details))}</div>` : ''}
+                        ${log.details ? `<details class="log-details"><summary>查看详情</summary><div class="log-text">${escapeHtml(log.details)}</div></details>` : ''}
+                    </article>
+                `).join('');
+            }
+
+            function renderLogSummary(details) {
+                const text = String(details || '').replace(/\s+/g, ' ').trim();
+                if (!text) return '';
+                return text.length > 180 ? `${text.slice(0, 180)}...` : text;
+            }
+
+        function formatTime(value) {
+            if (!value) return '';
+            if (typeof value === 'number') {
+                return new Date(value * 1000).toLocaleString();
+            }
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return String(value);
+            return date.toLocaleString();
+        }
+
+        async function handleManualFetch() {
+            const taskId = requireValue(elements.manualTaskId, 'task_id');
+            const action = elements.manualAction.value || 'MUSIC';
+            elements.fetchTaskButton.disabled = true;
+            try {
+                const task = await pollTaskStatus(taskId, action);
+                showToast(`查询完成：${task.status || 'UNKNOWN'}`);
+            } catch (error) {
+                addLog('error', '查询失败', { message: error.message });
+                showToast(`查询失败：${error.message}`);
+            } finally {
+                elements.fetchTaskButton.disabled = false;
+            }
+        }
+
+        function bindEvents() {
+            document.querySelectorAll('.mode-tab').forEach((tab) => {
+                tab.addEventListener('click', () => setActiveMode(tab.dataset.mode));
+            });
+            elements.sunoForm.addEventListener('submit', handleSubmit);
+            elements.fetchTaskButton.addEventListener('click', () => handleManualFetch().catch((error) => showToast(error.message)));
+            elements.clearHistoryButton.addEventListener('click', () => {
+                state.history = [];
+                state.pollers.forEach((poller) => clearTimeout(poller.timer));
+                state.pollers.clear();
+                saveHistory();
+                renderAll();
+            });
+            elements.clearLogsButton.addEventListener('click', () => {
+                state.logs = [];
+                saveLogs();
+                renderLogs();
+            });
+            elements.clearAllButton.addEventListener('click', () => {
+                state.history = [];
+                state.logs = [];
+                state.pollers.forEach((poller) => clearTimeout(poller.timer));
+                state.pollers.clear();
+                saveHistory();
+                saveLogs();
+                renderAll();
+            });
+
+            elements.taskList.addEventListener('click', async (event) => {
+                const button = event.target.closest('button[data-action]');
+                if (!button) return;
+                const taskId = button.dataset.taskId;
+                const action = button.dataset.taskAction || 'MUSIC';
+                if (button.dataset.action === 'fetch') {
+                    button.disabled = true;
+                    try {
+                        await pollTaskStatus(taskId, action);
+                        showToast('查询完成');
+                    } catch (error) {
+                        addLog('error', '查询失败', { message: error.message });
+                        showToast(`查询失败：${error.message}`);
+                    } finally {
+                        button.disabled = false;
+                    }
+                }
+                if (button.dataset.action === 'poll') {
+                    if (state.pollers.has(taskId)) {
+                        stopTaskPolling(taskId);
+                    } else {
+                        startTaskPolling(taskId, action);
+                    }
+                }
+            });
+
+                [
+                    elements.apiBaseUrl,
+                    elements.sunoApiKey,
+                    elements.rememberApiKey,
+                    elements.notifyHook,
+                    elements.pollInterval,
+                    elements.musicModel,
+                elements.autoPoll,
+                elements.makeInstrumental
+            ].forEach((input) => input.addEventListener('change', saveConfig));
+        }
+
+        loadState();
+        bindEvents();
+        setActiveMode(state.activeMode);
+        renderAll();
+
+        window.sunoDebug = {
+            fetchBatchTasks,
+            fetchSingleTask,
+            submitLyricsTask,
+            submitMusicTask,
+            startTaskPolling,
+            pollTaskStatus
+        };
+    </script>
+</body>
+</html>
