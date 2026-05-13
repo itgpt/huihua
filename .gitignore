@@ -181,3 +181,9 @@ service-account-key.json
 
 # Project specific
 # Add any project-specific ignore patterns below this line
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
