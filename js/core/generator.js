@@ -111,19 +111,29 @@ export class Generator {
         const baseLog = createCallLogger(this.logger);
         baseLog.add('info', `任务开始，Base URL: ${this.apiClient.baseUrl}`);
 
-        // 将本地文件上传到中国大陆可访问的图床，获取公网 URL 作为模型输入
-        this.dom.generateBtnText.textContent = '上传参考素材...';
-        const imageFiles = await Promise.all(rawImageFiles.map(async (file) => {
-            if (file.isFromUrl) return file;
-            try {
-                const url = await uploadToImageHost(file);
-                baseLog.add('info', `参考素材已上传: ${file.name} → ${url}`);
-                return { name: file.name, size: file.size, type: file.type, isFromUrl: true, originalUrl: url };
-            } catch (err) {
-                baseLog.add('error', `参考素材上传失败: ${file.name}`, err.message);
-                throw err;
-            }
-        }));
+        // gpt-image-2 图生图：跳过图床上传，直接用 base64
+        const allGPTImage2 = models.length > 0 && models.every(m => isGPTImageModel(m));
+        const skipUpload = allGPTImage2 && rawImageFiles.length > 0;
+        
+        let imageFiles;
+        if (skipUpload) {
+            baseLog.add('info', 'gpt-image-2 编辑模式，跳过图床上传，使用 base64 直传');
+            imageFiles = rawImageFiles;
+        } else {
+            // 将本地文件上传到中国大陆可访问的图床，获取公网 URL 作为模型输入
+            this.dom.generateBtnText.textContent = '上传参考素材...';
+            imageFiles = await Promise.all(rawImageFiles.map(async (file) => {
+                if (file.isFromUrl) return file;
+                try {
+                    const url = await uploadToImageHost(file);
+                    baseLog.add('info', `参考素材已上传: ${file.name} → ${url}`);
+                    return { name: file.name, size: file.size, type: file.type, isFromUrl: true, originalUrl: url };
+                } catch (err) {
+                    baseLog.add('error', `参考素材上传失败: ${file.name}`, err.message);
+                    throw err;
+                }
+            }));
+        }
 
         baseLog.add('info', `选择模型 (${models.length}): ${models.join(', ')}`);
         baseLog.add('info', `API Key: ${maskApiKey(apiKey)}`);
@@ -164,7 +174,7 @@ export class Generator {
                     const callIndex = promises.length + 1;
                     this.logger.append('info', `(${callIndex}/${totalCalls}) 准备调用: ${model} (第 ${i + 1}/${n} 张)`);
                     
-                    const promise = this.runImageCall(model, optimizedPrompt, originalPrompt, modeTag, size, responseFormat, imageFiles, baseLog);
+                    const promise = this.runImageCall(model, optimizedPrompt, originalPrompt, modeTag, size, responseFormat, imageFiles, rawImageFiles, baseLog);
                     promises.push(promise);
                 }
             }
@@ -186,7 +196,7 @@ export class Generator {
         }
     }
 
-    async runImageCall(modelName, optimizedPrompt, originalPrompt, modeTag, size, responseFormat, imageFiles, baseLog) {
+    async runImageCall(modelName, optimizedPrompt, originalPrompt, modeTag, size, responseFormat, imageFiles, rawImageFiles, baseLog) {
         const log = createCallLogger(this.logger);
         // 继承优化阶段日志（不重复输出到实时面板，因为 createCallLogger 可能会重复输出，这里仅用于记录完整日志）
         // 如果 globalLogger 已经输出了，这里不需要再操作 DOM，只需记录数据
@@ -366,13 +376,13 @@ export class Generator {
                 params.n = 1;
                 log.add('info', `参考素材转 base64: ${rawImageFiles.length} 张`);
                 const base64Images = await Promise.all(rawImageFiles.map(async (f) => {
-                    if (f.file) {
-                        // 本地文件：FileReader 直接转
+                    if (!f.isFromUrl) {
+                        // 本地文件：f 本身就是 File 对象，FileReader 直接转
                         return await new Promise((resolve) => {
                             const reader = new FileReader();
                             reader.onload = () => resolve(reader.result);
                             reader.onerror = () => resolve(null);
-                            reader.readAsDataURL(f.file);
+                            reader.readAsDataURL(f);
                         });
                     }
                     // URL：img+canvas 转
