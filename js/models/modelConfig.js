@@ -49,6 +49,12 @@ export function isGPTImageModel(modelName) {
     return modelName.toLowerCase().startsWith('gpt-') && modelName.toLowerCase().includes('image');
 }
 
+// 判断是否为 GPT 2K 绘画模型
+export function isGPTImageModel2K(modelName) {
+    if (!modelName) return false;
+    return isGPTImageModel(modelName) && modelName.toLowerCase().includes('2k');
+}
+
 // 判断是否为 GPT 4K 绘画模型
 export function isGPTImageModel4K(modelName) {
     if (!modelName) return false;
@@ -72,21 +78,40 @@ export function mapAspectRatioToPixelSize(aspectRatio) {
     return map[aspectRatio] || '1024x1024';
 }
 
-// 将宽高比映射为 4K 像素尺寸（gpt-image-2-4k 使用）
-export function mapAspectRatioToPixelSize4K(aspectRatio) {
+// 将宽高比映射为 2K 像素尺寸（gpt-image-2-2k 使用，基准 2048）
+export function mapAspectRatioToPixelSize2K(aspectRatio) {
+    // 所有尺寸满足：max edge ≤ 2048, 均为 16px 倍数, px ≤ 8,294,400
     const map = {
-        '1:1': '4096x4096',
-        '16:9': '4096x2304',
-        '9:16': '2304x4096',
-        '4:3': '4096x3072',
-        '3:4': '3072x4096',
-        '3:2': '4096x2730',
-        '2:3': '2730x4096',
-        '5:4': '4096x3276',
-        '4:5': '3276x4096',
-        '21:9': '4096x1755',
+        '1:1': '2048x2048',      // API 枚举值
+        '16:9': '2048x1152',     // API 枚举值
+        '9:16': '1152x2048',
+        '4:3': '2048x1536',
+        '3:4': '1536x2048',
+        '3:2': '2048x1360',      // 2048x1360=2,785,280
+        '2:3': '1360x2048',
+        '5:4': '2048x1632',      // 2048x1632=3,342,336
+        '4:5': '1632x2048',
+        '21:9': '2048x880',      // 2048x880=1,802,240
     };
-    return map[aspectRatio] || '4096x4096';
+    return map[aspectRatio] || '2048x2048';
+}
+
+// 将宽高比映射为 4K 像素尺寸（gpt-image-2-4k 使用，基准 3840）
+export function mapAspectRatioToPixelSize4K(aspectRatio) {
+    // 所有尺寸满足：max edge ≤ 3840, 均为 16px 倍数, px ≤ 8,294,400
+    const map = {
+        '1:1': '2880x2880',      // 2880x2880=8,294,400 ← 像素上限
+        '16:9': '3840x2160',     // API 枚举值 4K 横向
+        '9:16': '2160x3840',     // API 枚举值 4K 纵向
+        '4:3': '3264x2448',      // 3264x2448=7,990,272
+        '3:4': '2448x3264',
+        '3:2': '3504x2336',      // 3504x2336=8,185,344
+        '2:3': '2336x3504',
+        '5:4': '3200x2560',      // 3200x2560=8,192,000
+        '4:5': '2560x3200',
+        '21:9': '3840x1648',     // 3840x1648=6,328,320
+    };
+    return map[aspectRatio] || '2880x2880';
 }
 
 // 判断是否为 Grok 绘画模型
