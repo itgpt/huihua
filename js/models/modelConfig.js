@@ -49,6 +49,12 @@ export function isGPTImageModel(modelName) {
     return modelName.toLowerCase().startsWith('gpt-') && modelName.toLowerCase().includes('image');
 }
 
+// 判断是否为 GPT 4K 绘画模型
+export function isGPTImageModel4K(modelName) {
+    if (!modelName) return false;
+    return isGPTImageModel(modelName) && modelName.toLowerCase().includes('4k');
+}
+
 // 将宽高比映射为像素尺寸（gpt-image-2 API 使用像素尺寸）
 export function mapAspectRatioToPixelSize(aspectRatio) {
     const map = {
@@ -64,6 +70,23 @@ export function mapAspectRatioToPixelSize(aspectRatio) {
         '21:9': '1792x768',
     };
     return map[aspectRatio] || '1024x1024';
+}
+
+// 将宽高比映射为 4K 像素尺寸（gpt-image-2-4k 使用）
+export function mapAspectRatioToPixelSize4K(aspectRatio) {
+    const map = {
+        '1:1': '4096x4096',
+        '16:9': '4096x2304',
+        '9:16': '2304x4096',
+        '4:3': '4096x3072',
+        '3:4': '3072x4096',
+        '3:2': '4096x2730',
+        '2:3': '2730x4096',
+        '5:4': '4096x3276',
+        '4:5': '3276x4096',
+        '21:9': '4096x1755',
+    };
+    return map[aspectRatio] || '4096x4096';
 }
 
 // 判断是否为 Grok 绘画模型

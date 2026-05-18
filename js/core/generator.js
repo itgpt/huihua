@@ -3,7 +3,7 @@ import { createCallLogger } from '../utils/logger.js';
 import { maskApiKey } from '../utils/format.js';
 import { showSuccess, showError, showVideoSuccessToast } from '../ui/components/toast.js';
 import { updateModeIndicator } from '../ui/status.js';
-import { isVideoModel, isGeminiModel, isGemini3ProImage, isGPTImageModel, isGrokImageModel, mapAspectRatioToPixelSize } from '../models/modelConfig.js';
+import { isVideoModel, isGeminiModel, isGemini3ProImage, isGPTImageModel, isGPTImageModel4K, isGrokImageModel, mapAspectRatioToPixelSize, mapAspectRatioToPixelSize4K } from '../models/modelConfig.js';
 import { optimizePrompt } from '../api/optimizer.js';
 import { generateImage, editImage } from '../api/image.js';
 import { createVideoTask } from '../api/video.js';
@@ -361,7 +361,9 @@ export class Generator {
 
             // gpt-image-2：使用 size（像素），不用 aspect_ratio
             // Grok 绘画模型：使用 aspect_ratio 参数
-            if (isGPTImageModel(modelName)) {
+            if (isGPTImageModel4K(modelName)) {
+                params.size = mapAspectRatioToPixelSize4K(size);
+            } else if (isGPTImageModel(modelName)) {
                 params.size = mapAspectRatioToPixelSize(size);
             } else if (isGrokImageModel(modelName)) {
                 params.aspect_ratio = size || '1:1';
