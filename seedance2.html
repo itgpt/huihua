@@ -5050,6 +5050,18 @@
             });
         }
 
+        // 优先使用 base64 上传：将 URL 转 base64 data URL
+        async function urlToDataUrl(url) {
+            const resp = await fetch(url);
+            const blob = await resp.blob();
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error || new Error('URL转base64失败'));
+                reader.readAsDataURL(blob);
+            });
+        }
+
         function dataUrlToBlob(dataUrl) {
             const [meta, base64Data] = String(dataUrl || '').split(',');
             if (!base64Data) throw new Error('无效的 base64 图片');
@@ -5070,9 +5082,13 @@
                     if (!ref.publicUrl) {
                         ref.publicUrl = await uploadToPublicImageHostRaw(ref.file);
                     }
-                    imagePayload.push(ref.publicUrl);
+                    // 优先 base64
+                    try { imagePayload.push(await urlToDataUrl(ref.publicUrl)); }
+                    catch { imagePayload.push(ref.publicUrl); }
                 } else if (ref.publicUrl) {
-                    imagePayload.push(ref.publicUrl);
+                    // 优先 base64
+                    try { imagePayload.push(await urlToDataUrl(ref.publicUrl)); }
+                    catch { imagePayload.push(ref.publicUrl); }
                 }
             }
             return imagePayload;
