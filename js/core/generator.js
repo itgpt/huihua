@@ -25,20 +25,26 @@ function normalizeImageSrc(src, mimeType = 'image/png') {
     return `data:${mimeType};base64,${normalized}`;
 }
 
-// 优先 base64：将 URL 下载转为 data URL
-async function urlToDataUrl(url) {
-    try {
-        const resp = await fetch(url);
-        const blob = await resp.blob();
-        return await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(reader.error);
-            reader.readAsDataURL(blob);
-        });
-    } catch {
-        return url; // 失败回退原始 URL
-    }
+// 优先 base64：将 URL 转为 data URL（img+canvas，不受 CORS 限制）
+function urlToDataUrl(url) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                resolve(canvas.toDataURL('image/png'));
+            } catch {
+                resolve(url);
+            }
+        };
+        img.onerror = () => resolve(url);
+        img.src = url;
+    });
 }
 
 function imageResultToSrc(item) {

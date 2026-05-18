@@ -4972,15 +4972,23 @@
             });
         }
 
-        // 优先使用 base64 上传：将 URL 转 base64 data URL
-        async function urlToDataUrl(url) {
-            const resp = await fetch(url);
-            const blob = await resp.blob();
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(reader.error || new Error('URL转base64失败'));
-                reader.readAsDataURL(blob);
+        // 优先 base64：img+canvas 转 data URL（不受 CORS 限制）
+        function urlToDataUrl(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas.toDataURL('image/png'));
+                    } catch { resolve(url); }
+                };
+                img.onerror = () => resolve(url);
+                img.src = url;
             });
         }
 
