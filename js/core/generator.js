@@ -25,6 +25,22 @@ function normalizeImageSrc(src, mimeType = 'image/png') {
     return `data:${mimeType};base64,${normalized}`;
 }
 
+// 优先 base64：将 URL 下载转为 data URL
+async function urlToDataUrl(url) {
+    try {
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        return await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(blob);
+        });
+    } catch {
+        return url; // 失败回退原始 URL
+    }
+}
+
 function imageResultToSrc(item) {
     if (!item) return '';
     if (item.b64_json) {
@@ -342,7 +358,10 @@ export class Generator {
                 // gpt-image-2 图生图：使用 /v1/images/generations JSON，image URLs 放入 image 数组
                 params.prompt = finalPrompt;
                 params.n = 1;
-                params.image = imageFiles.map(f => f.originalUrl || f.url).filter(Boolean);
+                log.add('info', `参考素材转 base64: ${imageFiles.length} 张`);
+                const imageUrls = imageFiles.map(f => f.originalUrl || f.url).filter(Boolean);
+                const imageBase64 = await Promise.all(imageUrls.map(u => urlToDataUrl(u)));
+                params.image = imageBase64;
                 result = await generateImage(this.apiClient, params, log);
             } else if (modeTag === 'edit') {
                 params.prompt = finalPrompt;
