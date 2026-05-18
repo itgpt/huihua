@@ -361,13 +361,24 @@ export class Generator {
             }
 
             if (modeTag === 'edit' && isGPTImageModel(modelName)) {
-                // gpt-image-2 图生图：使用 /v1/images/generations JSON，image URLs 放入 image 数组
+                // gpt-image-2 图生图：直接转 base64，不上传图床
                 params.prompt = finalPrompt;
                 params.n = 1;
-                log.add('info', `参考素材转 base64: ${imageFiles.length} 张`);
-                const imageUrls = imageFiles.map(f => f.originalUrl || f.url).filter(Boolean);
-                const imageBase64 = await Promise.all(imageUrls.map(u => urlToDataUrl(u)));
-                params.image = imageBase64;
+                log.add('info', `参考素材转 base64: ${rawImageFiles.length} 张`);
+                const base64Images = await Promise.all(rawImageFiles.map(async (f) => {
+                    if (f.file) {
+                        // 本地文件：FileReader 直接转
+                        return await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = () => resolve(null);
+                            reader.readAsDataURL(f.file);
+                        });
+                    }
+                    // URL：img+canvas 转
+                    return await urlToDataUrl(f.url || f.originalUrl);
+                }));
+                params.image = base64Images.filter(Boolean);
                 result = await generateImage(this.apiClient, params, log);
             } else if (modeTag === 'edit') {
                 params.prompt = finalPrompt;
