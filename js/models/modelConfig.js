@@ -49,6 +49,23 @@ export function isGPTImageModel(modelName) {
     return modelName.toLowerCase().startsWith('gpt-') && modelName.toLowerCase().includes('image');
 }
 
+// 将宽高比映射为像素尺寸（gpt-image-2 API 使用像素尺寸）
+export function mapAspectRatioToPixelSize(aspectRatio) {
+    const map = {
+        '1:1': '1024x1024',
+        '16:9': '1792x1024',
+        '9:16': '1024x1792',
+        '4:3': '1536x1024',
+        '3:4': '1024x1536',
+        '3:2': '1536x1024',
+        '2:3': '1024x1536',
+        '5:4': '1280x1024',
+        '4:5': '1024x1280',
+        '21:9': '1792x768',
+    };
+    return map[aspectRatio] || '1024x1024';
+}
+
 // 判断是否为 Grok 绘画模型
 export function isGrokImageModel(modelName) {
     if (!modelName) return false;

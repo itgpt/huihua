@@ -4073,6 +4073,22 @@
             return allowedRatios.includes(ratioValue) ? ratioValue : 'auto';
         }
 
+        // gpt-image-2 使用像素尺寸而非 aspect_ratio
+        function aspectRatioToPixelSize(aspectRatio) {
+            const map = {
+                '21:9': '1792x768',
+                '16:9': '1792x1024',
+                '4:3': '1536x1024',
+                '3:2': '1536x1024',
+                '1:1': '1024x1024',
+                '2:3': '1024x1536',
+                '3:4': '1024x1536',
+                '9:16': '1024x1792',
+                '9:21': '768x1792',
+            };
+            return map[aspectRatio] || '1024x1024';
+        }
+
         function isDirectArkBaseUrl(url) {
             return /^https:\/\/ark\.cn-beijing\.volces\.com\/api\/v3\/?$/i.test((url || '').trim());
         }
@@ -5467,7 +5483,7 @@
                     let body = {
                         model: IMAGE_MODEL_ID,
                         prompt,
-                        ...(aspectRatio !== 'auto' ? { aspect_ratio: aspectRatio } : {}),
+                        ...(aspectRatio !== 'auto' ? { size: aspectRatioToPixelSize(aspectRatio) } : {}),
                         response_format: responseFormat
                     };
                     if (referencePayload.length) body.image = referencePayload;
@@ -5555,7 +5571,7 @@
                         });
 
                         completedCount += 1;
-                        addLog('success', `图片生成成功: ${taskId}`, `第 ${attempt}/${generationCount} 次\n模型: ${IMAGE_MODEL_ID}\n比例: ${aspectRatio}\n提示词: ${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`, {
+                        addLog('success', `图片生成成功: ${taskId}`, `第 ${attempt}/${generationCount} 次\n模型: ${IMAGE_MODEL_ID}\n尺寸: ${aspectRatio !== 'auto' ? aspectRatioToPixelSize(aspectRatio) : '自动'}\n提示词: ${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`, {
                             taskId,
                             taskKind: 'image_generate',
                             modelId: IMAGE_MODEL_ID,
@@ -6235,7 +6251,7 @@
             const lines = [];
             if (log.modelId) lines.push(`模型: ${log.modelId}`);
             if (log.size) lines.push(`尺寸: ${log.size}`);
-            if (log.aspectRatio) lines.push(`比例: ${log.aspectRatio}`);
+            if (log.aspectRatio) lines.push(`尺寸: ${log.aspectRatio}`);
             if (log.generationAttempt && log.generationCount) lines.push(`生成次数: ${log.generationAttempt}/${log.generationCount}`);
             if (log.completedCount !== undefined && log.generationCount) lines.push(`已完成: ${log.completedCount}/${log.generationCount}`);
             if (log.resolution) lines.push(`分辨率: ${log.resolution}`);

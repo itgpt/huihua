@@ -3,7 +3,7 @@ import { createCallLogger } from '../utils/logger.js';
 import { maskApiKey } from '../utils/format.js';
 import { showSuccess, showError, showVideoSuccessToast } from '../ui/components/toast.js';
 import { updateModeIndicator } from '../ui/status.js';
-import { isVideoModel, isGeminiModel, isGemini3ProImage, isGPTImageModel, isGrokImageModel } from '../models/modelConfig.js';
+import { isVideoModel, isGeminiModel, isGemini3ProImage, isGPTImageModel, isGrokImageModel, mapAspectRatioToPixelSize } from '../models/modelConfig.js';
 import { optimizePrompt } from '../api/optimizer.js';
 import { generateImage, editImage } from '../api/image.js';
 import { createVideoTask } from '../api/video.js';
@@ -318,7 +318,7 @@ export class Generator {
             
             // ========== 处理普通绘画模型 ==========
             let result;
-            
+
             let finalPrompt = optimizedPrompt;
 
             const params = {
@@ -327,12 +327,13 @@ export class Generator {
                 mode: modeTag
             };
 
-            // gpt-image-2 和 Grok 绘画模型使用 aspect_ratio 参数，不传 size
-            if (isGPTImageModel(modelName) || isGrokImageModel(modelName)) {
+            // gpt-image-2：使用 size（像素），不用 aspect_ratio
+            // Grok 绘画模型：使用 aspect_ratio 参数
+            if (isGPTImageModel(modelName)) {
+                params.size = mapAspectRatioToPixelSize(size);
+            } else if (isGrokImageModel(modelName)) {
                 params.aspect_ratio = size || '1:1';
-                if (isGrokImageModel(modelName)) {
-                    log.add('info', `[Grok 绘画] 优化参数调用方式`);
-                }
+                log.add('info', `[Grok 绘画] 优化参数调用方式`);
             } else {
                 params.size = size;
             }
