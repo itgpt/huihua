@@ -53,7 +53,7 @@ export class HistoryUI {
         const thumbnailDataUrl = normalizeMediaUrl(item.thumbnailDataUrl || '');
         const originalPrompt = item.originalPrompt || item.prompt || '无提示词';
         const optimizedPrompt = item.optimizedPrompt || '';
-        const modelName = (item.params && item.params.model) || (item.meta && item.meta.model) || '未知';
+        const modelName = (item.meta && item.meta.model) || (item.params && item.params.model) || '未知';
         const logKey = item.logKey || '';
         const promptTextLimit = 60;
         const isLongPrompt = originalPrompt.length > promptTextLimit || optimizedPrompt;
