@@ -341,10 +341,8 @@ export class Generator {
             // Grok 绘画模型：使用 aspect_ratio 参数
             if (isGPTImageModel4K(modelName)) {
                 params.size = mapAspectRatioToPixelSize4K(size);
-                params.model = 'gpt-image-2';  // API 只认 gpt-image-2，4K 靠 size 区分
             } else if (isGPTImageModel2K(modelName)) {
                 params.size = mapAspectRatioToPixelSize2K(size);
-                params.model = 'gpt-image-2';  // API 只认 gpt-image-2，2K 靠 size 区分
             } else if (isGPTImageModel(modelName)) {
                 params.size = mapAspectRatioToPixelSize(size);
             } else if (isGrokImageModel(modelName)) {
