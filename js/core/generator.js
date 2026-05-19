@@ -25,28 +25,6 @@ function normalizeImageSrc(src, mimeType = 'image/png') {
     return `data:${mimeType};base64,${normalized}`;
 }
 
-// 优先 base64：将 URL 转为 data URL（img+canvas，不受 CORS 限制）
-function urlToDataUrl(url) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.naturalWidth;
-                canvas.height = img.naturalHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                resolve(canvas.toDataURL('image/png'));
-            } catch {
-                resolve(url);
-            }
-        };
-        img.onerror = () => resolve(url);
-        img.src = url;
-    });
-}
-
 function imageResultToSrc(item) {
     if (!item) return '';
     if (item.b64_json) {
@@ -117,7 +95,7 @@ export class Generator {
         
         let imageFiles;
         if (skipUpload) {
-            baseLog.add('info', 'gpt-image-2 编辑模式，跳过图床上传，使用 base64 直传');
+            baseLog.add('info', 'gpt-image-2 编辑模式，跳过图床上传，文件直传 API（multipart/form-data）');
             imageFiles = rawImageFiles;
         } else {
             // 将本地文件上传到中国大陆可访问的图床，获取公网 URL 作为模型输入
@@ -377,25 +355,11 @@ export class Generator {
             }
 
             if (modeTag === 'edit' && isGPTImageModel(modelName)) {
-                // gpt-image-2 图生图：直接转 base64，不上传图床
+                // gpt-image-2 图生图：送文件到 /images/edits（multipart/form-data），不上传图床
                 params.prompt = finalPrompt;
                 params.n = 1;
-                log.add('info', `参考素材转 base64: ${rawImageFiles.length} 张`);
-                const base64Images = await Promise.all(rawImageFiles.map(async (f) => {
-                    if (!f.isFromUrl) {
-                        // 本地文件：f 本身就是 File 对象，FileReader 直接转
-                        return await new Promise((resolve) => {
-                            const reader = new FileReader();
-                            reader.onload = () => resolve(reader.result);
-                            reader.onerror = () => resolve(null);
-                            reader.readAsDataURL(f);
-                        });
-                    }
-                    // URL：img+canvas 转
-                    return await urlToDataUrl(f.url || f.originalUrl);
-                }));
-                params.image = base64Images.filter(Boolean);
-                result = await generateImage(this.apiClient, params, log);
+                log.add('info', `gpt-image-2 编辑模式，${imageFiles.length} 张参考图直传（multipart/form-data）`);
+                result = await editImage(this.apiClient, params, imageFiles, log);
             } else if (modeTag === 'edit') {
                 params.prompt = finalPrompt;
                 params.n = 1;
