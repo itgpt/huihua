@@ -1256,6 +1256,32 @@
             border-left-color: var(--danger);
         }
         
+
+        /* ========== 提交倒计时 ========== */
+        .btn-retract {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            cursor: pointer;
+            padding: 6px 16px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-retract:hover {
+            background: var(--danger);
+            color: white;
+        }
+        .countdown-active {
+            animation: pulse-warning 1s infinite;
+        }
+        @keyframes pulse-warning {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.65; }
+        }
+
         @keyframes pulse-border {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
@@ -2565,10 +2591,14 @@
                                     </label>
                                 </div>
 
-                                <button class="btn btn-primary" onclick="submitTask()" style="width: 100%; display: flex; flex-direction: column; align-items: center; padding: 10px;">
-                                    <span>🚀 提交生成任务</span>
+                                <button id="submitTaskBtn" class="btn btn-primary" onclick="submitTask()" style="width: 100%; display: flex; flex-direction: column; align-items: center; padding: 10px;">
+                                    <span id="submitBtnText">🚀 提交生成任务</span>
                                     <span id="costEstimate" style="font-size: 11px; opacity: 0.8; font-weight: normal; margin-top: 2px;">预估: 0 Tokens (约 0.000 元)</span>
                                 </button>
+                                <div id="countdownBar" style="display: none; margin-top: 10px; text-align: center;">
+                                    <span id="countdownText" class="countdown-active" style="font-size: 15px; font-weight: 600; color: var(--warning);">⏳ 30 秒后自动提交</span>
+                                    <button id="retractBtn" class="btn-retract" onclick="retractSubmit()" style="margin-left: 12px;">↩️ 撤回</button>
+                                </div>
 
                             </div>
                             </section>
@@ -5704,8 +5734,32 @@
             return text.replace(/\n{3,}/g, '\n\n').trim();
         }
 
-        // ==================== 任务提交（多任务） ====================
+        // ==================== 提交倒计时 & 任务提交 ====================
+        let countdownTimer = null;
+
+        function retractSubmit() {
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+            }
+            const submitBtn = document.getElementById('submitTaskBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const countdownBar = document.getElementById('countdownBar');
+            const countdownText = document.getElementById('countdownText');
+            const costEstimate = document.getElementById('costEstimate');
+            const retractBtn = document.getElementById('retractBtn');
+            submitBtnText.textContent = '🚀 提交生成任务';
+            submitBtn.disabled = false;
+            countdownBar.style.display = 'none';
+            costEstimate.style.display = '';
+            countdownText.style.color = 'var(--warning)';
+            countdownText.classList.remove('countdown-active');
+            if (retractBtn) retractBtn.style.display = '';
+        }
+
         async function submitTask() {
+            if (countdownTimer) return;
+
             const apiKey = document.getElementById('apiKey').value.trim();
             const baseUrl = getEffectiveBaseUrl();
             const prompt = getPromptText();
@@ -5718,10 +5772,49 @@
                 return;
             }
 
-            const submitBtn = document.querySelector('button[onclick="submitTask()"]');
-            const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span>⏳ 提交生成中...</span>';
+            const submitBtn = document.getElementById('submitTaskBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const countdownBar = document.getElementById('countdownBar');
+            const countdownText = document.getElementById('countdownText');
+            const costEstimate = document.getElementById('costEstimate');
+
             submitBtn.disabled = true;
+            submitBtnText.textContent = '⏳ 倒计时中...';
+            costEstimate.style.display = 'none';
+            countdownBar.style.display = 'block';
+            countdownText.style.color = 'var(--warning)';
+            countdownText.classList.add('countdown-active');
+
+            let remaining = 30;
+            countdownText.textContent = `⏳ ${remaining} 秒后自动提交`;
+
+            countdownTimer = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                    countdownText.classList.remove('countdown-active');
+                    countdownText.textContent = '🚀 正在提交...';
+                    countdownText.style.color = 'var(--primary)';
+                    document.getElementById('retractBtn').style.display = 'none';
+                    doSubmitGenerate(apiKey, baseUrl, prompt, modelId);
+                } else {
+                    countdownText.textContent = `⏳ ${remaining} 秒后自动提交`;
+                    if (remaining <= 10) {
+                        countdownText.style.color = 'var(--danger)';
+                    }
+                }
+            }, 1000);
+        }
+
+        async function doSubmitGenerate(apiKey, baseUrl, prompt, modelId) {
+            const submitBtn = document.getElementById('submitTaskBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const countdownBar = document.getElementById('countdownBar');
+            const countdownText = document.getElementById('countdownText');
+            const costEstimate = document.getElementById('costEstimate');
+
+            submitBtnText.textContent = '🚀 提交生成中...';
 
             const content = [{ type: 'text', text: prompt }];
             assets.images.forEach(img => {
@@ -5805,8 +5898,16 @@
                     promptPreview: `${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`
                 });
             } finally {
-                submitBtn.innerHTML = originalBtnText;
+                submitBtnText.textContent = '🚀 提交生成任务';
                 submitBtn.disabled = false;
+                countdownBar.style.display = 'none';
+                costEstimate.style.display = '';
+                if (countdownText) {
+                    countdownText.style.color = 'var(--warning)';
+                    countdownText.classList.remove('countdown-active');
+                }
+                const retractBtn = document.getElementById('retractBtn');
+                if (retractBtn) retractBtn.style.display = '';
             }
         }
 
