@@ -2555,7 +2555,7 @@
                                                 </div>
                                                 <input type="file" id="imageReferenceFile" class="file-input" accept="image/*" multiple onchange="handleImageReferenceFileSelect(event)">
                                                 <div class="image-reference-strip" id="imageReferenceList"></div>
-                                                <div class="generation-note">图生图会先使用 base64；如接口拒绝，会把本地参考图转存到 Litterbox 公共图床后自动重试。</div>
+                                                <div class="generation-note">图生图会先使用 base64；如接口拒绝，会把本地参考图转存到图床（设置可选）后自动重试。</div>
                                             </div>
 
                                             <div class="input-row">
@@ -2734,6 +2734,13 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>图床上传服务</label>
+                        <select id="imageHostProvider" onchange="onImageHostChange()">
+                            <option value="scdn" selected>img.scdn.io (默认)</option>
+                            <option value="litterbox">Litterbox (catbox.moe)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="litterboxExpiryGroup" style="display:none">
                         <label>Litterbox 素材过期时间</label>
                         <select id="litterboxExpiry">
                             <option value="1h">1 小时</option>
@@ -3699,6 +3706,11 @@
         }
 
         async function uploadToLitterboxRaw(file) {
+            const provider = getImageHostProvider();
+            if (provider === 'scdn') {
+                return await uploadToScdnRaw(file);
+            }
+            // Litterbox (original)
             const expiry = document.getElementById('litterboxExpiry').value || '12h';
             const formData = new FormData();
             formData.append('reqtype', 'fileupload');
@@ -3709,6 +3721,18 @@
             const text = await response.text();
             if (!text || !text.startsWith('https://')) throw new Error(text || '上传失败');
             return text.trim();
+        }
+
+        async function uploadToScdnRaw(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            const response = await fetch(getLitterboxProxyUrl(), { method: 'POST', body: formData });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (!data.success || !data.data?.image_url) {
+                throw new Error(data.message || '上传失败');
+            }
+            return data.data.image_url;
         }
 
         // ==================== 资源库：轮询状态 ====================
@@ -3915,7 +3939,22 @@
         }
 
         function getLitterboxProxyUrl() {
+            const provider = localStorage.getItem('imageHostProvider') || 'scdn';
+            if (provider === 'scdn') {
+                return 'https://img.scdn.io/api/v1.php';
+            }
             return 'https://litterbox.catbox.moe/resources/internals/api.php';
+        }
+
+        function getImageHostProvider() {
+            return localStorage.getItem('imageHostProvider') || 'scdn';
+        }
+
+        function onImageHostChange() {
+            const provider = document.getElementById('imageHostProvider').value;
+            localStorage.setItem('imageHostProvider', provider);
+            const expiryGroup = document.getElementById('litterboxExpiryGroup');
+            if (expiryGroup) expiryGroup.style.display = provider === 'litterbox' ? '' : 'none';
         }
 
         function getSubtitleEraseBaseUrl() {
@@ -3938,6 +3977,14 @@
             if (config.themeMode) document.getElementById('themeMode').value = config.themeMode;
             if (config.colorScheme) document.getElementById('colorScheme').value = config.colorScheme;
             if (config.litterboxExpiry) document.getElementById('litterboxExpiry').value = config.litterboxExpiry;
+            if (config.imageHostProvider) {
+                const hostSel = document.getElementById('imageHostProvider');
+                if (hostSel) { hostSel.value = config.imageHostProvider; }
+            }
+            // Restore litterbox expiry group visibility
+            const provider = config.imageHostProvider || 'scdn';
+            const expiryGroup = document.getElementById('litterboxExpiryGroup');
+            if (expiryGroup) expiryGroup.style.display = provider === 'litterbox' ? '' : 'none';
             if (config.pollInterval) document.getElementById('pollInterval').value = config.pollInterval;
             if (config.taskRecordLimit) document.getElementById('taskRecordLimit').value = config.taskRecordLimit;
             if (config.historyLimit) document.getElementById('historyLimitConfig').value = config.historyLimit;
@@ -3994,7 +4041,7 @@
         });
 
         function setupAutoSave() {
-            const configInputs = ['apiKey', 'baseUrl', 'themeMode', 'colorScheme', 'litterboxExpiry', 'pollInterval', 'taskRecordLimit', 'historyLimitConfig', 'model', 'seedance20Endpoint', 'seedance20FastEndpoint', 'resolution', 'ratio', 'duration', 'seed', 'generateAudio', 'imagePrompt', 'imageSize', 'imageResponseFormat', 'imageGenerationCount'];
+            const configInputs = ['apiKey', 'baseUrl', 'themeMode', 'colorScheme', 'imageHostProvider', 'litterboxExpiry', 'pollInterval', 'taskRecordLimit', 'historyLimitConfig', 'model', 'seedance20Endpoint', 'seedance20FastEndpoint', 'resolution', 'ratio', 'duration', 'seed', 'generateAudio', 'imagePrompt', 'imageSize', 'imageResponseFormat', 'imageGenerationCount'];
             configInputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -4012,6 +4059,7 @@
                 baseUrl: document.getElementById('baseUrl').value,
                 themeMode: document.getElementById('themeMode').value || 'system',
                 colorScheme: document.getElementById('colorScheme').value || 'green',
+                imageHostProvider: document.getElementById('imageHostProvider')?.value || 'scdn',
                 litterboxExpiry: document.getElementById('litterboxExpiry').value,
                 pollInterval: document.getElementById('pollInterval').value,
                 taskRecordLimit: document.getElementById('taskRecordLimit').value,
@@ -4823,7 +4871,7 @@
         }
 
         async function uploadToLitterbox(file, type) {
-            const expiry = document.getElementById('litterboxExpiry').value || '12h';
+            const provider = getImageHostProvider();
 
             const tempId = 'upload-' + Date.now() + Math.floor(Math.random() * 1000);
             const container = document.getElementById(type + 'List');
@@ -4842,9 +4890,14 @@
 
             try {
                 const formData = new FormData();
-                formData.append('reqtype', 'fileupload');
-                formData.append('time', expiry);
-                formData.append('fileToUpload', file);
+                if (provider === 'scdn') {
+                    formData.append('image', file);
+                } else {
+                    const expiry = document.getElementById('litterboxExpiry').value || '12h';
+                    formData.append('reqtype', 'fileupload');
+                    formData.append('time', expiry);
+                    formData.append('fileToUpload', file);
+                }
 
                 const response = await fetch(getLitterboxProxyUrl(), {
                     method: 'POST',
@@ -4855,15 +4908,27 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                const text = await response.text();
-
                 const tempEl = document.getElementById(tempId);
                 if (tempEl) tempEl.remove();
 
-                if (text && text.startsWith('https://')) {
-                    addAsset(type, text.trim(), file.name || 'Pasted File');
+                let url;
+                if (provider === 'scdn') {
+                    const data = await response.json();
+                    if (!data.success || !data.data?.image_url) {
+                        throw new Error(data.message || '上传失败');
+                    }
+                    url = data.data.image_url;
                 } else {
-                    alert('上传失败: ' + text);
+                    const text = await response.text();
+                    if (text && text.startsWith('https://')) {
+                        url = text.trim();
+                    } else {
+                        throw new Error(text || '上传失败');
+                    }
+                }
+
+                if (url) {
+                    addAsset(type, url, file.name || 'Pasted File');
                 }
             } catch (error) {
                 const tempEl = document.getElementById(tempId);
@@ -5152,7 +5217,7 @@
                             usedPublicFallback = true;
                             referencePayload = await getPublicFallbackPayload();
                             body = { ...body, image: referencePayload };
-                            requestLog += `\n\n[自动重试] base64 参考图失败，已改用 Litterbox 公网 URL。\n重试请求体:\n${safeStringifyForLog(body)}`;
+                            requestLog += `\n\n[自动重试] base64 参考图失败，已改用图床公网 URL。\n重试请求体:\n${safeStringifyForLog(body)}`;
                             addLog('warning', '图片生成已切换公网图床重试', error.message, {
                                 taskKind: 'image_generate',
                                 generationAttempt: attempt,
@@ -5171,7 +5236,7 @@
                             try {
                                 await ensureGeneratedResultPublicUrl(result);
                             } catch (uploadError) {
-                                addLog('warning', '图片结果转存 Litterbox 失败', uploadError.message, {
+                                addLog('warning', '图片结果转存图床失败', uploadError.message, {
                                     taskKind: 'image_generate',
                                     generationAttempt: attempt,
                                     generationCount
