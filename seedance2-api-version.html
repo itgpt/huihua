@@ -3898,9 +3898,29 @@
         }
 
         function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                addLog('info', '已复制到剪贴板', text);
-            });
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    addLog('info', '已复制到剪贴板', text);
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            ta.style.top = '-9999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try { document.execCommand('copy'); addLog('info', '已复制到剪贴板', text); }
+            catch (_) { addLog('warning', '复制失败', '请手动复制: ' + text); }
+            document.body.removeChild(ta);
         }
 
         // ==================== 资源库：本地存储 ====================
