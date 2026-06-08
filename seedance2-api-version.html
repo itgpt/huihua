@@ -3737,10 +3737,15 @@
             const response = await fetch(getLitterboxProxyUrl(), { method: 'POST', body: formData });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
-            if (!data.success || !data.data?.image_url) {
-                throw new Error(data.message || '上传失败');
+            // 秒传：图片已存在，但 data.image_url 可能仍在 data 中
+            const imageUrl = data?.data?.image_url || data?.image_url || '';
+            if (imageUrl) return imageUrl;
+            // 秒传且无 URL，尝试对文件做微小变化后重试
+            const msg = data?.message || data?.data?.message || '';
+            if (/秒传|已存在|already.?exist/i.test(msg)) {
+                throw new Error('图片已存在图床，秒传成功但未返回URL。请对图片做微小修改（如裁剪1px）后重试。');
             }
-            return data.data.image_url;
+            throw new Error(data.message || data?.data?.message || '上传失败');
         }
 
         // ==================== 资源库：轮询状态 ====================
