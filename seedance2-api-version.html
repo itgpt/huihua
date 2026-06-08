@@ -3263,11 +3263,11 @@
             const modelMap = {
                 create_asset_group: 'volc-portrait-library',
                 create_asset: 'volc-portrait-asset',
-                get_asset: 'volc-portrait-asset',
+                get_asset: 'volc-portrait',
                 create_visual_validate_session: 'volc-real-person-session',
                 get_visual_validate_result: 'volc-real-person-result'
             };
-            return modelMap[operation] || 'volc-portrait-asset';
+            return modelMap[operation] || 'volc-portrait';
         }
 
         function normalizeAssetsPayload(action, body = {}) {
