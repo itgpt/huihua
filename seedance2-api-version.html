@@ -3631,14 +3631,13 @@
                     ProjectName: group.projectName || 'default'
                 });
                 let assetId = getAssetIdFromResponse(resp);
-                // 秒传（图片已存在）：部分 API 返回消息但可能不含 asset_id
-                const isInstantUpload = resp?.message && /秒传|已存在|already.?exist/i.test(String(resp.message));
+                const msgText = resp?.message || resp?.content || '';
+                const isInstantUpload = /秒传|已存在|already.?exist/i.test(String(msgText));
                 if (!assetId && isInstantUpload) {
-                    // 尝试从 raw 数据中提取
                     assetId = resp?.raw?.Result?.Id || resp?.raw?.Result?.AssetId || resp?.id || '';
                 }
-                if (isInstantUpload && assetId) {
-                    addLog('info', '秒传成功', `图片已存在，asset_id=${assetId}`);
+                if (isInstantUpload && !assetId) {
+                    throw new Error('图片已存在但无法获取 asset_id，请更换文件或联系管理员');
                 }
                 if (!assetId) throw new Error('创建 Asset 未返回 ID');
                 // 替换临时 asset
