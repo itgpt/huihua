@@ -3630,7 +3630,16 @@
                     AssetType: assetType,
                     ProjectName: group.projectName || 'default'
                 });
-                const assetId = getAssetIdFromResponse(resp);
+                let assetId = getAssetIdFromResponse(resp);
+                // 秒传（图片已存在）：部分 API 返回消息但可能不含 asset_id
+                const isInstantUpload = resp?.message && /秒传|已存在|already.?exist/i.test(String(resp.message));
+                if (!assetId && isInstantUpload) {
+                    // 尝试从 raw 数据中提取
+                    assetId = resp?.raw?.Result?.Id || resp?.raw?.Result?.AssetId || resp?.id || '';
+                }
+                if (isInstantUpload && assetId) {
+                    addLog('info', '秒传成功', `图片已存在，asset_id=${assetId}`);
+                }
                 if (!assetId) throw new Error('创建 Asset 未返回 ID');
                 // 替换临时 asset
                 const idx = group.assets.findIndex(a => a.id === tempAsset.id);
