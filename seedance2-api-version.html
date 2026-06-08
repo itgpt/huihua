@@ -3738,7 +3738,7 @@
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             // 秒传：图片已存在，但 data.image_url 可能仍在 data 中
-            const imageUrl = data?.data?.image_url || data?.image_url || '';
+            const imageUrl = data?.data?.url || data?.data?.image_url || data?.url || data?.image_url || '';
             if (imageUrl) return imageUrl;
             // 秒传且无 URL，尝试对文件做微小变化后重试
             const msg = data?.message || data?.data?.message || '';
