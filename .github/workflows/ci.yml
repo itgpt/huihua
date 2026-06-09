@@ -27,4 +27,4 @@ jobs:
           sudo apt-get install -y -qq ffmpeg
 
       - name: Run tests
-        run: node --test tests/
+        run: node --test "tests/**/*.test.mjs"
