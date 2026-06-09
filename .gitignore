@@ -180,4 +180,5 @@ credentials.json
 service-account-key.json
 
 # Project specific
+.claude/
 # Add any project-specific ignore patterns below this line
