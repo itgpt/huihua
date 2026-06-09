@@ -169,7 +169,7 @@ export class VideoTaskManager {
         try {
             // 获取当前的 API 配置（可能已更新）
             const apiKey = this.dom.get('apiKey').value.trim();
-            const rawUrl = this.dom.get('apiBaseUrl').value.trim() || 'https://api.wanwuhuanxin.cn';
+            const rawUrl = this.dom.get('apiBaseUrl').value.trim() || 'https://qj.wanwuhuanxin.cn';
             const baseUrl = normalizeUrl(rawUrl);
 
             // 根据模型类型选择正确的端点

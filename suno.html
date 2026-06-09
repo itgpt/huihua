@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -544,6 +545,7 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <h1>🎵 Suno 音乐生成器</h1>
@@ -561,7 +563,7 @@
             <div class="settings-grid">
                 <div class="form-group">
                     <label for="apiBaseUrl">API 地址</label>
-                    <input id="apiBaseUrl" type="url" value="https://api.wanwuhuanxin.cn" autocomplete="off">
+                    <input id="apiBaseUrl" type="url" value="https://qj.wanwuhuanxin.cn" autocomplete="off">
                 </div>
                 <div class="form-group">
                     <label for="sunoApiKey">API Key <span style="color: var(--danger);">*</span></label>
@@ -591,7 +593,8 @@
                     </div>
 
                     <div class="mode-tabs" role="tablist" aria-label="Suno 生成模式">
-                        <button class="mode-tab active" id="modeInspiration" type="button" data-mode="inspiration">灵感歌曲</button>
+                        <button class="mode-tab active" id="modeInspiration" type="button"
+                            data-mode="inspiration">灵感歌曲</button>
                         <button class="mode-tab" id="modeCustom" type="button" data-mode="custom">自定义歌词</button>
                         <button class="mode-tab" id="modeContinue" type="button" data-mode="continue">续写歌曲</button>
                         <button class="mode-tab" id="modeLyrics" type="button" data-mode="lyrics">生成歌词</button>
@@ -625,11 +628,13 @@
                         <div class="mode-panel" id="panelContinue" data-panel="continue">
                             <div class="input-row">
                                 <div class="form-group">
-                                    <label for="continueTaskId">原任务 ID <span style="color: var(--danger);">*</span></label>
+                                    <label for="continueTaskId">原任务 ID <span
+                                            style="color: var(--danger);">*</span></label>
                                     <input id="continueTaskId" type="text" placeholder="task_id">
                                 </div>
                                 <div class="form-group">
-                                    <label for="continueClipId">Clip ID <span style="color: var(--danger);">*</span></label>
+                                    <label for="continueClipId">Clip ID <span
+                                            style="color: var(--danger);">*</span></label>
                                     <input id="continueClipId" type="text" placeholder="clip_id">
                                 </div>
                                 <div class="form-group">
@@ -747,7 +752,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        const DEFAULT_API_BASE = 'https://api.wanwuhuanxin.cn';
+        const DEFAULT_API_BASE = 'https://qj.wanwuhuanxin.cn';
         const STORAGE_CONFIG_KEY = 'suno_app_config';
         const STORAGE_API_KEY = 'suno_app_api_key';
         const STORAGE_HISTORY_KEY = 'suno_app_history';
@@ -1370,10 +1375,10 @@
             return `
                 <div class="result-grid">
                     ${songs.map((song) => {
-                        const cover = song.image_large_url || song.image_url || '';
-                        const title = song.title || song.id || 'Suno Song';
-                        const tags = song.metadata?.tags || song.metadata?.gpt_description_prompt || '';
-                        return `
+                const cover = song.image_large_url || song.image_url || '';
+                const title = song.title || song.id || 'Suno Song';
+                const tags = song.metadata?.tags || song.metadata?.gpt_description_prompt || '';
+                return `
                             <div class="song-result">
                                 ${cover ? `<img class="song-cover" src="${escapeAttr(cover)}" alt="${escapeAttr(title)}">` : '<div class="song-cover"></div>'}
                                 <div class="song-body">
@@ -1388,7 +1393,7 @@
                                 </div>
                             </div>
                         `;
-                    }).join('')}
+            }).join('')}
                 </div>
             `;
         }
@@ -1400,13 +1405,13 @@
             `;
         }
 
-            function renderLogs() {
-                if (!state.logs.length) {
-                    elements.logList.innerHTML = '<div class="empty-state">暂无日志</div>';
-                    return;
-                }
+        function renderLogs() {
+            if (!state.logs.length) {
+                elements.logList.innerHTML = '<div class="empty-state">暂无日志</div>';
+                return;
+            }
 
-                elements.logList.innerHTML = state.logs.slice(0, 80).map((log) => `
+            elements.logList.innerHTML = state.logs.slice(0, 80).map((log) => `
                     <article class="log-item">
                         <div class="item-head">
                             <div class="item-title">${escapeHtml(log.message)}</div>
@@ -1417,13 +1422,13 @@
                         ${log.details ? `<details class="log-details"><summary>查看详情</summary><div class="log-text">${escapeHtml(log.details)}</div></details>` : ''}
                     </article>
                 `).join('');
-            }
+        }
 
-            function renderLogSummary(details) {
-                const text = String(details || '').replace(/\s+/g, ' ').trim();
-                if (!text) return '';
-                return text.length > 180 ? `${text.slice(0, 180)}...` : text;
-            }
+        function renderLogSummary(details) {
+            const text = String(details || '').replace(/\s+/g, ' ').trim();
+            if (!text) return '';
+            return text.length > 180 ? `${text.slice(0, 180)}...` : text;
+        }
 
         function formatTime(value) {
             if (!value) return '';
@@ -1504,13 +1509,13 @@
                 }
             });
 
-                [
-                    elements.apiBaseUrl,
-                    elements.sunoApiKey,
-                    elements.rememberApiKey,
-                    elements.notifyHook,
-                    elements.pollInterval,
-                    elements.musicModel,
+            [
+                elements.apiBaseUrl,
+                elements.sunoApiKey,
+                elements.rememberApiKey,
+                elements.notifyHook,
+                elements.pollInterval,
+                elements.musicModel,
                 elements.autoPoll,
                 elements.makeInstrumental
             ].forEach((input) => input.addEventListener('change', saveConfig));
@@ -1531,4 +1536,5 @@
         };
     </script>
 </body>
+
 </html>
