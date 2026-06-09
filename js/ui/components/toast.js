@@ -29,10 +29,10 @@ export function showAnnouncement() {
             <div class="toast-section">
                 <strong>API 平台推荐:</strong>
                 <div class="link-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
-                    <a href="https://api.wanwuhuanxin.cn" target="_blank" class="link-card">
+                    <a href="__MAIN_SITE_URL__" target="_blank" class="link-card">
                         <span>🚀</span> 主站
                     </a>
-                    <a href="https://api.wanwuhuanxin.cn" target="_blank" class="link-card">
+                    <a href="__MAIN_SITE_URL__" target="_blank" class="link-card">
                         <span>🔢</span> 次数站
                     </a>
                 </div>
@@ -49,7 +49,7 @@ export function showAnnouncement() {
             <div class="toast-section">
                 <strong>联系微信:</strong>
                 <p style="margin-top: 5px;">
-                    <span class="wechat-id" title="点击复制" id="wechatId">p7tk19</span>
+                    <span class="wechat-id" title="点击复制" id="wechatId">__WECHAT_ID__</span>
                     <span style="font-size: 0.85em; color: #718096;">(点击复制 | 获取源码)</span>
                 </p>
             </div>
@@ -83,8 +83,8 @@ export function showAnnouncement() {
     const wechatIdSpan = toast.querySelector('#wechatId');
     if (wechatIdSpan) {
         wechatIdSpan.onclick = () => {
-            navigator.clipboard.writeText('p7tk19').then(() => {
-                showSuccess('已复制到剪贴板: p7tk19');
+            navigator.clipboard.writeText('__WECHAT_ID__').then(() => {
+                showSuccess('已复制到剪贴板: __WECHAT_ID__');
             }).catch(() => showError('复制失败'));
         };
     }

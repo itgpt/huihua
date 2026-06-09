@@ -17,6 +17,27 @@ docker-compose down
 
 访问地址：http://localhost:8000
 
+### 环境变量
+
+启动时可通过环境变量自定义配置，无需修改源码：
+
+```bash
+# Docker Compose（在 docker-compose.yml 中添加 environment）
+docker run -d \
+  --name ai-drawing-tool \
+  -p 8000:80 \
+  -e WECHAT_ID=p7tk19 \
+  -e MAIN_SITE_URL=https://api.wanwuhuanxin.cn \
+  -e API_BASE_URL=https://api.wanwuhuanxin.cn \
+  ai-drawing-tool
+```
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `WECHAT_ID` | `p7tk19` | 公告中显示的微信号 |
+| `MAIN_SITE_URL` | `https://api.wanwuhuanxin.cn` | 主站/次数站链接 |
+| `API_BASE_URL` | `https://api.wanwuhuanxin.cn` | API 接口默认地址 |
+
 ### 方式二：使用 Docker 命令
 
 ```bash

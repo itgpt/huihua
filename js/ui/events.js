@@ -32,7 +32,7 @@ export class EventManager {
 
         if (this.dom.apiBaseUrl) {
             this.dom.apiBaseUrl.addEventListener('change', (e) => {
-                const rawUrl = (e.target.value || '').trim() || 'https://api.wanwuhuanxin.cn';
+                const rawUrl = (e.target.value || '').trim() || '__API_BASE_URL__';
                 const finalUrl = normalizeUrl(rawUrl);
                 e.target.value = finalUrl;
                 // 保存到 localStorage

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>seedance2.0 API视频生成器</title>
+    <title>seedance2.0 API视频生成�?/title>
     <link rel="icon" type="image/png" href="./favicon.png">
     <style>
         * {
@@ -568,7 +568,7 @@
             border-color: var(--primary);
         }
 
-        /* 下拉菜单分隔条样式 */
+        /* 下拉菜单分隔条样�?*/
         select {
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
@@ -699,7 +699,7 @@
             display: block;
         }
         
-        /* 密码输入框 */
+        /* 密码输入�?*/
         .password-input {
             position: relative;
         }
@@ -714,7 +714,7 @@
             font-size: 12px;
         }
         
-        /* 富文本提示词编辑器 */
+        /* 富文本提示词编辑�?*/
         .prompt-editor-wrapper {
             position: relative;
             display: flex;
@@ -751,12 +751,12 @@
         }
         
         .prompt-editor:empty::before {
-            content: "描述视频内容，输入 @ 引用素材...";
+            content: "描述视频内容，输�?@ 引用素材...";
             color: #999;
             pointer-events: none;
         }
         
-        /* 引用标签 (Chip) - 参考 ref.html */
+        /* 引用标签 (Chip) - 参�?ref.html */
         .mention-chip {
             display: inline-flex;
             align-items: center;
@@ -1390,7 +1390,7 @@
             margin-top: 8px;
         }
         
-        /* 调试窗 */
+        /* 调试�?*/
         .debug-panel {
             margin-top: 16px;
             border: 1px solid var(--border);
@@ -1461,7 +1461,7 @@
             font-size: 14px;
         }
 
-        /* 标签页导航 */
+        /* 标签页导�?*/
         .tab-nav {
             display: flex;
             gap: 8px;
@@ -1909,7 +1909,7 @@
             border-top: 1px solid var(--border);
         }
 
-        /* ========== 资源库 ========== */
+        /* ========== 资源�?========== */
         .library-toolbar {
             display: flex;
             gap: 8px;
@@ -2199,7 +2199,7 @@
             color: var(--text);
         }
 
-        /* ========== 生成工作区 ========== */
+        /* ========== 生成工作�?========== */
         .workspace-switcher {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2348,32 +2348,32 @@
         <!-- 左侧：资源库 -->
         <aside class="side-panel expanded" id="leftPanel">
             <div class="side-panel-header">
-                <span class="side-panel-title">📦 资源库</span>
-                <button class="panel-toggle" onclick="toggleLeftPanel()" title="收起">‹</button>
+                <span class="side-panel-title">📦 资源�?/span>
+                <button class="panel-toggle" onclick="toggleLeftPanel()" title="收起">�?/button>
             </div>
             <div class="side-panel-body" id="leftPanelBody">
                 <div class="library-toolbar">
-                    <button class="btn btn-primary btn-sm" onclick="openCreateGroupModal()">➕ 创建资源</button>
+                    <button class="btn btn-primary btn-sm" onclick="openCreateGroupModal()">�?创建资源</button>
                     <button class="btn btn-secondary btn-sm" onclick="openPullModal()">📥 拉取资源</button>
                 </div>
                 <div id="assetLibraryList">
-                    <div class="empty-state">暂无资源库，请先创建或拉取</div>
+                    <div class="empty-state">暂无资源库，请先创建或拉�?/div>
                 </div>
             </div>
             <div class="side-panel-header" style="display:none;" id="leftPanelCollapsedHeader">
-                <button class="panel-toggle" onclick="toggleLeftPanel()" title="展开">›</button>
+                <button class="panel-toggle" onclick="toggleLeftPanel()" title="展开">�?/button>
             </div>
         </aside>
-        <button class="panel-dock-toggle hidden" id="leftPanelDock" onclick="toggleLeftPanel()" title="打开资源库">
-            <span class="dock-icon">›</span>
-            <span class="dock-label">资源库</span>
+        <button class="panel-dock-toggle hidden" id="leftPanelDock" onclick="toggleLeftPanel()" title="打开资源�?>
+            <span class="dock-icon">�?/span>
+            <span class="dock-label">资源�?/span>
         </button>
         <div class="side-panel-resizer" id="leftPanelResizer" title="拖拽调整左侧面板宽度"></div>
 
         <!-- 中间：主内容 -->
         <div class="main-area">
             <header>
-                <h1>🎬 Seedance2.0 视频 / 图片生成器</h1>
+                <h1>🎬 Seedance2.0 视频 / 图片生成�?/h1>
                 <div class="header-actions">
                     <button class="icon-btn" onclick="openSettingsModal()" title="设置">⚙️</button>
                 </div>
@@ -2384,7 +2384,7 @@
                         <div class="main-content">
                             <div class="workspace-switcher" aria-label="生成模式切换">
                                 <button class="workspace-tab active" id="workspaceTabVideo" onclick="switchWorkspaceMode('video')">🎬 视频生成</button>
-                                <button class="workspace-tab" id="workspaceTabImage" onclick="switchWorkspaceMode('image')">🖼️ 图片生成</button>
+                                <button class="workspace-tab" id="workspaceTabImage" onclick="switchWorkspaceMode('image')">🖼�?图片生成</button>
                             </div>
 
                             <!-- 生成配置 -->
@@ -2392,9 +2392,9 @@
                             <div class="card">
                                 <div class="card-title">🎨 多模态参考生视频</div>
 
-                                <!-- 提示词输入（富文本，支持@引用） -->
+                                <!-- 提示词输入（富文本，支持@引用�?-->
                                 <div class="form-group">
-                                    <label>提示词 <span style="color: var(--danger);">*</span></label>
+                                    <label>提示�?<span style="color: var(--danger);">*</span></label>
                                     <div class="prompt-editor-wrapper">
                                         <div class="prompt-editor-toolbar">
                                             <button class="mention-btn" id="mentionBtn" onclick="toggleMentionPopup()">@ 引用素材</button>
@@ -2410,30 +2410,30 @@
                                                 <span style="font-size: 11px; color: var(--text-secondary);">↑↓选择 · 回车确认</span>
                                             </div>
                                             <div class="mention-popup-list" id="mentionPopupList">
-                                                <div class="mention-popup-empty">暂无素材，请先上传</div>
+                                                <div class="mention-popup-empty">暂无素材，请先上�?/div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- 参考素材上传 - 三列布局 -->
+                                <!-- 参考素材上�?- 三列布局 -->
                                 <div class="form-group">
-                                    <label>📎 参考素材</label>
+                                    <label>📎 参考素�?/label>
                                     <div class="asset-id-row">
                                         <select id="assetTypeSelect">
                                             <option value="image">Image 素材</option>
                                             <option value="video">Video 素材</option>
                                             <option value="audio">Audio 素材</option>
                                         </select>
-                                        <input type="text" id="assetIdInput" placeholder="输入素材库 ASSET_ID，例如 asset-2026xxxxxxxxx-xxxxx" onkeypress="if(event.key==='Enter')addAssetFromAssetId()">
+                                        <input type="text" id="assetIdInput" placeholder="输入素材�?ASSET_ID，例�?asset-2026xxxxxxxxx-xxxxx" onkeypress="if(event.key==='Enter')addAssetFromAssetId()">
                                         <button type="button" class="btn btn-primary btn-sm" onclick="addAssetFromAssetId()">添加 ASSET_ID</button>
                                     </div>
-                                    <div class="asset-id-hint">会按文档格式自动转换为 <code>asset://&lt;asset_id&gt;</code>，并根据素材类型加入对应素材列表。</div>
+                                    <div class="asset-id-hint">会按文档格式自动转换�?<code>asset://&lt;asset_id&gt;</code>，并根据素材类型加入对应素材列表�?/div>
                                     <div class="assets-upload-row">
                                         <!-- 图片 -->
                                         <div class="asset-upload-col">
                                             <div class="asset-upload-header">
-                                                <span>🖼️ 图片</span>
+                                                <span>🖼�?图片</span>
                                                 <span class="asset-count">0-9</span>
                                             </div>
                                             <div class="url-input-compact">
@@ -2493,7 +2493,7 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label>分辨率</label>
+                                        <label>分辨�?/label>
                                         <select id="resolution">
                                             <option value="480p" selected>480p</option>
                                             <option value="720p">720p</option>
@@ -2511,11 +2511,11 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label>时长（秒）</label>
+                                        <label>时长（秒�?/label>
                                         <input type="number" id="duration" value="5" min="4" max="15">
                                     </div>
                                     <div class="form-group">
-                                        <label>Seed (-1为随机)</label>
+                                        <label>Seed (-1为随�?</label>
                                         <input type="number" id="seed" value="-1" min="-1" max="4294967295">
                                     </div>
                                 </div>
@@ -2529,7 +2529,7 @@
 
                                 <button class="btn btn-primary" onclick="submitTask()" style="width: 100%; display: flex; flex-direction: column; align-items: center; padding: 10px;">
                                     <span>🚀 提交生成任务</span>
-                                    <span id="costEstimate" style="font-size: 11px; opacity: 0.8; font-weight: normal; margin-top: 2px;">预估: 0 Tokens (约 0.000 元)</span>
+                                    <span id="costEstimate" style="font-size: 11px; opacity: 0.8; font-weight: normal; margin-top: 2px;">预估: 0 Tokens (�?0.000 �?</span>
                                 </button>
 
                             </div>
@@ -2537,16 +2537,16 @@
 
                             <section class="workspace-pane" id="imageWorkspace">
                                 <div class="card">
-                                    <div class="card-title">🖼️ GPT Image 2 生图</div>
+                                    <div class="card-title">🖼�?GPT Image 2 生图</div>
                                     <div class="image-workbench">
                                         <div class="image-workbench-panel">
                                             <div class="form-group">
-                                                <label>图片提示词 <span style="color: var(--danger);">*</span></label>
-                                                <textarea id="imagePrompt" class="image-prompt-input" placeholder="描述你要生成或改造的图片，例如：一张电影感产品海报，主体居中，柔和棚拍灯光，高级质感..." oninput="saveAllConfigs()"></textarea>
+                                                <label>图片提示�?<span style="color: var(--danger);">*</span></label>
+                                                <textarea id="imagePrompt" class="image-prompt-input" placeholder="描述你要生成或改造的图片，例如：一张电影感产品海报，主体居中，柔和棚拍灯光，高级质�?.." oninput="saveAllConfigs()"></textarea>
                                             </div>
 
                                             <div class="form-group">
-                                                <label>图生图参考</label>
+                                                <label>图生图参�?/label>
                                                 <div class="url-input-compact">
                                                     <input type="text" id="imageReferenceUrlInput" placeholder="参考图 URL..." onkeypress="if(event.key==='Enter')addImageReferenceFromUrlInput()">
                                                     <button type="button" onclick="addImageReferenceFromUrlInput()">+</button>
@@ -2556,7 +2556,7 @@
                                                 </div>
                                                 <input type="file" id="imageReferenceFile" class="file-input" accept="image/*" multiple onchange="handleImageReferenceFileSelect(event)">
                                                 <div class="image-reference-strip" id="imageReferenceList"></div>
-                                                <div class="generation-note">图生图会先使用 base64；如接口拒绝，会把本地参考图转存到 SCDN 公共图床后自动重试。</div>
+                                                <div class="generation-note">图生图会先使�?base64；如接口拒绝，会把本地参考图转存�?SCDN 公共图床后自动重试�?/div>
                                             </div>
 
                                             <div class="input-row">
@@ -2626,7 +2626,7 @@
                         </div>
                     </div>
 
-                    <!-- 底部：生成历史 -->
+                    <!-- 底部：生成历�?-->
                     <div class="card" style="margin-top: 20px;">
                         <div class="card-title">
                             <span>📜 生成历史</span>
@@ -2642,14 +2642,14 @@
 
         <button class="panel-dock-toggle hidden" id="rightPanelDock" onclick="toggleRightPanel()" title="打开任务 / 日志">
             <span class="dock-label">任务 / 日志</span>
-            <span class="dock-icon">‹</span>
+            <span class="dock-icon">�?/span>
         </button>
         <div class="side-panel-resizer right" id="rightPanelResizer" title="拖拽调整右侧面板宽度"></div>
 
-        <!-- 右侧：任务记录 / 日志 -->
+        <!-- 右侧：任务记�?/ 日志 -->
         <aside class="side-panel right expanded" id="rightPanel">
             <div class="side-panel-header">
-                <button class="panel-toggle" onclick="toggleRightPanel()" title="收起">›</button>
+                <button class="panel-toggle" onclick="toggleRightPanel()" title="收起">�?/button>
                 <span class="side-panel-title">📋 任务 / 日志</span>
             </div>
             <div class="side-panel-body" id="rightPanelBody">
@@ -2685,7 +2685,7 @@
                         <label>Seedance API Key <span style="color: var(--danger);">*</span></label>
                         <div class="password-input">
                             <input type="password" id="apiKey" placeholder="ARK_API_KEY">
-                            <span class="password-toggle" onclick="togglePassword('apiKey')">👁️</span>
+                            <span class="password-toggle" onclick="togglePassword('apiKey')">👁�?/span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -2697,44 +2697,44 @@
                     <div class="form-group" style="flex: 2;">
                         <label>生图 API Key <span style="color: var(--danger);">*</span></label>
                         <div class="password-input">
-                            <input type="password" id="imageApiKey" placeholder="用于 gpt-image-2 的 API Key">
-                            <span class="password-toggle" onclick="togglePassword('imageApiKey')">👁️</span>
+                            <input type="password" id="imageApiKey" placeholder="用于 gpt-image-2 �?API Key">
+                            <span class="password-toggle" onclick="togglePassword('imageApiKey')">👁�?/span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>生图 Base URL</label>
-                        <input type="text" id="imageBaseUrl" value="https://api.wanwuhuanxin.cn">
+                        <input type="text" id="imageBaseUrl" value="__API_BASE_URL__">
                     </div>
                 </div>
                 <div class="input-row">
                     <div class="form-group" style="flex: 2;">
                         <label>Assets API Access Key (AK)</label>
                         <div class="password-input">
-                            <input type="password" id="assetsAk" placeholder="用于素材资产库鉴权的 AK，不是 Seedance API Key">
-                            <span class="password-toggle" onclick="togglePassword('assetsAk')">👁️</span>
+                            <input type="password" id="assetsAk" placeholder="用于素材资产库鉴权的 AK，不�?Seedance API Key">
+                            <span class="password-toggle" onclick="togglePassword('assetsAk')">👁�?/span>
                         </div>
                     </div>
                     <div class="form-group" style="flex: 2;">
                         <label>Assets API Secret Key (SK)</label>
                         <div class="password-input">
-                            <input type="password" id="assetsSk" placeholder="用于素材资产库鉴权的 SK；留空时可尝试读取本机 VOLC_ACCESSKEY/VOLC_SECRETKEY">
-                            <span class="password-toggle" onclick="togglePassword('assetsSk')">👁️</span>
+                            <input type="password" id="assetsSk" placeholder="用于素材资产库鉴权的 SK；留空时可尝试读取本�?VOLC_ACCESSKEY/VOLC_SECRETKEY">
+                            <span class="password-toggle" onclick="togglePassword('assetsSk')">👁�?/span>
                         </div>
                     </div>
                 </div>
                 <div class="api-config-hint" style="display:none;">
-                    当前版本使用本地 Python 服务代理 Ark 请求。请先运行 <code>python app.py</code>，再通过
-                    <code>http://127.0.0.1:18765</code> 打开页面；默认端口使用较少见的 <code>18765</code>，尽量避开常见本地服务冲突。
-                    素材库拉取使用的是火山引擎 <code>AK/SK</code>，不是 Seedance 生成接口里的 <code>API Key</code>。
+                    当前版本使用本地 Python 服务代理 Ark 请求。请先运�?<code>python app.py</code>，再通过
+                    <code>http://127.0.0.1:18765</code> 打开页面；默认端口使用较少见�?<code>18765</code>，尽量避开常见本地服务冲突�?
+                    素材库拉取使用的是火山引�?<code>AK/SK</code>，不�?Seedance 生成接口里的 <code>API Key</code>�?
                 </div>
                 <div class="input-row">
                     <div class="form-group" style="flex: 2;">
                         <label>Seedance 2.0 Endpoint 替换</label>
-                        <input type="text" id="seedance20Endpoint" placeholder="留空则使用 doubao-seedance-2-0-260128">
+                        <input type="text" id="seedance20Endpoint" placeholder="留空则使�?doubao-seedance-2-0-260128">
                     </div>
                     <div class="form-group" style="flex: 2;">
                         <label>Seedance 2.0 Fast Endpoint 替换</label>
-                        <input type="text" id="seedance20FastEndpoint" placeholder="留空则使用 doubao-seedance-2-0-fast-260128">
+                        <input type="text" id="seedance20FastEndpoint" placeholder="留空则使�?doubao-seedance-2-0-fast-260128">
                     </div>
                 </div>
                 <div class="input-row">
@@ -2764,7 +2764,7 @@
                         <input type="text" id="imageHostUploadUrl" value="https://img.scdn.io/api/v1.php" readonly>
                     </div>
                     <div class="form-group">
-                        <label>轮询间隔（秒）</label>
+                        <label>轮询间隔（秒�?/label>
                         <input type="number" id="pollInterval" value="10" min="5" max="300">
                     </div>
                     <div class="form-group">
@@ -2776,10 +2776,10 @@
                         <input type="number" id="historyLimitConfig" value="30" min="1" max="50" onchange="saveAllConfigs()">
                     </div>
                     <div class="form-group">
-                        <label>完成后自动下载</label>
+                        <label>完成后自动下�?/label>
                         <select id="autoDownload" onchange="saveAllConfigs()">
                             <option value="0">关闭</option>
-                            <option value="1" selected>开启</option>
+                            <option value="1" selected>开�?/option>
                         </select>
                     </div>
                 </div>
@@ -2789,7 +2789,7 @@
                         📂 导入配置
                         <input type="file" accept=".json" style="display: none;" onchange="importConfig(event)">
                     </label>
-                    <button class="btn btn-danger btn-sm" onclick="clearAllConfigs()">🗑️ 清除所有配置</button>
+                    <button class="btn btn-danger btn-sm" onclick="clearAllConfigs()">🗑�?清除所有配�?/button>
                 </div>
             </div>
             <div class="modal-footer">
@@ -2799,27 +2799,27 @@
         </div>
     </div>
 
-    <!-- 创建资源库 Group 弹窗 -->
+    <!-- 创建资源�?Group 弹窗 -->
     <div class="modal-backdrop" id="createGroupModal" onclick="if(event.target===this)closeCreateGroupModal()">
         <div class="modal-dialog small-modal">
             <div class="modal-header">
-                <span class="modal-title">➕ 创建素材资产组合</span>
+                <span class="modal-title">�?创建素材资产组合</span>
                 <button class="modal-close" onclick="closeCreateGroupModal()">×</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
                     <label>名称 <span style="color: var(--danger);">*</span></label>
-                    <input type="text" id="newGroupName" placeholder="例如：古风男主" maxlength="64">
+                    <input type="text" id="newGroupName" placeholder="例如：古风男�? maxlength="64">
                 </div>
                 <div class="form-group">
                     <label>描述</label>
-                    <input type="text" id="newGroupDesc" placeholder="可选描述" maxlength="300">
+                    <input type="text" id="newGroupDesc" placeholder="可选描�? maxlength="300">
                 </div>
                 <div class="form-group">
-                    <label>项目名</label>
+                    <label>项目�?/label>
                     <input type="text" id="newGroupProject" value="default" placeholder="default">
                 </div>
-                <div class="form-hint">首次创建需在控制台签署授权函。类型固定为 AIGC。</div>
+                <div class="form-hint">首次创建需在控制台签署授权函。类型固定为 AIGC�?/div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeCreateGroupModal()">取消</button>
@@ -2837,14 +2837,14 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Group ID 或 Asset ID</label>
-                    <input type="text" id="pullId" placeholder="输入 group-xxx 或 asset-xxx">
+                    <label>Group ID �?Asset ID</label>
+                    <input type="text" id="pullId" placeholder="输入 group-xxx �?asset-xxx">
                 </div>
                 <div class="form-group">
-                    <label>项目名</label>
+                    <label>项目�?/label>
                     <input type="text" id="pullProject" value="default">
                 </div>
-                <div class="form-hint">输入 Group ID 会拉取该组合下所有素材；输入 Asset ID 会拉取单个素材并自动归属到对应组合。</div>
+                <div class="form-hint">输入 Group ID 会拉取该组合下所有素材；输入 Asset ID 会拉取单个素材并自动归属到对应组合�?/div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closePullModal()">取消</button>
@@ -2863,9 +2863,9 @@
             <div class="modal-body">
                 <div id="deleteModalText">请选择删除方式</div>
                 <div class="delete-options">
-                    <button class="btn btn-secondary delete-option-btn" onclick="confirmDelete('local')">🗑️ 仅删除本地记录</button>
-                    <button class="btn btn-danger delete-option-btn" onclick="confirmDelete('cloud')">☁️ 删除本地和云端</button>
-                    <button class="btn btn-cancel-ghost delete-option-btn" onclick="closeDeleteModal()">❌ 取消操作</button>
+                    <button class="btn btn-secondary delete-option-btn" onclick="confirmDelete('local')">🗑�?仅删除本地记�?/button>
+                    <button class="btn btn-danger delete-option-btn" onclick="confirmDelete('cloud')">☁️ 删除本地和云�?/button>
+                    <button class="btn btn-cancel-ghost delete-option-btn" onclick="closeDeleteModal()">�?取消操作</button>
                 </div>
             </div>
         </div>
@@ -3040,15 +3040,15 @@
         function formatNetworkLogDetails(requestInfo, responseInfo = {}) {
             const lines = [
                 `请求: ${requestInfo.method} ${requestInfo.url}`,
-                '请求头:',
+                '请求�?',
                 JSON.stringify(requestInfo.headers || {}, null, 2)
             ];
             if (requestInfo.bodyText) {
-                lines.push('请求体:');
+                lines.push('请求�?');
                 lines.push(requestInfo.bodyText);
             }
             if (responseInfo.status !== undefined) {
-                lines.push(`响应状态: ${responseInfo.status}${responseInfo.statusText ? ` ${responseInfo.statusText}` : ''}`);
+                lines.push(`响应状�? ${responseInfo.status}${responseInfo.statusText ? ` ${responseInfo.statusText}` : ''}`);
             }
             if (responseInfo.errorMessage) {
                 lines.push(`错误: ${responseInfo.errorMessage}`);
@@ -3086,12 +3086,12 @@
 
         window.fetch = trackedFetch;
 
-        // 资源库数据
+        // 资源库数�?
         let assetLibrary = { groups: [] };
         let pendingDeleteAssetId = null;
         let activeAssetUploadGroupId = null;
 
-        // ==================== 初始化 ====================
+        // ==================== 初始�?====================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Seedance Video Generator 初始化中...');
             loadLogs();
@@ -3230,7 +3230,7 @@
             pendingDeleteAssetId = assetId;
             const asset = findLibraryAsset(assetId);
             document.getElementById('deleteModalText').textContent = asset
-                ? `确定要删除素材 "${asset.name || asset.id}" 吗？`
+                ? `确定要删除素�?"${asset.name || asset.id}" 吗？`
                 : '确定要删除该素材吗？';
             document.getElementById('deleteModal').classList.add('active');
         }
@@ -3243,7 +3243,7 @@
             if (!assetId) { closeDeleteModal(); return; }
             if (mode === 'local') {
                 removeLibraryAsset(assetId);
-                addLog('info', '已删除本地素材记录', assetId);
+                addLog('info', '已删除本地素材记�?, assetId);
             } else if (mode === 'cloud') {
                 try {
                     await callAssetsApi('DeleteAsset', { Id: assetId, ProjectName: findLibraryAsset(assetId)?.projectName || 'default' });
@@ -3339,7 +3339,7 @@
             const ak = (document.getElementById('assetsAk')?.value || '').trim();
             const sk = (document.getElementById('assetsSk')?.value || '').trim();
             if (!ak || !sk) {
-                throw new Error('请先在设置中配置 Assets API 的 AK/SK');
+                throw new Error('请先在设置中配置 Assets API �?AK/SK');
             }
             const region = 'cn-beijing';
             const version = '2024-01-01';
@@ -3357,7 +3357,7 @@
             if (!resp.ok) {
                 throw new Error(data?.error?.message || data?.message || `HTTP ${resp.status}`);
             }
-            // 代理会原样返回上游响应；若上游返回错误可能在 Result 里
+            // 代理会原样返回上游响应；若上游返回错误可能在 Result �?
             return data;
         }
 
@@ -3366,7 +3366,7 @@
             const name = document.getElementById('newGroupName').value.trim();
             const desc = document.getElementById('newGroupDesc').value.trim();
             const project = document.getElementById('newGroupProject').value.trim() || 'default';
-            if (!name) { alert('请输入名称'); return; }
+            if (!name) { alert('请输入名�?); return; }
             try {
                 const resp = await callAssetsApi('CreateAssetGroup', {
                     Name: name,
@@ -3399,7 +3399,7 @@
         async function doPull() {
             const rawId = document.getElementById('pullId').value.trim();
             const project = document.getElementById('pullProject').value.trim() || 'default';
-            if (!rawId) { alert('请输入 ID'); return; }
+            if (!rawId) { alert('请输�?ID'); return; }
             try {
                 if (rawId.startsWith('group-')) {
                     // 拉取 group 信息
@@ -3409,7 +3409,7 @@
                     if (!group) {
                         group = {
                             id: rawId,
-                            name: groupData?.Name || '未命名组合',
+                            name: groupData?.Name || '未命名组�?,
                             description: groupData?.Description || '',
                             projectName: project,
                             assets: []
@@ -3446,17 +3446,17 @@
                 } else if (rawId.startsWith('asset-') || rawId.startsWith('Asset-')) {
                     const assetResp = await callAssetsApi('GetAsset', { Id: rawId, ProjectName: project });
                     const item = assetResp?.Result || assetResp;
-                    if (!item?.GroupId) throw new Error('Asset 信息中缺少 GroupId');
+                    if (!item?.GroupId) throw new Error('Asset 信息中缺�?GroupId');
                     // 拉取对应 group
                     let group = assetLibrary.groups.find(g => g.id === item.GroupId);
                     if (!group) {
                         try {
                             const groupResp = await callAssetsApi('GetAssetGroup', { Id: item.GroupId, ProjectName: project });
                             const gd = groupResp?.Result || groupResp;
-                            group = { id: item.GroupId, name: gd?.Name || '未命名组合', description: gd?.Description || '', projectName: project, assets: [] };
+                            group = { id: item.GroupId, name: gd?.Name || '未命名组�?, description: gd?.Description || '', projectName: project, assets: [] };
                             assetLibrary.groups.push(group);
                         } catch (e) {
-                            group = { id: item.GroupId, name: '未命名组合', description: '', projectName: project, assets: [] };
+                            group = { id: item.GroupId, name: '未命名组�?, description: '', projectName: project, assets: [] };
                             assetLibrary.groups.push(group);
                         }
                     }
@@ -3466,7 +3466,7 @@
                     closePullModal();
                     addLog('success', '拉取素材成功', rawId);
                 } else {
-                    alert('ID 格式不正确，应以 group- 或 asset- 开头');
+                    alert('ID 格式不正确，应以 group- �?asset- 开�?);
                 }
             } catch (e) {
                 alert('拉取失败: ' + e.message);
@@ -3493,7 +3493,7 @@
             } else {
                 group.assets.push(asset);
             }
-            // 如果需要轮询
+            // 如果需要轮�?
             if (asset.status === 'Processing') {
                 startAssetPolling(asset.id, group.id);
             }
@@ -3605,7 +3605,7 @@
                 addLog('warning', '不支持的文件类型', file.name);
                 return;
             }
-            // 1. 上传图片到公共图床获取公共 URL
+            // 1. 上传图片到公共图床获取公�?URL
             const tempAsset = {
                 id: 'temp-' + Date.now() + '-' + Math.floor(Math.random()*1000),
                 name: file.name.replace(/\.[^/.]+$/, ''),
@@ -3632,7 +3632,7 @@
                     ProjectName: group.projectName || 'default'
                 });
                 const assetId = resp?.Result?.Id || resp?.Id;
-                if (!assetId) throw new Error('创建 Asset 未返回 ID');
+                if (!assetId) throw new Error('创建 Asset 未返�?ID');
                 // 替换临时 asset
                 const idx = group.assets.findIndex(a => a.id === tempAsset.id);
                 if (idx !== -1) {
@@ -3648,7 +3648,7 @@
                     saveAssetLibrary();
                     renderAssetLibrary();
                     startAssetPolling(assetId, group.id);
-                    addLog('info', '开始上传素材', `${assetId} -> ${group.name}`);
+                    addLog('info', '开始上传素�?, `${assetId} -> ${group.name}`);
                 }
             } catch (e) {
                 tempAsset.status = 'Failed';
@@ -3759,12 +3759,12 @@
             }
             const imageUrl = result?.url || result?.data?.url || '';
             if (!/^https?:\/\//i.test(imageUrl)) {
-                throw new Error(result?.message || '图床未返回图片 URL');
+                throw new Error(result?.message || '图床未返回图�?URL');
             }
             return imageUrl;
         }
 
-        // ==================== 资源库：轮询状态 ====================
+        // ==================== 资源库：轮询状�?====================
         const assetPollTimers = new Map();
         function startAssetPolling(assetId, groupId) {
             if (assetPollTimers.has(assetId)) return;
@@ -3803,7 +3803,7 @@
             const container = document.getElementById('assetLibraryList');
             if (!container) return;
             if (assetLibrary.groups.length === 0) {
-                container.innerHTML = '<div class="empty-state">暂无资源库，请先创建或拉取</div>';
+                container.innerHTML = '<div class="empty-state">暂无资源库，请先创建或拉�?/div>';
                 return;
             }
             container.innerHTML = assetLibrary.groups.map(g => {
@@ -3815,12 +3815,12 @@
                             ${a.status !== 'Active' ? `<div class="asset-status-badge ${statusClass}">${a.status}</div>` : ''}
                             ${thumb}
                             <div class="asset-overlay">
-                                <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(a.name || '未命名')}</div>
+                                <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(a.name || '未命�?)}</div>
                                 <div style="font-size:10px;opacity:.85;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
                                      class="copyable-id" onclick="event.stopPropagation();copyText('${a.id}')" title="点击复制 ID">${a.id}</div>
                                 <div class="asset-actions">
-                                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();addAssetToGenerator('${a.id}')">➕ 添加</button>
-                                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();openDeleteModal('${a.id}')">🗑️</button>
+                                    <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();addAssetToGenerator('${a.id}')">�?添加</button>
+                                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();openDeleteModal('${a.id}')">🗑�?/button>
                                 </div>
                             </div>
                         </div>
@@ -3841,7 +3841,7 @@
                             accept="image/*,video/*,audio/*"
                             onclick="event.stopPropagation()"
                             onchange="handleAssetGroupFileInput(event, '${g.id}')">
-                        <span class="add-icon">➕</span>
+                        <span class="add-icon">�?/span>
                         <div class="upload-entry-title">添加素材</div>
                         <div class="upload-entry-hint">拖拽 / 点击上传 / Ctrl+V 粘贴</div>
                     </div>
@@ -3852,19 +3852,19 @@
                         <div class="group-header">
                             <div class="group-title-row" onclick="setActiveAssetUploadGroup('${g.id}')">
                                 <button class="group-toggle" onclick="event.stopPropagation();toggleGroupCollapsed('${g.id}')" title="${isCollapsed ? '展开分组' : '收起分组'}">
-                                    ${isCollapsed ? '▸' : '▾'}
+                                    ${isCollapsed ? '�? : '�?}
                                 </button>
-                                <span class="group-name">${escapeHtml(g.name || '未命名')}</span>
+                                <span class="group-name">${escapeHtml(g.name || '未命�?)}</span>
                             </div>
                             <div class="group-actions">
-                                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();refreshAssetGroup('${g.id}')" title="刷新当前分组">⟳</button>
-                                <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteGroup('${g.id}')" title="删除组合">🗑️</button>
+                                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();refreshAssetGroup('${g.id}')" title="刷新当前分组">�?/button>
+                                <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteGroup('${g.id}')" title="删除组合">🗑�?/button>
                             </div>
                         </div>
                         <div class="group-content ${isCollapsed ? 'collapsed' : ''}">
                             <div class="group-meta">
                                 <span class="copyable-id" onclick="copyText('${g.id}')" title="点击复制">${g.id}</span>
-                                <span>${g.assets.length} 个素材</span>
+                                <span>${g.assets.length} 个素�?/span>
                             </div>
                             <div class="asset-grid">
                                 ${assetsHtml}
@@ -3879,7 +3879,7 @@
         function getAssetThumbHtml(asset) {
             if (asset.assetType === 'Image' && asset.url) {
                 return `<img src="${asset.url}" class="asset-thumb" alt="" onerror="this.style.display='none';this.parentElement.querySelector('.asset-thumb-placeholder').style.display='flex';">` +
-                       `<div class="asset-thumb-placeholder" style="display:none">🖼️</div>`;
+                       `<div class="asset-thumb-placeholder" style="display:none">🖼�?/div>`;
             }
             if (asset.assetType === 'Video') {
                 return `<div class="asset-thumb-placeholder">🎬</div>`;
@@ -3898,13 +3898,13 @@
             const asset = findLibraryAsset(assetId);
             if (!asset) return;
             if (asset.status !== 'Active') {
-                alert('该素材尚未处理完成，请稍后再试');
+                alert('该素材尚未处理完成，请稍后再�?);
                 return;
             }
             const type = asset.assetType === 'Image' ? 'image' : asset.assetType === 'Video' ? 'video' : 'audio';
             const url = `asset://${asset.id}`;
             addAsset(type, url, asset.name || asset.id);
-            addLog('info', '已添加素材到生成器', `${asset.name || asset.id} (${type})`);
+            addLog('info', '已添加素材到生成�?, `${asset.name || asset.id} (${type})`);
         }
 
         function deleteGroup(groupId) {
@@ -3919,7 +3919,7 @@
 
         function copyText(text) {
             navigator.clipboard.writeText(text).then(() => {
-                addLog('info', '已复制到剪贴板', text);
+                addLog('info', '已复制到剪贴�?, text);
             });
         }
 
@@ -3960,7 +3960,7 @@
         }
 
         function getDefaultImageBaseUrl() {
-            return 'https://api.wanwuhuanxin.cn';
+            return '__API_BASE_URL__';
         }
 
         function normalizeImageAspectRatio(value) {
@@ -3973,7 +3973,7 @@
                 '2048x1536': '4:3',
                 '1536x2048': '3:4'
             };
-            const normalizedValue = String(value || 'auto').trim().replace(/：/g, ':');
+            const normalizedValue = String(value || 'auto').trim().replace(/�?g, ':');
             if (!normalizedValue || normalizedValue === 'auto') return 'auto';
             const ratioValue = sizeToRatioMap[normalizedValue] || normalizedValue;
             const allowedRatios = ['21:9', '16:9', '4:3', '3:2', '1:1', '2:3', '3:4', '9:16', '9:21'];
@@ -4142,16 +4142,16 @@
         function formatFetchError(error, targetUrl) {
             if (error && typeof error.message === 'string' && error.message.includes('Failed to fetch')) {
                 if (targetUrl.startsWith(getServiceOrigin())) {
-                    return `无法连接到 ${targetUrl}。请先运行 python app.py，并通过 ${getServiceOrigin()} 打开页面。若服务已启动，请检查端口 ${LOCAL_SERVICE_PORT} 是否被占用。`;
+                    return `无法连接�?${targetUrl}。请先运�?python app.py，并通过 ${getServiceOrigin()} 打开页面。若服务已启动，请检查端�?${LOCAL_SERVICE_PORT} 是否被占用。`;
                 }
-                return `无法连接到 ${targetUrl}。当前版本默认通过本地 Python 服务代理请求；若你手动改成了外部直连地址，请检查目标接口、网络策略和浏览器拦截情况。`;
+                return `无法连接�?${targetUrl}。当前版本默认通过本地 Python 服务代理请求；若你手动改成了外部直连地址，请检查目标接口、网络策略和浏览器拦截情况。`;
             }
             return error?.message || '未知错误';
         }
 
         function formatFetchError(error, targetUrl) {
             if (error && typeof error.message === 'string' && error.message.includes('Failed to fetch')) {
-                return `无法连接到 ${targetUrl}。这通常是浏览器直连时被 CORS、插件策略、企业网络、证书或目标站点可达性拦截。`;
+                return `无法连接�?${targetUrl}。这通常是浏览器直连时被 CORS、插件策略、企业网络、证书或目标站点可达性拦截。`;
             }
             return error?.message || '未知错误';
         }
@@ -4211,7 +4211,7 @@
 
             const estimateEl = document.getElementById('costEstimate');
             if (estimateEl) {
-                estimateEl.textContent = `预估: ${Math.round(tokens).toLocaleString()} Tokens (约 ${cost.toFixed(3)} 元)`;
+                estimateEl.textContent = `预估: ${Math.round(tokens).toLocaleString()} Tokens (�?${cost.toFixed(3)} �?`;
             }
         }
 
@@ -4226,7 +4226,7 @@
         function getTaskKindLabel(taskOrRecord) {
             const kind = getTaskKind(taskOrRecord);
             if (kind === 'image_generate') return '生图';
-            return kind === 'subtitle_erase' ? '擦字幕' : '生成';
+            return kind === 'subtitle_erase' ? '擦字�? : '生成';
         }
 
         function buildTaskKindBadge(taskOrRecord) {
@@ -4370,14 +4370,14 @@
                     alert('配置导入成功！页面将刷新...');
                     location.reload();
                 } catch (err) {
-                    alert('配置文件格式错误：' + err.message);
+                    alert('配置文件格式错误�? + err.message);
                 }
             };
             reader.readAsText(file);
         }
 
         function clearAllConfigs() {
-            if (confirm('确定要清除所有配置吗？')) {
+            if (confirm('确定要清除所有配置吗�?)) {
                 localStorage.removeItem('seedance_app_config');
                 localStorage.removeItem('seedance_history_config');
                 localStorage.removeItem('seedance_history');
@@ -4479,18 +4479,18 @@
             const listEl = document.getElementById('mentionPopupList');
 
             if (allAssets.length === 0) {
-                listEl.innerHTML = '<div class="mention-popup-empty">暂无素材，请先上传</div>';
+                listEl.innerHTML = '<div class="mention-popup-empty">暂无素材，请先上�?/div>';
             } else {
                 listEl.innerHTML = allAssets.map((asset, index) => {
                     const previewMeta = getPreviewableAsset(asset);
                     const iconHtml = asset.type === 'image'
-                        ? (isAssetReferenceUrl(asset.url) ? '🖼️' : `<img src="${asset.url}" alt="">`)
+                        ? (isAssetReferenceUrl(asset.url) ? '🖼�? : `<img src="${asset.url}" alt="">`)
                         : asset.type === 'video' ? '🎬' : '🎵';
                     const tagName = asset.type === 'image' ? 'img' : asset.type === 'video' ? 'video' : 'audio';
                     const mentionIconHtml = asset.type === 'image'
                         ? (previewMeta.isPreviewable
-                            ? `<img src="${previewMeta.resolvedUrl}" alt="" onerror="this.style.display='none'; this.replaceWith(document.createTextNode('🖼️'));">`
-                            : '🖼️')
+                            ? `<img src="${previewMeta.resolvedUrl}" alt="" onerror="this.style.display='none'; this.replaceWith(document.createTextNode('🖼�?));">`
+                            : '🖼�?)
                         : asset.type === 'video' ? '🎬' : '🎵';
 
                     return `
@@ -4753,7 +4753,7 @@
             if (!asset || !asset.url) return;
             const previewMeta = getPreviewableAsset(asset);
             if (!previewMeta.isPreviewable) {
-                alert('这个 ASSET_ID 还没有可预览的素材详情。请先在左侧资源库拉取该素材，或等待素材处理完成。');
+                alert('这个 ASSET_ID 还没有可预览的素材详情。请先在左侧资源库拉取该素材，或等待素材处理完成�?);
                 return;
             }
 
@@ -4816,7 +4816,7 @@
                         : type === 'video' && previewMeta.isPreviewable
                             ? `<video src="${previewMeta.resolvedUrl}" muted playsinline preload="metadata"></video>`
                             : type === 'image'
-                                ? '🖼️'
+                                ? '🖼�?
                                 : type === 'video'
                                     ? '🎬'
                                     : '🎵';
@@ -4875,7 +4875,7 @@
             if (!url) return;
 
             if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('asset://')) {
-                alert('URL 必须以 http://、https:// 或 asset:// 开头');
+                alert('URL 必须�?http://、https:// �?asset:// 开�?);
                 return;
             }
 
@@ -4926,10 +4926,10 @@
             if (container) {
                 const uploadingHtml = `
                     <div class="media-item" id="${tempId}" style="border-color: var(--warning);">
-                        <div class="media-preview" style="font-size: 14px;">⏳</div>
+                        <div class="media-preview" style="font-size: 14px;">�?/div>
                         <div class="media-info">
-                            <div class="media-name">${file.name || '上传中...'}</div>
-                            <div class="media-status" style="color: var(--warning);">上传中...</div>
+                            <div class="media-name">${file.name || '上传�?..'}</div>
+                            <div class="media-status" style="color: var(--warning);">上传�?..</div>
                         </div>
                     </div>
                 `;
@@ -4997,7 +4997,7 @@
             const url = input.value.trim();
             if (!url) return;
             if (!/^https?:\/\//i.test(url)) {
-                alert('参考图 URL 必须以 http:// 或 https:// 开头');
+                alert('参考图 URL 必须�?http:// �?https:// 开�?);
                 return;
             }
             imageReferenceAssets.push({
@@ -5050,7 +5050,7 @@
             });
         }
 
-        // 优先 base64：img+canvas 转 data URL（不受 CORS 限制）
+        // 优先 base64：img+canvas �?data URL（不�?CORS 限制�?
         function urlToDataUrl(url) {
             return new Promise((resolve) => {
                 const img = new Image();
@@ -5072,7 +5072,7 @@
 
         function dataUrlToBlob(dataUrl) {
             const [meta, base64Data] = String(dataUrl || '').split(',');
-            if (!base64Data) throw new Error('无效的 base64 图片');
+            if (!base64Data) throw new Error('无效�?base64 图片');
             const mimeMatch = meta.match(/data:([^;]+);base64/);
             const mime = mimeMatch ? mimeMatch[1] : 'image/png';
             const binary = atob(base64Data);
@@ -5185,7 +5185,7 @@
             const responseFormat = document.getElementById('imageResponseFormat').value || 'url';
             const generationCount = getImageGenerationCount();
 
-            if (!imageApiKey) { alert('请输入生图 API Key'); return; }
+            if (!imageApiKey) { alert('请输入生�?API Key'); return; }
             if (!prompt) { alert('请输入图片提示词'); return; }
 
             const submitBtn = document.getElementById('imageSubmitBtn');
@@ -5218,7 +5218,7 @@
                     };
                     if (referencePayload.length) body.image = referencePayload;
 
-                    let requestLog = `第 ${attempt}/${generationCount} 次\nPOST ${baseUrl}/v1/images/generations\nHeaders:\n  Content-Type: application/json\n  Authorization: Bearer ${imageApiKey.substring(0, 10)}...\nBody:\n${safeStringifyForLog(body)}\n\n调试 curl（大字段已省略）：\n${buildImageCurlCommand(baseUrl, imageApiKey, body)}`;
+                    let requestLog = `�?${attempt}/${generationCount} 次\nPOST ${baseUrl}/v1/images/generations\nHeaders:\n  Content-Type: application/json\n  Authorization: Bearer ${imageApiKey.substring(0, 10)}...\nBody:\n${safeStringifyForLog(body)}\n\n调试 curl（大字段已省略）：\n${buildImageCurlCommand(baseUrl, imageApiKey, body)}`;
                     let apiResult;
 
                     try {
@@ -5230,8 +5230,8 @@
                             usedPublicFallback = true;
                             referencePayload = await getPublicFallbackPayload();
                             body = { ...body, image: referencePayload };
-                            requestLog += `\n\n[自动重试] base64 参考图失败，已改用 SCDN 公网 URL。\n重试请求体:\n${safeStringifyForLog(body)}`;
-                            addLog('warning', '图片生成已切换公网图床重试', error.message, {
+                            requestLog += `\n\n[自动重试] base64 参考图失败，已改用 SCDN 公网 URL。\n重试请求�?\n${safeStringifyForLog(body)}`;
+                            addLog('warning', '图片生成已切换公网图床重�?, error.message, {
                                 taskKind: 'image_generate',
                                 generationAttempt: attempt,
                                 generationCount
@@ -5242,7 +5242,7 @@
                         const responseLogText = `Status: ${apiResult.response.status}\nBody:\n${safeStringifyForLog(apiResult.result)}`;
                         const imageResults = extractImageResults(apiResult.result);
                         if (!imageResults.length) {
-                            throw new Error('图片接口已返回，但未找到 url 或 b64_json 图片结果');
+                            throw new Error('图片接口已返回，但未找到 url �?b64_json 图片结果');
                         }
 
                         for (const result of imageResults) {
@@ -5301,7 +5301,7 @@
                         });
 
                         completedCount += 1;
-                        addLog('success', `图片生成成功: ${taskId}`, `第 ${attempt}/${generationCount} 次\n模型: ${IMAGE_MODEL_ID}\n尺寸: ${aspectRatio !== 'auto' ? aspectRatioToPixelSize(aspectRatio) : '自动'}\n提示词: ${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`, {
+                        addLog('success', `图片生成成功: ${taskId}`, `�?${attempt}/${generationCount} 次\n模型: ${IMAGE_MODEL_ID}\n尺寸: ${aspectRatio !== 'auto' ? aspectRatioToPixelSize(aspectRatio) : '自动'}\n提示�? ${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`, {
                             taskId,
                             taskKind: 'image_generate',
                             modelId: IMAGE_MODEL_ID,
@@ -5313,11 +5313,11 @@
                         return { taskId, primaryResult, attempt };
                     } finally {
                         finishedCount += 1;
-                        submitBtn.innerHTML = `⏳ 并发生成中... ${finishedCount}/${generationCount}`;
+                        submitBtn.innerHTML = `�?并发生成�?.. ${finishedCount}/${generationCount}`;
                     }
                 };
 
-                submitBtn.innerHTML = `⏳ 并发生成中... 0/${generationCount}`;
+                submitBtn.innerHTML = `�?并发生成�?.. 0/${generationCount}`;
                 const attempts = Array.from({ length: generationCount }, (_, index) => runImageGenerationAttempt(index + 1));
                 const settledResults = await Promise.allSettled(attempts);
                 const fulfilledResults = settledResults
@@ -5343,7 +5343,7 @@
                 }
             } catch (error) {
                 const errMsg = formatFetchError(error, `${baseUrl}/v1/images/generations`);
-                alert(`图片生成失败: ${errMsg}${completedCount > 0 ? `\n已完成 ${completedCount}/${generationCount} 次。` : ''}`);
+                alert(`图片生成失败: ${errMsg}${completedCount > 0 ? `\n已完�?${completedCount}/${generationCount} 次。` : ''}`);
                 addLog('error', '图片生成失败', errMsg, {
                     taskKind: 'image_generate',
                     modelId: IMAGE_MODEL_ID,
@@ -5380,7 +5380,7 @@
             }
         });
 
-        // ==================== 获取提示词文本 ====================
+        // ==================== 获取提示词文�?====================
         function getPromptText() {
             let text = '';
 
@@ -5392,7 +5392,7 @@
                         const type = node.dataset.type;
                         const index = node.dataset.index;
                         const typeName = type === 'image' ? '图片' : type === 'video' ? '视频' : '音频';
-                        text += `（${typeName}${index}）`;
+                        text += `�?{typeName}${index}）`;
                     } else if (node.tagName === 'BR') {
                         text += '\n';
                     } else {
@@ -5410,14 +5410,14 @@
             return text.replace(/\n{3,}/g, '\n\n').trim();
         }
 
-        // ==================== 任务提交（多任务） ====================
+        // ==================== 任务提交（多任务�?====================
         async function submitTask() {
             const apiKey = document.getElementById('apiKey').value.trim();
             const baseUrl = getEffectiveBaseUrl();
             const prompt = getPromptText();
             const modelId = getSelectedModelId();
 
-            if (!apiKey) { alert('请输入 API Key'); return; }
+            if (!apiKey) { alert('请输�?API Key'); return; }
             if (!prompt) { alert('请输入提示词'); return; }
             if (!modelId) {
                 alert('请选择模型');
@@ -5426,7 +5426,7 @@
 
             const submitBtn = document.querySelector('button[onclick="submitTask()"]');
             const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span>⏳ 提交生成中...</span>';
+            submitBtn.innerHTML = '<span>�?提交生成�?..</span>';
             submitBtn.disabled = true;
 
             const content = [{ type: 'text', text: prompt }];
@@ -5492,7 +5492,7 @@
 
                 registerTaskRecord(taskRecord);
 
-                addLog('info', `任务提交成功: ${taskId}`, `模型: ${modelId}\n分辨率: ${body.resolution}\n比例: ${body.ratio}\n时长: ${body.duration}s\n提示词: ${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`, {
+                addLog('info', `任务提交成功: ${taskId}`, `模型: ${modelId}\n分辨�? ${body.resolution}\n比例: ${body.ratio}\n时长: ${body.duration}s\n提示�? ${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`, {
                     taskId,
                     taskKind: 'generate',
                     modelId,
@@ -5520,8 +5520,8 @@
             const apiKey = document.getElementById('apiKey').value.trim();
             const baseUrl = getSubtitleEraseBaseUrl();
 
-            if (!apiKey) { alert('请输入 API Key'); return; }
-            if (!videoUrl) { alert('缺少可用的视频 URL'); return; }
+            if (!apiKey) { alert('请输�?API Key'); return; }
+            if (!videoUrl) { alert('缺少可用的视�?URL'); return; }
 
             const body = { video_url: videoUrl };
             const requestLog = `POST ${baseUrl}/ark-tools/ark-erase-video-subtitle-pro\nHeaders:\n  Authorization: Bearer ${apiKey.substring(0, 10)}...\nBody:\n${JSON.stringify(body, null, 2)}`;
@@ -5558,7 +5558,7 @@
                 });
 
                 registerTaskRecord(taskRecord);
-                addLog('info', `字幕擦除任务提交成功: ${result.task_id}`, `源视频: ${videoUrl}`, {
+                addLog('info', `字幕擦除任务提交成功: ${result.task_id}`, `源视�? ${videoUrl}`, {
                     taskId: result.task_id,
                     taskKind: 'subtitle_erase',
                     sourceVideoUrl: videoUrl
@@ -5577,7 +5577,7 @@
             const history = JSON.parse(localStorage.getItem('seedance_history') || '[]');
             const item = history[index];
             if (!item || !item.videoUrl) {
-                alert('找不到可用于擦除字幕的视频 URL');
+                alert('找不到可用于擦除字幕的视�?URL');
                 return;
             }
             await submitSubtitleEraseTask(item.videoUrl, item);
@@ -5731,7 +5731,7 @@
                 const hasVideo = task.assets && task.assets.videos && task.assets.videos.length > 0;
                 const usageInfo = calculateCostFromUsage(result.usage, task.params.model, hasVideo);
                 if (usageInfo.tokens !== null) {
-                    addLog('success', `Token 消耗查询成功: ${taskId}`, `实际 Token: ${usageInfo.tokens.toLocaleString()}\n费用: ${usageInfo.cost} 元`, {
+                    addLog('success', `Token 消耗查询成�? ${taskId}`, `实际 Token: ${usageInfo.tokens.toLocaleString()}\n费用: ${usageInfo.cost} 元`, {
                         taskId,
                         taskKind: 'generate',
                         tokens: usageInfo.tokens,
@@ -5750,7 +5750,7 @@
                         pricePerMillion = hasVideo ? 28 : 46;
                     }
                     const estimatedCost = ((estimatedTokens / 1000000) * pricePerMillion).toFixed(4);
-                    addLog('warning', `Token 消耗未返回: ${taskId}`, `API 未返回 usage 字段，使用预估:\n预估 Token: ${Math.round(estimatedTokens).toLocaleString()}\n预估费用: ${estimatedCost} 元`, {
+                    addLog('warning', `Token 消耗未返回: ${taskId}`, `API 未返�?usage 字段，使用预�?\n预估 Token: ${Math.round(estimatedTokens).toLocaleString()}\n预估费用: ${estimatedCost} 元`, {
                         taskId,
                         taskKind: 'generate',
                         tokens: Math.round(estimatedTokens),
@@ -5773,7 +5773,7 @@
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                console.log(`[自动下载] 已触发下载: ${a.download}`);
+                console.log(`[自动下载] 已触发下�? ${a.download}`);
             } catch (err) {
                 console.error('[自动下载] 失败:', err);
             }
@@ -5781,12 +5781,12 @@
 
         // ==================== 任务记录面板 ====================
         function getTaskStatusText(status) {
-            const statusText = { running: '运行中', succeeded: '已完成', failed: '已失败', pending: '排队中' };
+            const statusText = { running: '运行�?, succeeded: '已完�?, failed: '已失�?, pending: '排队�? };
             return statusText[status] || status;
         }
 
         function getTaskStatusEmoji(status) {
-            const statusEmoji = { running: '⏳', succeeded: '✅', failed: '❌', pending: '🕐' };
+            const statusEmoji = { running: '�?, succeeded: '�?, failed: '�?, pending: '🕐' };
             return statusEmoji[status] || '🕐';
         }
 
@@ -5831,10 +5831,10 @@
                     <div class="task-record-actions" style="margin-bottom: 8px;">
                         ${resultUrl ? `<button class="btn btn-primary btn-sm" onclick="previewTaskResult('${task.id}')">▶️ 预览</button>` : ''}
                         <button class="btn btn-secondary btn-sm" onclick="toggleTaskDebug('${task.id}')" id="task-debug-toggle-${task.id}">${task.isDebugOpen ? '📂 收起调试' : '🐛 调试'}</button>
-                        <button class="btn btn-danger btn-sm" onclick="removeTaskRecord('${task.id}')">🗑️</button>
+                        <button class="btn btn-danger btn-sm" onclick="removeTaskRecord('${task.id}')">🗑�?/button>
                     </div>
                     <div class="task-debug-content" id="debug-${task.id}" style="display: ${task.isDebugOpen ? 'block' : 'none'}; background: #1a1a1a; color: #00ff88; font-family: monospace; font-size: 11px; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto;">
-                        <div style="color: #74c0fc; margin-bottom: 4px;">请求体:</div>
+                        <div style="color: #74c0fc; margin-bottom: 4px;">请求�?</div>
                         <div style="background: #0d0d0d; padding: 8px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; margin-bottom: 8px;">${escapeHtml(task.requestLog || '')}</div>
                         <div style="color: #74c0fc; margin-bottom: 4px;">响应日志:</div>
                         <div id="debug-response-${task.id}" style="background: #0d0d0d; padding: 8px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; word-break: break-all;">${escapeHtml(task.responseLog || '')}</div>
@@ -5983,14 +5983,14 @@
             if (log.size) lines.push(`尺寸: ${log.size}`);
             if (log.aspectRatio) lines.push(`尺寸: ${log.aspectRatio}`);
             if (log.generationAttempt && log.generationCount) lines.push(`生成次数: ${log.generationAttempt}/${log.generationCount}`);
-            if (log.completedCount !== undefined && log.generationCount) lines.push(`已完成: ${log.completedCount}/${log.generationCount}`);
-            if (log.resolution) lines.push(`分辨率: ${log.resolution}`);
+            if (log.completedCount !== undefined && log.generationCount) lines.push(`已完�? ${log.completedCount}/${log.generationCount}`);
+            if (log.resolution) lines.push(`分辨�? ${log.resolution}`);
             if (log.ratio) lines.push(`比例: ${log.ratio}`);
             if (log.durationSeconds !== undefined && log.durationSeconds !== null) lines.push(`时长: ${log.durationSeconds}s`);
             if (log.elapsedText) lines.push(`总耗时: ${log.elapsedText}`);
-            if (log.promptPreview) lines.push(`提示词: ${log.promptPreview}`);
+            if (log.promptPreview) lines.push(`提示�? ${log.promptPreview}`);
             if (log.errorSnippet) lines.push(`响应片段: ${log.errorSnippet}`);
-            if (log.sourceVideoUrl && log.taskKind === 'subtitle_erase') lines.push(`源视频: ${log.sourceVideoUrl}`);
+            if (log.sourceVideoUrl && log.taskKind === 'subtitle_erase') lines.push(`源视�? ${log.sourceVideoUrl}`);
             return lines.join('\n');
         }
 
@@ -6097,7 +6097,7 @@
                 const timeStr = new Date(log.time).toLocaleString();
                 const badgeClass = log.type || 'info';
                 const costHtml = log.cost !== undefined
-                    ? `<div class="log-cost">💰 Token: ${log.tokens !== undefined ? log.tokens.toLocaleString() : '-'} · 费用: ${log.cost} 元</div>`
+                    ? `<div class="log-cost">💰 Token: ${log.tokens !== undefined ? log.tokens.toLocaleString() : '-'} · 费用: ${log.cost} �?/div>`
                     : '';
                 const detailsHtml = log.details
                     ? `<div class="log-details">${escapeHtml(log.details)}</div>`
@@ -6117,7 +6117,7 @@
         }
 
         function clearLogs() {
-            if (!confirm('确定要清空所有系统日志吗？')) return;
+            if (!confirm('确定要清空所有系统日志吗�?)) return;
             appLogs = [];
             saveLogs();
             renderLogs();
@@ -6167,7 +6167,7 @@
         }
 
         function clearTaskRecords() {
-            if (!confirm('确定要清空所有任务记录吗？')) return;
+            if (!confirm('确定要清空所有任务记录吗�?)) return;
             activeTasks.forEach(task => {
                 if (task.timer) clearInterval(task.timer);
                 if (task.displayTimer) clearInterval(task.displayTimer);
@@ -6294,7 +6294,7 @@
                             <button class="btn btn-success btn-sm" onclick="reuseHistory(${index})">🔄 复用</button>
                             ${mediaType === 'video' && item.videoUrl ? `<button class="btn btn-secondary btn-sm" onclick="submitSubtitleEraseTaskFromHistory(${index})">🪄 擦除字幕</button>` : ''}
                             ${imageCanBecomeVideoAsset ? `<button class="btn btn-secondary btn-sm" onclick="addHistoryImageToVideoAssets(${index})">🎬 加到视频</button>` : ''}
-                            <button class="btn btn-danger btn-sm" onclick="deleteHistory(${index})">🗑️</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteHistory(${index})">🗑�?/button>
                         </div>
                     </div>
                 `;
@@ -6373,12 +6373,12 @@
             const item = history[index];
             const imageUrl = item?.publicUrl || item?.imageUrl || '';
             if (!/^https?:\/\//i.test(imageUrl)) {
-                alert('这条图片历史没有公网 URL，不能作为视频素材');
+                alert('这条图片历史没有公网 URL，不能作为视频素�?);
                 return;
             }
             addAsset('image', imageUrl, `历史生图-${(item.id || '').slice(-8) || index}`);
             switchWorkspaceMode('video');
-            addLog('info', '已从历史添加图片到视频素材', imageUrl);
+            addLog('info', '已从历史添加图片到视频素�?, imageUrl);
         }
 
         function deleteHistory(index) {
@@ -6389,7 +6389,7 @@
         }
 
         function clearHistory() {
-            if (confirm('确定要清空所有历史记录吗？')) {
+            if (confirm('确定要清空所有历史记录吗�?)) {
                 localStorage.removeItem('seedance_history');
                 loadHistory();
             }
