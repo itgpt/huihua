@@ -46,8 +46,8 @@ jobs:
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
         with:
-          host: 124.220.42.103
-          username: ubuntu
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/huihua
