@@ -5,6 +5,27 @@ export class ImagePreviewManager {
         this.dom = dom;
         this.onUpdate = onUpdate; // 回调函数，用于更新模式指示器等
         this.uploadedFiles = [];
+        this._setupPasteHandler();
+    }
+
+    _setupPasteHandler() {
+        document.addEventListener('paste', (e) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            const imageFiles = [];
+            for (const item of items) {
+                if (item.type.startsWith('image/')) {
+                    const file = item.getAsFile();
+                    if (file) imageFiles.push(file);
+                }
+            }
+
+            if (imageFiles.length > 0) {
+                e.preventDefault();
+                this.addFiles(imageFiles);
+            }
+        });
     }
 
     // 从URL加载图片
