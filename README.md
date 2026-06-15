@@ -33,12 +33,16 @@
 ## 🚀 一键部署
 
 ```bash
+# 下载 compose 文件
+curl -O https://raw.githubusercontent.com/itgpt/huihua/main/docker-compose.yml
+
+# 启动（自动拉取镜像）
 docker-compose up -d
 ```
 
 浏览器打开 **http://localhost:8000** 即可使用。
 
-镜像自动从 Docker Hub 拉取（`itgpt/huihua:latest`），无需本地构建。默认 API 地址已内置，开箱即用。
+镜像自动从 Docker Hub 拉取（`itgpt/huihua:latest`），无需本地构建，默认 API 已内置，开箱即用。
 
 ## 📁 项目结构
 
