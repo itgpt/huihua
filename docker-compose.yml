@@ -8,6 +8,6 @@ services:
     volumes:
       - ./:/usr/share/nginx/html/
     environment:
-      - WECHAT_ID=${WECHAT_ID:-p7tk19}
-      - MAIN_SITE_URL=${MAIN_SITE_URL:-https://api.wanwuhuanxin.cn}
-      - API_BASE_URL=${API_BASE_URL:-https://api.wanwuhuanxin.cn}
+      - WECHAT_ID=p7tk19
+      - MAIN_SITE_URL=https://api.wanwuhuanxin.cn
+      - API_BASE_URL=https://api.wanwuhuanxin.cn
