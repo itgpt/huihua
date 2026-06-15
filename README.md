@@ -30,29 +30,15 @@
 - 📐 **分镜设计** — 视频分镜规划
 - 💡 **灵感实验室** — 小红书风格图文生成
 
-## 🚀 一键启动
-
-### Docker Compose（推荐）
+## 🚀 一键部署
 
 ```bash
-# 使用默认配置
 docker-compose up -d
-
-# 或通过环境变量自定义（支持系统环境变量 / .env 文件）
-WECHAT_ID=myid API_BASE_URL=https://myapi.com docker-compose up -d
 ```
 
-访问：**http://localhost:8000**
+浏览器打开 **http://localhost:8000** 即可使用。
 
-### 环境变量
-
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| `WECHAT_ID` | `p7tk19` | 公告中显示的微信号 |
-| `MAIN_SITE_URL` | `https://api.wanwuhuanxin.cn` | 主站 / 次数站链接 |
-| `API_BASE_URL` | `https://api.wanwuhuanxin.cn` | API 接口默认地址 |
-
-> 更详细的 Docker 部署说明见 [README-Docker.md](README-Docker.md)
+镜像自动从 Docker Hub 拉取（`itgpt/huihua:latest`），无需本地构建。默认 API 地址已内置，开箱即用。
 
 ## 📁 项目结构
 
