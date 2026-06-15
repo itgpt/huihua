@@ -400,11 +400,34 @@ const PromptLibrary = {
     },
 
     copyPrompt(text) {
-        navigator.clipboard.writeText(text).then(() => {
+        // 优先使用现代 clipboard API
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccess('已复制到剪贴板');
+            }).catch(() => {
+                this._fallbackCopy(text);
+            });
+        } else {
+            this._fallbackCopy(text);
+        }
+    },
+
+    _fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+            document.execCommand('copy');
             showSuccess('已复制到剪贴板');
-        }).catch(() => {
+        } catch (e) {
             showError('复制失败');
-        });
+        }
+        document.body.removeChild(textarea);
     },
 
     // 添加自定义提示词
