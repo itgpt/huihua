@@ -39,18 +39,23 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /opt/huihua
-            sudo docker compose pull
-            sudo docker compose down
-            sudo docker compose up -d
+  # deploy 步骤暂时禁用：目标服务器服务已过期（2026-08）。
+  # 恢复方法：
+  #   1. 在仓库 Secrets 中添加 SSH_HOST、SSH_USERNAME（SSH_PRIVATE_KEY 已存在）
+  #   2. 取消下方 deploy job 的注释
+  #   3. 重新触发 workflow 即可自动部署
+  # deploy:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Deploy to server
+  #       uses: appleboy/ssh-action@v1
+  #       with:
+  #         host: ${{ secrets.SSH_HOST }}
+  #         username: ${{ secrets.SSH_USERNAME }}
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         script: |
+  #           cd /opt/huihua
+  #           sudo docker compose pull
+  #           sudo docker compose down
+  #           sudo docker compose up -d
