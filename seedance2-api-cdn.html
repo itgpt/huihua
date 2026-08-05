@@ -2966,6 +2966,15 @@
                             <input type="text" id="relayCdnDomain" value="https://cdn.wanwuhuanxin.cn" placeholder="例如: https://cdn.wanwuhuanxin.cn">
                         </div>
                     </div>
+                    <div class="input-row" style="align-items:center;">
+                        <div class="form-group" style="flex: 2; margin-bottom: 0;">
+                            <label>我的用量</label>
+                            <div id="relayUsageInfo" style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">未查询（点击右侧按钮）</div>
+                        </div>
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <button class="btn btn-secondary btn-sm" onclick="queryRelayUsage()" style="width: 100%;">🔍 查询用量</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="config-action-row">
                     <button class="btn btn-secondary btn-sm" onclick="exportConfig()">💾 导出配置</button>
@@ -4289,6 +4298,7 @@
             if (expiryGroup) expiryGroup.style.display = provider === 'litterbox' ? '' : 'none';
             if (qiniuSection) qiniuSection.style.display = provider === 'qiniu' ? '' : 'none';
             if (relaySection) relaySection.style.display = provider === 'qiniu-relay' ? '' : 'none';
+            if (provider === 'qiniu-relay') queryRelayUsage();
         }
 
         function getSubtitleEraseBaseUrl() {
@@ -4324,6 +4334,41 @@
         function isRelayConfigured() {
             const cfg = getRelayConfig();
             return !!(cfg.key && cfg.url);
+        }
+
+        // 查询中转用量：GET /api/usage，返回已用/总额/文件数
+        function relayFmtBytes(b) {
+            b = Number(b) || 0;
+            if (b <= 0) return '0 B';
+            const u = ['B', 'KB', 'MB', 'GB', 'TB'];
+            let i = 0;
+            while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+            return `${b >= 100 ? b.toFixed(0) : b.toFixed(1)} ${u[i]}`;
+        }
+
+        async function queryRelayUsage() {
+            const cfg = getRelayConfig();
+            const infoEl = document.getElementById('relayUsageInfo');
+            if (!infoEl) return;
+            if (!isRelayConfigured()) {
+                infoEl.textContent = '请先填写中转 API Key';
+                infoEl.style.color = 'var(--warning)';
+                return;
+            }
+            infoEl.textContent = '查询中...';
+            infoEl.style.color = 'var(--text-secondary)';
+            try {
+                const resp = await fetch(`${cfg.url}/api/usage`, { headers: { Authorization: `Bearer ${cfg.key}` } });
+                const data = await resp.json().catch(() => ({}));
+                if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
+                const pct = data.quotaBytes ? ((data.usedBytes / data.quotaBytes) * 100).toFixed(1) : '-';
+                const color = data.quotaBytes && data.usedBytes >= data.quotaBytes ? 'var(--danger)' : 'var(--success)';
+                infoEl.textContent = `已用 ${relayFmtBytes(data.usedBytes)} / 共 ${relayFmtBytes(data.quotaBytes)}（${pct}%）· ${data.fileCount} 个文件`;
+                infoEl.style.color = color;
+            } catch (e) {
+                infoEl.textContent = '查询失败：' + e.message;
+                infoEl.style.color = 'var(--danger)';
+            }
         }
 
         async function uploadViaRelay(file) {
