@@ -4578,6 +4578,13 @@
         }
 
         async function smartUpload(file) {
+            console.log('[上传诊断]', {
+                type: file?.type,
+                relay已配置: isRelayConfigured(),
+                qiniu已配置: isQiniuConfigured(),
+                relayKey: (document.getElementById('relayKey')?.value || '').slice(0, 12) + '...',
+                provider: document.getElementById('imageHostProvider')?.value
+            });
             if (isRelayConfigured()) {
                 return await uploadViaRelay(file);
             }
@@ -4594,6 +4601,12 @@
         // 已配置中转/七牛时失败抛出真实错误（避免静默回退公共图床，便于排查）；
         // 未配置任何云存储时才回退 Litterbox。
         async function uploadToHostedUrl(file) {
+            // 选了「七牛中转」但 Key 为空/未保存 → 明确提示，不再静默走公共图床
+            const provider = document.getElementById('imageHostProvider')?.value;
+            if (provider === 'qiniu-relay' && !isRelayConfigured()) {
+                alert('你选择了「七牛中转」，但中转 API Key 为空或未保存！\n请到 设置 → 七牛中转 填写 Key，并确认状态显示「✅ 中转已配置」。\n\n现在将回退到公共图床。');
+                console.error('[上传诊断] 中转未配置: provider=qiniu-relay 但 relayKey 为空');
+            }
             if (isRelayConfigured() || isQiniuConfigured()) {
                 return await smartUpload(file);
             }
