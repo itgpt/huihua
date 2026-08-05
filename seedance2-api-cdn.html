@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>seedance2.0 API视频生成器</title>
-    <link rel="icon" type="image/png" href="./favicon.png">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
     <style>
         * {
             margin: 0;
@@ -4571,8 +4571,13 @@
             throw new Error('未配置七牛中转/OSS，且非图片文件无法使用默认图床上传。请在设置中配置七牛中转或七牛云 OSS。');
         }
 
-        // 上传到已配置的托管服务（中转/七牛/scdn），都不可用时回退 Litterbox
+        // 上传到已配置的托管服务（中转/七牛/scdn）
+        // 已配置中转/七牛时失败抛出真实错误（避免静默回退公共图床，便于排查）；
+        // 未配置任何云存储时才回退 Litterbox。
         async function uploadToHostedUrl(file) {
+            if (isRelayConfigured() || isQiniuConfigured()) {
+                return await smartUpload(file);
+            }
             try {
                 return await smartUpload(file);
             } catch (e) {
