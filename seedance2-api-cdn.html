@@ -5567,6 +5567,21 @@
                 container.insertAdjacentHTML('beforeend', uploadingHtml);
             }
 
+            // 已配置中转/七牛 → 优先走中转直传，失败则明确报错（不再静默回退公共图床）
+            if (isRelayConfigured() || isQiniuConfigured()) {
+                try {
+                    const url = await uploadToHostedUrl(file);
+                    const tempEl = document.getElementById(tempId);
+                    if (tempEl) tempEl.remove();
+                    if (url) addAsset(type, url, file.name || 'Pasted File');
+                } catch (e) {
+                    const tempEl = document.getElementById(tempId);
+                    if (tempEl) tempEl.remove();
+                    alert('上传失败: ' + e.message);
+                }
+                return;
+            }
+
             try {
                 const formData = new FormData();
                 if (provider === 'scdn') {
