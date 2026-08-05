@@ -2951,13 +2951,13 @@
                         <div class="form-group" style="flex: 2;">
                             <label>中转 API Key</label>
                             <div class="password-input">
-                                <input type="password" id="relayKey" placeholder="qr_...">
+                                <input type="password" id="relayKey" placeholder="qr_..." oninput="updateRelayStatus()">
                                 <span class="password-toggle" onclick="togglePassword('relayKey')">👁️</span>
                             </div>
                         </div>
                         <div class="form-group" style="flex: 2;">
                             <label>中转服务地址</label>
-                            <input type="text" id="relayUrl" value="https://oss1.wanwuhuanxin.cn" placeholder="例如: https://oss1.wanwuhuanxin.cn">
+                            <input type="text" id="relayUrl" value="https://oss1.wanwuhuanxin.cn" placeholder="例如: https://oss1.wanwuhuanxin.cn" oninput="updateRelayStatus()">
                         </div>
                     </div>
                     <div class="input-row">
@@ -2975,6 +2975,7 @@
                             <button class="btn btn-secondary btn-sm" onclick="queryRelayUsage()" style="width: 100%;">🔍 查询用量</button>
                         </div>
                     </div>
+                    <div id="relayStatusLine" style="font-size: 12px; margin-top: 10px; padding: 8px 10px; border-radius: 6px; background: var(--muted-bg); border: 1px solid var(--border);"></div>
                 </div>
                 <div class="config-action-row">
                     <button class="btn btn-secondary btn-sm" onclick="exportConfig()">💾 导出配置</button>
@@ -4299,6 +4300,7 @@
             if (expiryGroup) expiryGroup.style.display = provider === 'litterbox' ? '' : 'none';
             if (qiniuSection) qiniuSection.style.display = provider === 'qiniu' ? '' : 'none';
             if (relaySection) relaySection.style.display = provider === 'qiniu-relay' ? '' : 'none';
+            updateRelayStatus();
             if (provider === 'qiniu-relay') queryRelayUsage();
         }
 
@@ -4335,6 +4337,23 @@
         function isRelayConfigured() {
             const cfg = getRelayConfig();
             return !!(cfg.key && cfg.url);
+        }
+
+        // 中转配置状态提示（用于排查为什么上传没走中转）
+        function updateRelayStatus() {
+            const el = document.getElementById('relayStatusLine');
+            if (!el) return;
+            const cfg = getRelayConfig();
+            const provider = document.getElementById('imageHostProvider')?.value || '';
+            if (cfg.key && cfg.url) {
+                el.textContent = `✅ 中转已配置（key: ${cfg.key.slice(0, 10)}...，服务: ${cfg.url}），上传将走中转`;
+                el.style.color = 'var(--success)';
+                el.style.background = 'rgba(0,180,42,0.08)';
+            } else {
+                el.textContent = `⚠️ 中转未配置（API Key 为空）→ 上传将走公共图床。当前图床: ${provider}`;
+                el.style.color = 'var(--warning)';
+                el.style.background = 'rgba(255,125,0,0.08)';
+            }
         }
 
         // 查询中转用量：GET /api/usage，返回已用/总额/文件数
@@ -4622,6 +4641,7 @@
             if (config.relayKey) document.getElementById('relayKey').value = config.relayKey;
             if (config.relayUrl) document.getElementById('relayUrl').value = config.relayUrl;
             if (config.relayCdnDomain) document.getElementById('relayCdnDomain').value = config.relayCdnDomain;
+            updateRelayStatus();
             if (config.pollInterval) document.getElementById('pollInterval').value = config.pollInterval;
             if (config.taskRecordLimit) document.getElementById('taskRecordLimit').value = config.taskRecordLimit;
             if (config.historyLimit) document.getElementById('historyLimitConfig').value = config.historyLimit;
