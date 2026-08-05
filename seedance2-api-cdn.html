@@ -2917,14 +2917,14 @@
                     <div class="input-row">
                         <div class="form-group">
                             <label>存储桶 (Bucket)</label>
-                            <input type="text" id="qiniuBucket" placeholder="输入存储桶名称，如: wanwuhuanxin">
+                            <input type="text" id="qiniuBucket" value="wanwuhuanxin" placeholder="输入存储桶名称，如: wanwuhuanxin">
                         </div>
                         <div class="form-group">
                             <label>存储区域</label>
                             <select id="qiniuRegion">
                                 <option value="z0">华东 (z0)</option>
                                 <option value="z1">华北 (z1)</option>
-                                <option value="z2">华南 (z2)</option>
+                                <option value="z2" selected>华南 (z2)</option>
                                 <option value="na0">北美 (na0)</option>
                                 <option value="as0">东南亚 (as0)</option>
                             </select>
@@ -2937,7 +2937,7 @@
                         </div>
                         <div class="form-group">
                             <label>自定义域名（留空用默认）</label>
-                            <input type="text" id="qiniuDomain" placeholder="例如: https://cdn.wanwuhuanxin.cn">
+                            <input type="text" id="qiniuDomain" value="https://cdn.wanwuhuanxin.cn" placeholder="例如: https://cdn.wanwuhuanxin.cn">
                         </div>
                     </div>
                 </div>
