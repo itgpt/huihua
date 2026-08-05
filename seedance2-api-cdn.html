@@ -2862,6 +2862,7 @@
                             <option value="scdn" selected>img.scdn.io (默认)</option>
                             <option value="litterbox">Litterbox (catbox.moe)</option>
                             <option value="qiniu">CDN 上传 (七牛云)</option>
+                            <option value="qiniu-relay">七牛中转 (中转 Key)</option>
                         </select>
                     </div>
                     <div class="form-group" id="litterboxExpiryGroup" style="display:none">
@@ -2938,6 +2939,31 @@
                         <div class="form-group">
                             <label>自定义域名（留空用默认）</label>
                             <input type="text" id="qiniuDomain" value="https://cdn.wanwuhuanxin.cn" placeholder="例如: https://cdn.wanwuhuanxin.cn">
+                        </div>
+                    </div>
+                </div>
+                <div class="qiniu-section" id="relaySection" style="display:none">
+                    <div class="qiniu-section-header">
+                        <span>🔑 七牛中转（中转 Key 直传，无需七牛 AK/SK）</span>
+                        <span class="qiniu-status" id="relayStatus"></span>
+                    </div>
+                    <div class="input-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label>中转 API Key</label>
+                            <div class="password-input">
+                                <input type="password" id="relayKey" placeholder="qr_...">
+                                <span class="password-toggle" onclick="togglePassword('relayKey')">👁️</span>
+                            </div>
+                        </div>
+                        <div class="form-group" style="flex: 2;">
+                            <label>中转服务地址</label>
+                            <input type="text" id="relayUrl" value="https://oss.wanwuhuanxin.cn" placeholder="例如: https://oss.wanwuhuanxin.cn">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label>CDN 域名（生成文件链接用）</label>
+                            <input type="text" id="relayCdnDomain" value="https://cdn.wanwuhuanxin.cn" placeholder="例如: https://cdn.wanwuhuanxin.cn">
                         </div>
                     </div>
                 </div>
@@ -4259,8 +4285,10 @@
             localStorage.setItem('imageHostProvider', provider);
             const expiryGroup = document.getElementById('litterboxExpiryGroup');
             const qiniuSection = document.getElementById('qiniuSection');
+            const relaySection = document.getElementById('relaySection');
             if (expiryGroup) expiryGroup.style.display = provider === 'litterbox' ? '' : 'none';
             if (qiniuSection) qiniuSection.style.display = provider === 'qiniu' ? '' : 'none';
+            if (relaySection) relaySection.style.display = provider === 'qiniu-relay' ? '' : 'none';
         }
 
         function getSubtitleEraseBaseUrl() {
@@ -4282,6 +4310,63 @@
         function isQiniuConfigured() {
             const cfg = getQiniuConfig();
             return !!(cfg.ak && cfg.sk && cfg.bucket);
+        }
+
+        // ==================== 七牛中转（中转 Key 直传，无需 AK/SK） ====================
+        function getRelayConfig() {
+            return {
+                key: (document.getElementById('relayKey')?.value || '').trim(),
+                url: (document.getElementById('relayUrl')?.value || 'https://oss.wanwuhuanxin.cn').trim().replace(/\/+$/, ''),
+                cdnDomain: (document.getElementById('relayCdnDomain')?.value || 'https://cdn.wanwuhuanxin.cn').trim().replace(/\/+$/, '')
+            };
+        }
+
+        function isRelayConfigured() {
+            const cfg = getRelayConfig();
+            return !!(cfg.key && cfg.url);
+        }
+
+        async function uploadViaRelay(file) {
+            const cfg = getRelayConfig();
+            if (!isRelayConfigured()) throw new Error('未配置中转 API Key，请在设置中填写');
+
+            // 1. 向中转服务申请直传凭证（配额校验、路径隔离都在中转侧完成）
+            let resp;
+            try {
+                resp = await fetch(`${cfg.url}/api/upload-token`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${cfg.key}` }
+                });
+            } catch (e) {
+                throw new Error(`无法连接中转服务 ${cfg.url}: ${e.message}`);
+            }
+            let data;
+            try { data = await resp.json(); } catch (e) { data = {}; }
+            if (!resp.ok) {
+                if (resp.status === 401) throw new Error('中转 API Key 无效，请检查设置');
+                if (resp.status === 429) throw new Error('存储配额已用尽，请联系管理员');
+                throw new Error(data.error || `中转服务错误 HTTP ${resp.status}`);
+            }
+
+            // 2. 用凭证直传七牛（文件不经过中转服务器）
+            const fd = new FormData();
+            fd.append('token', data.token);
+            fd.append('file', file);
+            let up;
+            try {
+                up = await fetch(data.uploadUrl, { method: 'POST', body: fd });
+            } catch (e) {
+                throw new Error('直传七牛失败: ' + e.message);
+            }
+            let upData;
+            try { upData = await up.json(); } catch (e) { upData = {}; }
+            // 七牛返回 579 表示文件已上传但回调记账失败（如中转回调地址暂时不可达），文件仍可用，故只要有 key 即视为成功
+            if (!upData.key) {
+                throw new Error(upData.error || `上传失败 HTTP ${up.status}`);
+            }
+
+            // 3. 返回 CDN 可访问地址
+            return `${cfg.cdnDomain}/${upData.key}`;
         }
 
         function setQiniuStatus(text, cls) {
@@ -4428,13 +4513,16 @@
         }
 
         async function smartUpload(file) {
+            if (isRelayConfigured()) {
+                return await uploadViaRelay(file);
+            }
             if (isQiniuConfigured()) {
                 return await uploadToQiniu(file);
             }
             if (file?.type?.startsWith('image/')) {
                 return await uploadToScdnRaw(file);
             }
-            throw new Error('未配置七牛云 OSS，且非图片文件无法使用默认图床上传。请在设置中配置七牛云 OSS 存储。');
+            throw new Error('未配置七牛中转/OSS，且非图片文件无法使用默认图床上传。请在设置中配置七牛中转或七牛云 OSS。');
         }
 
         function loadAllConfigs() {
@@ -4461,14 +4549,19 @@
             const provider = config.imageHostProvider || 'scdn';
             const expiryGroup = document.getElementById('litterboxExpiryGroup');
             const qiniuSection = document.getElementById('qiniuSection');
+            const relaySection = document.getElementById('relaySection');
             if (expiryGroup) expiryGroup.style.display = provider === 'litterbox' ? '' : 'none';
             if (qiniuSection) qiniuSection.style.display = provider === 'qiniu' ? '' : 'none';
+            if (relaySection) relaySection.style.display = provider === 'qiniu-relay' ? '' : 'none';
             if (config.qiniuAk) document.getElementById('qiniuAk').value = config.qiniuAk;
             if (config.qiniuSk) document.getElementById('qiniuSk').value = config.qiniuSk;
             if (config.qiniuRegion) document.getElementById('qiniuRegion').value = config.qiniuRegion;
             if (config.qiniuBucket) document.getElementById('qiniuBucket').value = config.qiniuBucket;
             if (config.qiniuPathPrefix) document.getElementById('qiniuPathPrefix').value = config.qiniuPathPrefix;
             if (config.qiniuDomain) document.getElementById('qiniuDomain').value = config.qiniuDomain;
+            if (config.relayKey) document.getElementById('relayKey').value = config.relayKey;
+            if (config.relayUrl) document.getElementById('relayUrl').value = config.relayUrl;
+            if (config.relayCdnDomain) document.getElementById('relayCdnDomain').value = config.relayCdnDomain;
             if (config.pollInterval) document.getElementById('pollInterval').value = config.pollInterval;
             if (config.taskRecordLimit) document.getElementById('taskRecordLimit').value = config.taskRecordLimit;
             if (config.historyLimit) document.getElementById('historyLimitConfig').value = config.historyLimit;
@@ -4525,7 +4618,7 @@
         });
 
         function setupAutoSave() {
-            const configInputs = ['apiKey', 'baseUrl', 'themeMode', 'colorScheme', 'imageHostProvider', 'litterboxExpiry', 'pollInterval', 'taskRecordLimit', 'historyLimitConfig', 'model', 'seedance20Endpoint', 'seedance20FastEndpoint', 'resolution', 'ratio', 'duration', 'seed', 'generateAudio', 'imagePrompt', 'imageSize', 'imageResponseFormat', 'imageGenerationCount', 'qiniuAk', 'qiniuSk', 'qiniuRegion', 'qiniuBucket', 'qiniuPathPrefix', 'qiniuDomain'];
+            const configInputs = ['apiKey', 'baseUrl', 'themeMode', 'colorScheme', 'imageHostProvider', 'litterboxExpiry', 'pollInterval', 'taskRecordLimit', 'historyLimitConfig', 'model', 'seedance20Endpoint', 'seedance20FastEndpoint', 'resolution', 'ratio', 'duration', 'seed', 'generateAudio', 'imagePrompt', 'imageSize', 'imageResponseFormat', 'imageGenerationCount', 'qiniuAk', 'qiniuSk', 'qiniuRegion', 'qiniuBucket', 'qiniuPathPrefix', 'qiniuDomain', 'relayKey', 'relayUrl', 'relayCdnDomain'];
             configInputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -4551,6 +4644,9 @@
                 qiniuBucket: document.getElementById('qiniuBucket')?.value || '',
                 qiniuPathPrefix: document.getElementById('qiniuPathPrefix')?.value || '',
                 qiniuDomain: document.getElementById('qiniuDomain')?.value || '',
+                relayKey: document.getElementById('relayKey')?.value || '',
+                relayUrl: document.getElementById('relayUrl')?.value || '',
+                relayCdnDomain: document.getElementById('relayCdnDomain')?.value || '',
                 pollInterval: document.getElementById('pollInterval').value,
                 taskRecordLimit: document.getElementById('taskRecordLimit').value,
                 historyLimit: document.getElementById('historyLimitConfig').value,
