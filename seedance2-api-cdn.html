@@ -2957,7 +2957,7 @@
                         </div>
                         <div class="form-group" style="flex: 2;">
                             <label>中转服务地址</label>
-                            <input type="text" id="relayUrl" value="https://oss.wanwuhuanxin.cn" placeholder="例如: https://oss.wanwuhuanxin.cn">
+                            <input type="text" id="relayUrl" value="https://oss1.wanwuhuanxin.cn" placeholder="例如: https://oss1.wanwuhuanxin.cn">
                         </div>
                     </div>
                     <div class="input-row">
@@ -4316,7 +4316,7 @@
         function getRelayConfig() {
             return {
                 key: (document.getElementById('relayKey')?.value || '').trim(),
-                url: (document.getElementById('relayUrl')?.value || 'https://oss.wanwuhuanxin.cn').trim().replace(/\/+$/, ''),
+                url: (document.getElementById('relayUrl')?.value || 'https://oss1.wanwuhuanxin.cn').trim().replace(/\/+$/, ''),
                 cdnDomain: (document.getElementById('relayCdnDomain')?.value || 'https://cdn.wanwuhuanxin.cn').trim().replace(/\/+$/, '')
             };
         }
