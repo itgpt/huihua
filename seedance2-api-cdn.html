@@ -2582,6 +2582,7 @@
                                     <div class="form-group">
                                         <label>模型</label>
                                         <select id="model" onchange="onModelSelectChange()">
+                                            <option value="doubao-seedance-2-5-260628">Seedance 2.5</option>
                                             <option value="doubao-seedance-2-0-260128">Seedance 2.0</option>
                                             <option value="doubao-seedance-2-0-fast-260128" selected>Seedance 2.0 Fast</option>
                                             <option value="doubao-seedance-2-0-mini-260615">Seedance 2.0 Mini</option>
@@ -2602,6 +2603,8 @@
                                             <option value="1:1">1:1</option>
                                             <option value="4:3">4:3</option>
                                             <option value="3:4">3:4</option>
+                                            <option value="21:9">21:9</option>
+                                            <option value="adaptive">adaptive</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
@@ -4662,7 +4665,7 @@
             const seedance20FastEndpointInput = document.getElementById('seedance20FastEndpoint');
             let seedance20Endpoint = config.seedance20Endpoint || '';
             let seedance20FastEndpoint = config.seedance20FastEndpoint || '';
-            const supportedRatios = new Set(['16:9', '9:16', '1:1', '4:3', '3:4']);
+            const supportedRatios = new Set(['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', 'adaptive']);
 
             if (config.customModel && !seedance20Endpoint && !seedance20FastEndpoint) {
                 const legacyEndpoint = String(config.customModel).trim();
@@ -4678,6 +4681,7 @@
             seedance20FastEndpointInput.value = seedance20FastEndpoint;
             if (config.model) setSelectedModelId(config.model);
             else setSelectedModelId(document.getElementById('model').value);
+            applyModelParamLimits();
             if (config.resolution) document.getElementById('resolution').value = config.resolution;
             if (config.ratio) document.getElementById('ratio').value = supportedRatios.has(config.ratio) ? config.ratio : '16:9';
             if (config.duration) document.getElementById('duration').value = config.duration;
@@ -4850,7 +4854,33 @@
         }
 
         function onModelSelectChange() {
+            applyModelParamLimits();
             saveAllConfigs();
+        }
+
+        // Seedance 2.5 与 2.0 参数差异适配：
+        // - 2.5 时长上限 30 秒，2.0 上限 15 秒
+        // - 2.5 分辨率仅支持 480p/720p
+        const SEEDANCE25_MODEL_ID = 'doubao-seedance-2-5-260628';
+        function isSeedance25Model(modelId) {
+            return modelId === SEEDANCE25_MODEL_ID;
+        }
+        function applyModelParamLimits() {
+            const modelId = document.getElementById('model').value;
+            const durationInput = document.getElementById('duration');
+            const resolutionSelect = document.getElementById('resolution');
+            const maxSeconds = isSeedance25Model(modelId) ? 30 : 15;
+
+            durationInput.max = maxSeconds;
+            let dur = parseInt(durationInput.value, 10);
+            if (!Number.isFinite(dur)) dur = 5;
+            if (dur < 4) dur = 4;
+            if (dur > maxSeconds) dur = maxSeconds;
+            durationInput.value = dur;
+
+            if (isSeedance25Model(modelId) && !['480p', '720p'].includes(resolutionSelect.value)) {
+                resolutionSelect.value = '720p';
+            }
         }
 
         function getTaskKind(taskOrRecord) {
@@ -6113,11 +6143,20 @@
             const imageUrls = assets.images.map(img => img.url).filter(Boolean);
             const primaryImageIndex = imageUrls.findIndex(url => /^https?:\/\//i.test(url) || /^data:image\//i.test(url));
             const content = [];
+            // 首帧图须放入 content（role=first_frame），并排在最前；
+            // new-api 豆包通道在 metadata.content 存在时会丢弃顶层 image 字段，
+            // 因此首帧不再走 body.image。
             imageUrls.forEach((url, index) => {
-                if (index !== primaryImageIndex) {
-                    content.push({ type: 'image_url', image_url: { url }, role: 'reference_image' });
-                }
+                content.push({
+                    type: 'image_url',
+                    image_url: { url },
+                    role: index === primaryImageIndex ? 'first_frame' : 'reference_image'
+                });
             });
+            if (primaryImageIndex > 0) {
+                const [primary] = content.splice(primaryImageIndex, 1);
+                content.unshift(primary);
+            }
             assets.videos.forEach(vid => {
                 if (vid.url) content.push({ type: 'video_url', video_url: { url: vid.url }, role: 'reference_video' });
             });
@@ -6126,12 +6165,14 @@
             }
 
             const seedValue = parseInt(document.getElementById('seed').value, 10);
-            const supportedRatios = new Set(['16:9', '9:16', '1:1', '4:3', '3:4']);
+            const supportedRatios = new Set(['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', 'adaptive']);
             const ratioInput = document.getElementById('ratio');
             const ratio = supportedRatios.has(ratioInput.value) ? ratioInput.value : '16:9';
             if (ratioInput.value !== ratio) ratioInput.value = ratio;
             const durationValue = parseInt(document.getElementById('duration').value, 10);
-            const seconds = String(Math.max(4, Math.min(15, Number.isFinite(durationValue) ? durationValue : 5)));
+            // Seedance 2.5 支持 4~30 秒，2.0 支持 4~15 秒
+            const maxSeconds = isSeedance25Model(modelId) ? 30 : 15;
+            const seconds = String(Math.max(4, Math.min(maxSeconds, Number.isFinite(durationValue) ? durationValue : 5)));
             const metadata = {
                 ratio,
                 resolution: document.getElementById('resolution').value
@@ -6152,9 +6193,6 @@
                 seconds,
                 metadata
             };
-            if (primaryImageIndex !== -1) {
-                body.image = imageUrls[primaryImageIndex];
-            }
 
             const requestLog = `POST ${baseUrl}/v1/video/generations\nHeaders:\n  Content-Type: application/json\n  Authorization: Bearer ${apiKey.substring(0, 10)}...\nBody:\n${JSON.stringify(body, null, 2)}\n\n等价 curl：\n${buildCurlCommand(baseUrl, apiKey, body)}`;
 
