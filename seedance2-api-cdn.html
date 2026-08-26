@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>seedance2.0 API视频生成器</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
     <style>
@@ -2586,13 +2589,24 @@
                                             <option value="doubao-seedance-2-0-260128">Seedance 2.0</option>
                                             <option value="doubao-seedance-2-0-fast-260128" selected>Seedance 2.0 Fast</option>
                                             <option value="doubao-seedance-2-0-mini-260615">Seedance 2.0 Mini</option>
+                                            <option value="Minimax-h3" disabled>MiniMax H3（暂不可用）</option>
+                                            <optgroup label="阿里云百炼">
+                                                <option value="happyhorse-1.1-t2v">百炼 HappyHorse 文生视频</option>
+                                                <option value="happyhorse-1.1-i2v">百炼 HappyHorse 图生(首帧)</option>
+                                                <option value="happyhorse-1.1-r2v">百炼 HappyHorse 参考生</option>
+                                                <option value="happyhorse-1.0-video-edit">百炼 HappyHorse 视频编辑</option>
+                                                <option value="wan3.0-video">百炼 万相 3.0</option>
+                                                <option value="wan3.0-video-prime">百炼 万相 3.0 Prime</option>
+                                            </optgroup>
                                         </select>
                                     </div>
                                     <div class="form-group">
                                         <label>分辨率</label>
-                                        <select id="resolution">
+                                        <select id="resolution" onchange="onResolutionChange()">
                                             <option value="480p" selected>480p</option>
                                             <option value="720p">720p</option>
+                                            <option value="1080p">1080p</option>
+                                            <option value="2k">2K</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
@@ -4835,7 +4849,11 @@
             const duration = parseInt(document.getElementById('duration').value) || 5;
             const hasVideo = assets.videos.length > 0;
 
-            let area = resolution === '720p' ? (1280 * 720) : (854 * 480);
+            let area;
+            if (resolution === '720p') area = 1280 * 720;
+            else if (resolution === '1080p') area = 1920 * 1080;
+            else if (resolution === '2k') area = 2560 * 1440;
+            else area = 854 * 480;
             const tokens = (area * 24 * duration) / 1024;
 
             let pricePerMillion = 0;
@@ -4854,6 +4872,10 @@
         }
 
         function onModelSelectChange() {
+            // MiniMax H3 当前中转不可用（local t2v 不支持参考图），置灰并禁止选中
+            if (document.getElementById('model').value === 'Minimax-h3') {
+                document.getElementById('model').value = 'doubao-seedance-2-0-fast-260128';
+            }
             applyModelParamLimits();
             saveAllConfigs();
         }
@@ -4865,22 +4887,77 @@
         function isSeedance25Model(modelId) {
             return modelId === SEEDANCE25_MODEL_ID;
         }
+        function isMiniMaxH3Model(modelId) {
+            return /^(zzdh-)?Minimax-h3/i.test(modelId || '');
+        }
+        // 阿里云百炼（HappyHorse / 万相 3.0）模型判定
+        function isHappyHorseT2V(modelId) { return /^happyhorse-.*t2v$/i.test(modelId || ''); }
+        function isHappyHorseI2V(modelId) { return /^happyhorse-.*i2v$/i.test(modelId || ''); }
+        function isHappyHorseR2V(modelId) { return /^happyhorse-.*r2v$/i.test(modelId || ''); }
+        function isHappyHorseVideoEdit(modelId) { return /^happyhorse-.*video-edit$/i.test(modelId || ''); }
+        function isWan3Model(modelId) { return /^wan3\.0-video(-prime)?$/i.test(modelId || ''); }
+        function isBailianModel(modelId) { return /^(happyhorse|wan3\.0|wanxiang|wanx3)/i.test(modelId || ''); }
+        // 页面小写分辨率 -> DashScope 大写（720p -> 720P）
+        function toDashResolution(res) {
+            const m = String(res || '').toLowerCase().replace(/\s+/g, '');
+            if (m === '480p') return '480P';
+            if (m === '720p') return '720P';
+            if (m === '1080p') return '1080P';
+            return res || '720P';
+        }
+        // MiniMax H3 的逻辑模型名为 Minimax-h3；实际调用时按「分辨率」映射到具体档位
+        function resolveModelId(modelId) {
+            if (modelId === 'Minimax-h3') {
+                const res = document.getElementById('resolution').value;
+                return 'zzdh-Minimax-h3-' + (res || '720p');
+            }
+            return modelId;
+        }
         function applyModelParamLimits() {
-            const modelId = document.getElementById('model').value;
+            const modelId = resolveModelId(document.getElementById('model').value);
             const durationInput = document.getElementById('duration');
             const resolutionSelect = document.getElementById('resolution');
-            const maxSeconds = isSeedance25Model(modelId) ? 30 : 15;
+            // Seedance 2.5 上限 30 秒；MiniMax H3 480p 上限 10 秒，其余 15 秒；Seedance 2.0 上限 15 秒
+            let maxSeconds;
+            let minSeconds = 4;
+            if (isSeedance25Model(modelId)) {
+                maxSeconds = 30;
+            } else if (isWan3Model(modelId)) {
+                maxSeconds = 30;
+                minSeconds = 2;
+            } else if (isBailianModel(modelId)) {
+                maxSeconds = 15;
+                minSeconds = 3;
+            } else if (modelId === 'zzdh-Minimax-h3-480p') {
+                maxSeconds = 10;
+            } else {
+                maxSeconds = 15;
+            }
 
             durationInput.max = maxSeconds;
+            durationInput.min = minSeconds;
             let dur = parseInt(durationInput.value, 10);
             if (!Number.isFinite(dur)) dur = 5;
-            if (dur < 4) dur = 4;
+            if (dur < minSeconds) dur = minSeconds;
             if (dur > maxSeconds) dur = maxSeconds;
             durationInput.value = dur;
 
             if (isSeedance25Model(modelId) && !['480p', '720p'].includes(resolutionSelect.value)) {
                 resolutionSelect.value = '720p';
             }
+            // MiniMax H3 支持 1080p/2k；百炼最高 1080p（无 2k）；Seedance 其它模型仅到 720p
+            if (isMiniMaxH3Model(modelId)) {
+                // 保持 1080p/2k
+            } else if (isBailianModel(modelId)) {
+                if (resolutionSelect.value === '2k') resolutionSelect.value = '720p';
+            } else {
+                if (['1080p', '2k'].includes(resolutionSelect.value)) resolutionSelect.value = '720p';
+            }
+        }
+        function onResolutionChange() {
+            applyModelParamLimits();
+            updateEstimate();
+            saveAllConfigs();
         }
 
         function getTaskKind(taskOrRecord) {
@@ -4952,7 +5029,7 @@
             if (selectedValue === 'doubao-seedance-2-0-fast-260128') {
                 return (document.getElementById('seedance20FastEndpoint').value || '').trim() || selectedValue;
             }
-            return selectedValue || '';
+            return resolveModelId(selectedValue) || '';
         }
 
         function setSelectedModelId(modelId) {
@@ -4965,6 +5042,14 @@
             const seedance20Endpoint = (document.getElementById('seedance20Endpoint')?.value || '').trim();
             const seedance20FastEndpoint = (document.getElementById('seedance20FastEndpoint')?.value || '').trim();
             const hasPreset = Array.from(modelSelect.options).some(opt => opt.value === normalizedModelId);
+
+            if (isMiniMaxH3Model(normalizedModelId)) {
+                // MiniMax H3 当前中转不可用：回退到默认可用模型
+                modelSelect.value = 'doubao-seedance-2-0-fast-260128';
+                applyModelParamLimits();
+                saveAllConfigs();
+                return;
+            }
 
             if (
                 normalizedModelId === 'doubao-seedance-2-0-260128' ||
@@ -6170,9 +6255,18 @@
             const ratio = supportedRatios.has(ratioInput.value) ? ratioInput.value : '16:9';
             if (ratioInput.value !== ratio) ratioInput.value = ratio;
             const durationValue = parseInt(document.getElementById('duration').value, 10);
-            // Seedance 2.5 支持 4~30 秒，2.0 支持 4~15 秒
-            const maxSeconds = isSeedance25Model(modelId) ? 30 : 15;
-            const seconds = String(Math.max(4, Math.min(maxSeconds, Number.isFinite(durationValue) ? durationValue : 5)));
+            // Seedance 2.5 支持 4~30 秒，2.0 支持 4~15 秒，MiniMax H3 480p 上限 10 秒
+            let maxSeconds = isSeedance25Model(modelId) ? 30 : 15;
+            let minSeconds = 4;
+            if (isWan3Model(modelId)) {
+                maxSeconds = 30;
+                minSeconds = 2;
+            } else if (isBailianModel(modelId)) {
+                maxSeconds = 15;
+                minSeconds = 3;
+            }
+            if (modelId === 'zzdh-Minimax-h3-480p') maxSeconds = 10;
+            const seconds = String(Math.max(minSeconds, Math.min(maxSeconds, Number.isFinite(durationValue) ? durationValue : 5)));
             const metadata = {
                 ratio,
                 resolution: document.getElementById('resolution').value
@@ -6183,16 +6277,83 @@
             if (document.getElementById('generateAudio').checked) {
                 metadata.generate_audio = true;
             }
-            if (content.length) {
+            if (!isMiniMaxH3Model(modelId) && content.length) {
                 metadata.content = content;
             }
 
-            const body = {
-                model: modelId,
-                prompt,
-                seconds,
-                metadata
-            };
+            let body;
+            if (isMiniMaxH3Model(modelId)) {
+                // MiniMax H3 图生视频：走 New API 顶层 image 字段，会被映射为上游 reference_images。
+                // 不能用 metadata.content：New API 在该模型下会把任务判为 textGenerate 并丢弃图片。
+                const miniMaxImage = (content[0] && content[0].image_url && content[0].image_url.url) || imageUrls[0] || '';
+                body = {
+                    model: modelId,
+                    prompt,
+                    duration: Number(seconds) || 5,
+                    image: miniMaxImage || undefined,
+                    metadata: {
+                        aspect_ratio: ratio,
+                        seed: (!isNaN(seedValue) && seedValue >= 0) ? seedValue : undefined,
+                        generate_audio: !!document.getElementById('generateAudio').checked
+                    }
+                };
+                Object.keys(body.metadata).forEach(k => { if (body.metadata[k] === undefined) delete body.metadata[k]; });
+                if (body.image === undefined) delete body.image;
+            } else if (isBailianModel(modelId)) {
+                // 阿里云百炼（HappyHorse / 万相3.0）：按文档走 New API 标准字段
+                //   image                 -> input.media first_frame（i2v / 万相首帧）
+                //   metadata.image_urls   -> input.media reference_image（r2v / 视频编辑参考图）
+                //   metadata.video_url    -> input.media video（视频编辑源视频）
+                //   metadata.media/parameters -> 万相透传
+                const primaryImg = (content[0] && content[0].image_url && content[0].image_url.url) || imageUrls[0] || '';
+                const allImgs = imageUrls.filter(Boolean);
+                const vidUrl = assets.videos.length ? assets.videos[0].url : '';
+                const audioOn = !!document.getElementById('generateAudio').checked;
+                const hasWanRefs = isWan3Model(modelId) && (assets.videos.length > 0 || assets.audios.length > 0 || allImgs.length > 1);
+                const bMeta = { resolution: toDashResolution(document.getElementById('resolution').value) };
+                if (ratio && !isHappyHorseI2V(modelId) && !isHappyHorseVideoEdit(modelId)) bMeta.ratio = ratio;
+                if (!isNaN(seedValue) && seedValue >= 0) bMeta.seed = seedValue;
+                if (audioOn) bMeta.audio = true;
+                if (isWan3Model(modelId)) {
+                    bMeta.parameters = {
+                        resolution: bMeta.resolution,
+                        ratio: (ratio && ratio !== 'adaptive') ? ratio : 'adaptive',
+                        duration: Number(seconds) || 5,
+                        audio: true,
+                        prompt_extend: true
+                    };
+                    if (!isNaN(seedValue) && seedValue >= 0) bMeta.parameters.seed = seedValue;
+                }
+                body = {
+                    model: modelId,
+                    prompt,
+                    duration: Number(seconds) || 5,
+                    metadata: bMeta
+                };
+                if (primaryImg && (isHappyHorseI2V(modelId) || (isWan3Model(modelId) && !hasWanRefs))) {
+                    body.image = primaryImg; // 首帧图
+                }
+                if ((isHappyHorseR2V(modelId) || isHappyHorseVideoEdit(modelId)) && allImgs.length) {
+                    body.metadata.image_urls = allImgs;
+                }
+                if (isHappyHorseVideoEdit(modelId)) {
+                    if (vidUrl) body.metadata.video_url = vidUrl;
+                }
+                if (isWan3Model(modelId) && hasWanRefs) {
+                    const media = [];
+                    allImgs.forEach((u, i) => media.push({ type: 'reference_image', url: u }));
+                    assets.videos.forEach(v => { if (v.url) media.push({ type: 'reference_video', url: v.url }); });
+                    assets.audios.forEach(a => { if (a.url) media.push({ type: 'reference_audio', url: a.url }); });
+                    if (media.length) body.metadata.media = media;
+                }
+            } else {
+                body = {
+                    model: modelId,
+                    prompt,
+                    seconds,
+                    metadata
+                };
+            }
 
             const requestLog = `POST ${baseUrl}/v1/video/generations\nHeaders:\n  Content-Type: application/json\n  Authorization: Bearer ${apiKey.substring(0, 10)}...\nBody:\n${JSON.stringify(body, null, 2)}\n\n等价 curl：\n${buildCurlCommand(baseUrl, apiKey, body)}`;
 
@@ -6336,6 +6497,24 @@
             return 'running';
         }
 
+        // 递归查找任意嵌套层级里的 metadata.url（模型返回的媒体直链，如 volcvideo），
+        // 需要优先于 result_url（官方接口链接）使用
+        function findInfoMediaUrl(value, depth = 0, seen = new Set()) {
+            if (!value || typeof value !== 'object' || depth > 8 || seen.has(value)) return '';
+            seen.add(value);
+            if (value.metadata && typeof value.metadata === 'object') {
+                const u = value.metadata.url || value.metadata.video_url || value.metadata.play_url;
+                if (typeof u === 'string' && /^https?:\/\//i.test(u)) return u;
+            }
+            for (const v of Object.values(value)) {
+                if (v && typeof v === 'object') {
+                    const r = findInfoMediaUrl(v, depth + 1, seen);
+                    if (r) return r;
+                }
+            }
+            return '';
+        }
+
         function extractVideoUrlFromResult(value, depth = 0, seen = new Set()) {
             if (!value || depth > 8) return '';
             if (typeof value === 'string') {
@@ -6343,6 +6522,12 @@
             }
             if (typeof value !== 'object' || seen.has(value)) return '';
             seen.add(value);
+
+            // 顶层只扫一次：任何层级的 metadata.url（媒体直链）优先于 result_url（官方接口链接）
+            if (depth === 0) {
+                const infoMedia = findInfoMediaUrl(value);
+                if (infoMedia) return infoMedia;
+            }
 
             const directUrl = value.video_url || value.result_url || value.url || value.output_url;
             if (typeof directUrl === 'string' && /^https?:\/\//i.test(directUrl)) return directUrl;
@@ -6398,6 +6583,9 @@
                         task.timer = null;
                         task.status = 'succeeded';
                         handleTaskComplete(taskId, result);
+                        // 完成后重新渲染该任务卡片，让预览/下载链接出现在列表中
+                        updateTaskRecordElement(taskId);
+                        saveTaskRecords();
                         addLog('success', `任务执行成功: ${taskId}`, `总耗时: ${task.duration || getTaskDurationText(task)}`, {
                             taskId,
                             taskKind: kind,
@@ -6593,6 +6781,7 @@
                     </div>
                     <div class="task-record-actions" style="margin-bottom: 8px;">
                         ${resultUrl ? `<button class="btn btn-primary btn-sm" onclick="previewTaskResult('${task.id}')">▶️ 预览</button>` : ''}
+                        ${resultUrl ? `<a class="btn btn-success btn-sm" href="${escapeHtml(resultUrl)}" target="_blank" rel="noopener">⬇️ 下载</a>` : ''}
                         <button class="btn btn-secondary btn-sm" onclick="toggleTaskDebug('${task.id}')" id="task-debug-toggle-${task.id}">${task.isDebugOpen ? '📂 收起调试' : '🐛 调试'}</button>
                         <button class="btn btn-danger btn-sm" onclick="removeTaskRecord('${task.id}')">🗑️</button>
                     </div>
