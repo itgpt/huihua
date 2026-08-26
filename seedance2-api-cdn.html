@@ -4905,6 +4905,17 @@
             if (m === '1080p') return '1080P';
             return res || '720P';
         }
+        // 百炼按分辨率计费：模型名追加 -480/-720/-1080 后缀
+        function getBailianResolutionSuffix() {
+            const s = String(document.getElementById('resolution').value || '').toLowerCase().replace(/\s+/g, '').replace(/p$/, '');
+            return ['480', '720', '1080'].includes(s) ? s : '';
+        }
+        function appendBailianResolutionSuffix(modelId) {
+            const suffix = getBailianResolutionSuffix();
+            if (!suffix) return modelId;
+            if (/-\d{3,4}$/.test(modelId)) return modelId; // 已带分辨率后缀，避免重复
+            return modelId + '-' + suffix;
+        }
         // MiniMax H3 的逻辑模型名为 Minimax-h3；实际调用时按「分辨率」映射到具体档位
         function resolveModelId(modelId) {
             if (modelId === 'Minimax-h3') {
@@ -4950,6 +4961,11 @@
                 // 保持 1080p/2k
             } else if (isBailianModel(modelId)) {
                 if (resolutionSelect.value === '2k') resolutionSelect.value = '720p';
+                // HappyHorse 文生/参考生/视频编辑 不支持 480P
+                if (resolutionSelect.value === '480p' &&
+                    (isHappyHorseT2V(modelId) || isHappyHorseR2V(modelId) || isHappyHorseVideoEdit(modelId))) {
+                    resolutionSelect.value = '720p';
+                }
             } else {
                 if (['1080p', '2k'].includes(resolutionSelect.value)) resolutionSelect.value = '720p';
             }
@@ -5046,6 +5062,23 @@
             if (isMiniMaxH3Model(normalizedModelId)) {
                 // MiniMax H3 当前中转不可用：回退到默认可用模型
                 modelSelect.value = 'doubao-seedance-2-0-fast-260128';
+                applyModelParamLimits();
+                saveAllConfigs();
+                return;
+            }
+            if (isBailianModel(normalizedModelId)) {
+                // 拆分分辨率后缀（happyhorse-1.1-t2v-720 -> happyhorse-1.1-t2v + 720p）
+                const suffixMatch = normalizedModelId.match(/^(.*?)-(\d{3,4})$/);
+                const base = suffixMatch ? suffixMatch[1] : normalizedModelId;
+                if (Array.from(modelSelect.options).some(o => o.value === base)) {
+                    modelSelect.value = base;
+                    if (suffixMatch && document.getElementById('resolution')) {
+                        const res = suffixMatch[2].replace(/(\d{3,4})$/, '$1p');
+                        if (['480p', '720p', '1080p'].includes(res)) document.getElementById('resolution').value = res;
+                    }
+                } else {
+                    modelSelect.value = 'doubao-seedance-2-0-fast-260128';
+                }
                 applyModelParamLimits();
                 saveAllConfigs();
                 return;
@@ -6219,6 +6252,21 @@
                 alert('请选择模型');
                 return;
             }
+            // 百炼：图生/参考生/视频编辑需要对应素材（仅素材区 assets.images/videos 会进视频请求）
+            const assetImgCount = assets.images.filter(a => a.url).length;
+            const assetVidCount = assets.videos.filter(a => a.url).length;
+            if (isHappyHorseI2V(modelId) && assetImgCount === 0) {
+                alert('图生视频需要一张首帧图。请在上方「图片/视频/音频素材」区上传图片，而不是「图生图参考」区。');
+                return;
+            }
+            if (isHappyHorseR2V(modelId) && assetImgCount === 0) {
+                alert('参考生视频需要至少 1 张参考图。请在上方「图片/视频/音频素材」区上传图片。');
+                return;
+            }
+            if (isHappyHorseVideoEdit(modelId) && assetVidCount === 0) {
+                alert('视频编辑需要一段源视频。请在上方「图片/视频/音频素材」区上传视频。');
+                return;
+            }
 
             const submitBtn = document.querySelector('button[onclick="submitTask()"]');
             const originalBtnText = submitBtn.innerHTML;
@@ -6325,7 +6373,7 @@
                     if (!isNaN(seedValue) && seedValue >= 0) bMeta.parameters.seed = seedValue;
                 }
                 body = {
-                    model: modelId,
+                    model: appendBailianResolutionSuffix(modelId),
                     prompt,
                     duration: Number(seconds) || 5,
                     metadata: bMeta
