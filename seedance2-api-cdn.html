@@ -6563,6 +6563,55 @@
             return '';
         }
 
+        // 深度优先找一棵树里的真实媒体直链（*.mp4/mov/webm 等），用于优先于 /content 接口链接
+        function findDeepMediaUrl(value, depth = 0, seen = new Set()) {
+            if (!value || depth > 8 || seen.has(value)) return '';
+            if (typeof value === 'string') {
+                return /^https?:\/\/.+(\.mp4|\.mov|\.m4v|\.webm)(\?|#|$)/i.test(value) ? value : '';
+            }
+            if (typeof value !== 'object') return '';
+            seen.add(value);
+            for (const v of Object.values(value)) {
+                if (typeof v === 'string') {
+                    if (/^https?:\/\/.+(\.mp4|\.mov|\.m4v|\.webm)(\?|#|$)/i.test(v)) return v;
+                } else if (v && typeof v === 'object') {
+                    const r = findDeepMediaUrl(v, depth + 1, seen);
+                    if (r) return r;
+                }
+            }
+            return '';
+        }
+
+        // /content 接口链接必须禁用：它需要走服务端鉴权，浏览器视频/下载直接加载会失败
+        function isContentLink(u) {
+            return typeof u === 'string' && /\/content(\?|#|$)/i.test(u);
+        }
+
+        // 把可能是 /content 的链接解析成真实媒体直链；取不到就返回空（绝不返回 /content）
+        async function resolveDirectVideoUrl(url, taskIdHint) {
+            if (!url) return '';
+            if (/\.(mp4|mov|m4v|webm)(\?|#|$)/i.test(url)) return url;
+            if (!isContentLink(url)) return url;
+            let taskId = taskIdHint || '';
+            if (!taskId) {
+                const m = String(url).match(/\/videos\/([^/?#]+)\/content/i);
+                if (m) taskId = m[1];
+            }
+            if (!taskId) return '';
+            try {
+                const apiKey = document.getElementById('apiKey').value.trim();
+                if (!apiKey) return '';
+                const resp = await fetch(`${getEffectiveBaseUrl()}/v1/video/generations/${taskId}`, {
+                    headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' }
+                });
+                const result = await resp.json();
+                const direct = extractVideoUrlFromResult(result);
+                return direct && !isContentLink(direct) ? direct : '';
+            } catch (e) {
+                return '';
+            }
+        }
+
         function extractVideoUrlFromResult(value, depth = 0, seen = new Set()) {
             if (!value || depth > 8) return '';
             if (typeof value === 'string') {
@@ -6575,15 +6624,18 @@
             if (depth === 0) {
                 const infoMedia = findInfoMediaUrl(value);
                 if (infoMedia) return infoMedia;
+                // 优先整棵树里的真实媒体直链（data.data.url 的 mp4），避免拿到 /content 接口链接
+                const directMedia = findDeepMediaUrl(value, 0, new Set());
+                if (directMedia) return directMedia;
             }
 
             const directUrl = value.video_url || value.result_url || value.url || value.output_url;
-            if (typeof directUrl === 'string' && /^https?:\/\//i.test(directUrl)) return directUrl;
-            if (value.metadata?.url && /^https?:\/\//i.test(value.metadata.url)) return value.metadata.url;
-            if (value.video?.url && /^https?:\/\//i.test(value.video.url)) return value.video.url;
-            if (value.content?.video_url && /^https?:\/\//i.test(value.content.video_url)) return value.content.video_url;
-            if (value.task_result?.video_url && /^https?:\/\//i.test(value.task_result.video_url)) return value.task_result.video_url;
-            if (value.result?.video_url && /^https?:\/\//i.test(value.result.video_url)) return value.result.video_url;
+            if (typeof directUrl === 'string' && /^https?:\/\//i.test(directUrl) && !isContentLink(directUrl)) return directUrl;
+            if (value.metadata?.url && /^https?:\/\//i.test(value.metadata.url) && !isContentLink(value.metadata.url)) return value.metadata.url;
+            if (value.video?.url && /^https?:\/\//i.test(value.video.url) && !isContentLink(value.video.url)) return value.video.url;
+            if (value.content?.video_url && /^https?:\/\//i.test(value.content.video_url) && !isContentLink(value.content.video_url)) return value.content.video_url;
+            if (value.task_result?.video_url && /^https?:\/\//i.test(value.task_result.video_url) && !isContentLink(value.task_result.video_url)) return value.task_result.video_url;
+            if (value.result?.video_url && /^https?:\/\//i.test(value.result.video_url) && !isContentLink(value.result.video_url)) return value.result.video_url;
 
             for (const child of Object.values(value)) {
                 const found = extractVideoUrlFromResult(child, depth + 1, seen);
@@ -6925,9 +6977,10 @@
             saveTaskRecords();
         }
 
-        function previewTaskResult(taskId) {
+        async function previewTaskResult(taskId) {
             const task = activeTasks.get(taskId);
-            const resultUrl = getTaskResultUrl(task);
+            const rawUrl = getTaskResultUrl(task);
+            const resultUrl = rawUrl ? await resolveDirectVideoUrl(rawUrl, taskId) : '';
             if (task && resultUrl) {
                 const kind = getTaskKind(task);
                 const previewTitle = kind === 'subtitle_erase'
@@ -7310,10 +7363,11 @@
                 : (item.videoUrl || '');
         }
 
-        function playHistoryResult(index) {
+        async function playHistoryResult(index) {
             const history = JSON.parse(localStorage.getItem('seedance_history') || '[]');
             const item = history[index];
-            const resultUrl = getHistoryResultUrl(item);
+            const rawUrl = getHistoryResultUrl(item);
+            const resultUrl = rawUrl ? await resolveDirectVideoUrl(rawUrl, item.id) : '';
             if (item && resultUrl) {
                 openPreviewWindow(getHistoryMediaType(item), resultUrl, `任务 ID: ${item.id || 'N/A'}`, '历史结果预览');
             }
