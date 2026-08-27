@@ -3681,6 +3681,20 @@
             return resp?.group_id || resp?.asset_group_id || resp?.id || resp?.Result?.Id || resp?.raw?.Result?.Id || '';
         }
 
+        // 把素材库 asset:// 引用解析成真实 http URL（get_asset），SDK/通道才能用；解析失败返回原样
+        async function resolveAssetUrl(url) {
+            if (typeof url !== 'string' || !/^asset:\/\//i.test(url)) return url;
+            const assetId = url.replace(/^asset:\/\//i, '');
+            if (!assetId) return url;
+            try {
+                const resp = await callAssetsApi('GetAsset', { Id: assetId });
+                const realUrl = resp?.url || resp?.URL || resp?.raw?.Result?.URL || resp?.Result?.URL || resp?.Result?.url || '';
+                return realUrl || url;
+            } catch (e) {
+                return url;
+            }
+        }
+
         function getAssetIdFromResponse(resp) {
             return resp?.asset_id || resp?.id || resp?.Result?.Id || resp?.raw?.Result?.Id || '';
         }
@@ -6252,6 +6266,24 @@
                 alert('请选择模型');
                 return;
             }
+            // Seedance 用素材库 asset id（asset://）请求素材；其它模型（万相/百炼等）不支持 asset://，需真实 URL
+            const modelSelectValue = (document.getElementById('model')?.value || '');
+            const isSeedanceModel = /^doubao-seedance-/i.test(modelSelectValue) || /^doubao-seedance-/i.test(modelId);
+            if (isSeedanceModel) {
+                // Seedance：保留 asset://（asset id），不转 URL
+            } else {
+                // 非 Seedance：asset:// -> 真实 http URL；解析失败则保留
+                await Promise.all([
+                    ...assets.images.map(a => resolveAssetUrl(a.url).then(u => { a.url = u; })),
+                    ...assets.videos.map(a => resolveAssetUrl(a.url).then(u => { a.url = u; })),
+                    ...assets.audios.map(a => resolveAssetUrl(a.url).then(u => { a.url = u; }))
+                ]);
+                const hasAssetRef = [...assets.images, ...assets.videos, ...assets.audios].some(a => /^asset:\/\//i.test(a.url || ''));
+                if (hasAssetRef) {
+                    alert('当前模型不支持素材库 asset:// 引用（仅 Seedance 支持）。\n请在「图片/视频/音频素材」区上传真实图片/视频，或粘贴 http(s) 链接后再生成。');
+                    return;
+                }
+            }
             // 百炼：图生/参考生/视频编辑需要对应素材（仅素材区 assets.images/videos 会进视频请求）
             const assetImgCount = assets.images.filter(a => a.url).length;
             const assetVidCount = assets.videos.filter(a => a.url).length;
@@ -6274,7 +6306,7 @@
             submitBtn.disabled = true;
 
             const imageUrls = assets.images.map(img => img.url).filter(Boolean);
-            const primaryImageIndex = imageUrls.findIndex(url => /^https?:\/\//i.test(url) || /^data:image\//i.test(url));
+            const primaryImageIndex = imageUrls.findIndex(url => /^https?:\/\//i.test(url) || /^data:image\//i.test(url) || /^asset:\/\//i.test(url));
             const content = [];
             // 首帧图须放入 content（role=first_frame），并排在最前；
             // new-api 豆包通道在 metadata.content 存在时会丢弃顶层 image 字段，
