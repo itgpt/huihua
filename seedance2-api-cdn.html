@@ -6311,11 +6311,16 @@
             // 首帧图须放入 content（role=first_frame），并排在最前；
             // new-api 豆包通道在 metadata.content 存在时会丢弃顶层 image 字段，
             // 因此首帧不再走 body.image。
+            // Seedance：首帧与参考素材不能混用（first/last frame 不能与 reference media 同请求）。
+            // 多张图或含参考视频时 → 全部走参考生（reference_image/video）；否则单图作为首帧 i2v。
+            const seedanceSelectVal = (document.getElementById('model')?.value || '');
+            const isSeedModel = /^doubao-seedance-/i.test(seedanceSelectVal) || /^doubao-seedance-/i.test(modelId);
+            const useRefMode = isSeedModel && (assets.videos.length > 0 || imageUrls.length > 1);
             imageUrls.forEach((url, index) => {
                 content.push({
                     type: 'image_url',
                     image_url: { url },
-                    role: index === primaryImageIndex ? 'first_frame' : 'reference_image'
+                    role: (isSeedModel && useRefMode) ? 'reference_image' : (index === primaryImageIndex ? 'first_frame' : 'reference_image')
                 });
             });
             if (primaryImageIndex > 0) {
