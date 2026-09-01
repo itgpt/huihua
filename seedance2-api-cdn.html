@@ -6365,6 +6365,10 @@
             if (!isMiniMaxH3Model(modelId) && content.length) {
                 metadata.content = content;
             }
+            // Seedance 首帧/首尾帧：输出比例跟随首帧图，不允许传 ratio（否则报 TaskTypeConstraint）
+            if (isSeedModel && content.some(c => c.role === 'first_frame')) {
+                delete metadata.ratio;
+            }
 
             let body;
             if (isMiniMaxH3Model(modelId)) {
