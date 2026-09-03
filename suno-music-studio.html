@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suno AI 音乐工作室 - 本地工具</title>
+<style>
+  :root {
+    --bg-primary: #0f0f14;
+    --bg-secondary: #1a1a24;
+    --bg-tertiary: #252532;
+    --bg-input: #1e1e2a;
+    --border: #2e2e3e;
+    --text-primary: #e8e8f0;
+    --text-secondary: #9898a8;
+    --text-muted: #686878;
+    --accent: #4f8cff;
+    --accent-hover: #6ba0ff;
+    --accent-glow: rgba(79, 140, 255, 0.15);
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+  /* 顶部导航 */
+  .header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), #7c5cff);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .api-status {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--danger);
+  }
+  .status-dot.active { background: var(--success); }
+  .btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { border-color: var(--accent); background: var(--accent-glow); }
+  .btn-primary {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-danger { border-color: var(--danger); color: var(--danger); }
+  .btn-danger:hover { background: rgba(248,113,113,0.1); }
+
+  /* 主体布局 */
+  .main {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    min-height: calc(100vh - 60px);
+  }
+  /* 侧边栏 */
+  .sidebar {
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  .nav-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: flex; align-items: center; gap: 10px;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+  .nav-item.active {
+    color: var(--accent);
+    background: var(--accent-glow);
+    border-left-color: var(--accent);
+  }
+  .nav-section {
+    padding: 16px 20px 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+  /* 内容区 */
+  .content { padding: 24px; max-width: 1100px; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-title {
+    font-size: 22px; font-weight: 700; margin-bottom: 6px;
+  }
+  .page-desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+
+  /* 卡片 */
+  .card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 15px; font-weight: 600; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  /* 表单 */
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block; font-size: 13px; color: var(--text-secondary);
+    margin-bottom: 6px; font-weight: 500;
+  }
+  .form-label .required { color: var(--danger); }
+  .form-label .hint { color: var(--text-muted); font-weight: 400; font-size: 12px; }
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none; border-color: var(--accent);
+  }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.7; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  /* 开关 */
+  .toggle-group { display: flex; gap: 8px; }
+  .toggle-btn {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+  .toggle-btn.active {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+    color: var(--accent);
+  }
+  /* 标签输入 */
+  .tag-input-wrap {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    min-height: 42px;
+    align-items: center;
+  }
+  .tag-input-wrap:focus-within { border-color: var(--accent); }
+  .tag {
+    background: var(--accent-glow);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .tag-remove { cursor: pointer; opacity: 0.7; }
+  .tag-remove:hover { opacity: 1; }
+  .tag-input {
+    flex: 1; min-width: 100px;
+    border: none !important; background: transparent !important;
+    padding: 4px !important; outline: none;
+  }
+  /* 结果卡片 */
+  .result-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .result-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .result-title { font-size: 15px; font-weight: 600; }
+  .result-status {
+    font-size: 12px; padding: 3px 10px; border-radius: 12px;
+  }
+  .status-pending { background: rgba(251,191,36,0.15); color: var(--warning); }
+  .status-running { background: rgba(79,140,255,0.15); color: var(--accent); }
+  .status-success { background: rgba(74,222,128,0.15); color: var(--success); }
+  .status-failed { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .result-body { padding: 18px; }
+  .result-media {
+    display: grid; grid-template-columns: 200px 1fr; gap: 18px;
+  }
+  .result-cover {
+    width: 200px; height: 200px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    object-fit: cover;
+  }
+  .result-info { display: flex; flex-direction: column; gap: 10px; }
+  .result-meta { font-size: 13px; color: var(--text-secondary); }
+  .result-meta span { color: var(--text-primary); }
+  audio { width: 100%; border-radius: var(--radius-sm); }
+  video { width: 100%; border-radius: var(--radius-sm); background: #000; }
+  .result-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .result-prompt {
+    margin-top: 14px;
+    padding: 12px;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  /* 历史列表 */
+  .history-item {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .history-item:hover { background: var(--bg-tertiary); }
+  .history-item:last-child { border-bottom: none; }
+  .history-thumb {
+    width: 48px; height: 48px; border-radius: 6px;
+    background: var(--bg-tertiary); object-fit: cover;
+  }
+  .history-info { flex: 1; min-width: 0; }
+  .history-title { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--text-muted);
+  }
+  .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+  /* 加载动画 */
+  .loading { display: inline-flex; align-items: center; gap: 8px; }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  /* Toast */
+  .toast-container {
+    position: fixed; top: 72px; right: 24px; z-index: 1000;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast {
+    padding: 12px 18px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
+    max-width: 360px;
+  }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast.error { border-left: 3px solid var(--danger); }
+  .toast.info { border-left: 3px solid var(--accent); }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  /* 模态框 */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: none; align-items: center; justify-content: center; z-index: 200;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 90%; max-width: 500px;
+  }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  /* 歌词展示 */
+  .lyrics-box {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    line-height: 1.8;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  /* 进度条 */
+  .progress-bar {
+    height: 4px; background: var(--bg-tertiary);
+    border-radius: 2px; overflow: hidden; margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent);
+    border-radius: 2px; transition: width 0.3s;
+  }
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  /* 移动端导航栏（默认隐藏，手机显示） */
+  .mobile-nav {
+    display: none;
+    position: sticky;
+    top: 60px;
+    z-index: 90;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+  .mobile-nav-inner {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0 8px;
+  }
+  .mobile-nav-inner::-webkit-scrollbar { display: none; }
+  .mobile-nav-item {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 5px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .mobile-nav-item.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  /* 响应式 */
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .mobile-nav { display: block; }
+    .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    .result-media { grid-template-columns: 1fr; }
+    .result-cover { width: 100%; height: auto; aspect-ratio: 1; }
+    .content { padding: 14px; }
+    .page-title { font-size: 19px; }
+    .header { padding: 0 14px; height: 56px; }
+    .logo { font-size: 16px; }
+    .logo-icon { width: 28px; height: 28px; font-size: 14px; }
+    .api-status { display: none; }
+    .btn { padding: 9px 16px; font-size: 14px; }
+    .btn-sm { padding: 7px 12px; }
+    textarea, input[type="text"], input[type="number"], select { font-size: 16px; }
+    .result-card { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 顶部 -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">🎵</div>
+    <span>Suno AI 音乐工作室</span>
+  </div>
+  <div class="header-right">
+    <div class="api-status">
+      <div class="status-dot" id="apiStatusDot"></div>
+      <span id="apiStatusText">未配置 API Key</span>
+    </div>
+    <button class="btn btn-sm" onclick="openSettings()">⚙️ 设置</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- 移动端导航栏（仅手机显示） -->
+  <div class="mobile-nav">
+    <div class="mobile-nav-inner">
+      <div class="mobile-nav-item active" data-page="generate" onclick="switchPage('generate')"><span>🎼</span>生成</div>
+      <div class="mobile-nav-item" data-page="lyrics" onclick="switchPage('lyrics')"><span>📝</span>歌词</div>
+      <div class="mobile-nav-item" data-page="query" onclick="switchPage('query')"><span>🔍</span>查询</div>
+      <div class="mobile-nav-item" data-page="tools" onclick="switchPage('tools')" style="display:none"><span>🛠️</span>处理</div>
+      <div class="mobile-nav-item" data-page="upload" onclick="switchPage('upload')"><span>📤</span>上传</div>
+      <div class="mobile-nav-item" data-page="stem" onclick="switchPage('stem')"><span>🎚️</span>分离</div>
+      <div class="mobile-nav-item" data-page="cover" onclick="switchPage('cover')"><span>🎤</span>翻唱</div>
+      <div class="mobile-nav-item" data-page="history" onclick="switchPage('history')"><span>📚</span>历史</div>
+    </div>
+  </div>
+
+  <!-- 侧边栏 -->
+  <div class="sidebar">
+    <div class="nav-section">核心功能</div>
+    <div class="nav-item active" data-page="generate" onclick="switchPage('generate')">
+      <span>🎼</span> 生成音乐
+    </div>
+    <div class="nav-item" data-page="lyrics" onclick="switchPage('lyrics')">
+      <span>📝</span> 生成歌词
+    </div>
+    <div class="nav-item" data-page="query" onclick="switchPage('query')">
+      <span>🔍</span> 任务查询
+    </div>
+    <div class="nav-section">音频工具</div>
+    <div class="nav-item" data-page="tools" onclick="switchPage('tools')" style="display:none">
+      <span>🛠️</span> 音频处理
+    </div>
+    <div class="nav-item" data-page="upload" onclick="switchPage('upload')">
+      <span>📤</span> 上传音频
+    </div>
+    <div class="nav-item" data-page="stem" onclick="switchPage('stem')">
+      <span>🎚️</span> 声曲分离
+    </div>
+    <div class="nav-item" data-page="cover" onclick="switchPage('cover')">
+      <span>🎤</span> 翻唱
+    </div>
+    <div class="nav-section">记录</div>
+    <div class="nav-item" data-page="history" onclick="switchPage('history')">
+      <span>📚</span> 历史记录
+    </div>
+  </div>
+
+  <!-- 内容区 -->
+  <div class="content">
+
+    <!-- 生成音乐页面 -->
+    <div class="page active" id="page-generate">
+      <div class="page-title">生成音乐</div>
+      <div class="page-desc">使用 Suno AI 生成原创音乐，支持灵感模式和自定义歌词模式</div>
+
+      <div class="card">
+        <div class="card-title">🎵 生成参数</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">生成模式 <span class="required">*</span></label>
+            <div class="toggle-group">
+              <div class="toggle-btn active" id="modeInspire" onclick="setMode(0)">✨ 灵感模式</div>
+              <div class="toggle-btn" id="modeCustom" onclick="setMode(1)">📝 自定义模式</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">音乐类型 <span class="required">*</span></label>
+            <div class="toggle-group">
+              <div class="toggle-btn active" id="vocalNo" onclick="setInstrumental(0)">🎤 带人声</div>
+              <div class="toggle-btn" id="vocalYes" onclick="setInstrumental(1)">🎹 纯音乐</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">模型版本</label>
+            <select id="mv">
+              <option value="chirp-v4-5">chirp-v4-5 (最新)</option>
+              <option value="chirp-fenix">chirp-fenix (5.5)</option>
+              <option value="chirp-v4">chirp-v4</option>
+              <option value="chirp-v3-5" selected>chirp-v3-5 (默认)</option>
+              <option value="chirp-bluejay">chirp-bluejay</option>
+              <option value="chirp-auk">chirp-auk (声曲分离)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">歌曲标题</label>
+            <input type="text" id="title" placeholder="例如：夏日微风">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" id="promptLabel">
+            音乐描述 <span class="hint">（灵感模式，最多200字，描述你想要的音乐风格和主题）</span>
+          </label>
+          <textarea id="prompt" placeholder="例如：一首充满夏日气息的流行歌曲，轻快的旋律，关于青春和友谊"></textarea>
+        </div>
+
+        <div class="form-group" id="tagsGroup">
+          <label class="form-label">风格标签 <span class="hint">（最多120字，用逗号分隔，如：pop, upbeat, summer）</span></label>
+          <input type="text" id="tags" placeholder="pop, upbeat, electronic, female vocal">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">排除风格 <span class="hint">（可选，不想要的音乐风格）</span></label>
+          <input type="text" id="negative_tags" placeholder="例如：dance pop, heavy metal">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">GPT 描述提示词 <span class="hint">（新增，用于指导歌词生成方向）</span></label>
+          <input type="text" id="gpt_description_prompt" placeholder="例如：写一首关于夏天的歌">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">声音性别 <span class="hint">（v4.5高级参数）</span></label>
+            <select id="vocal_gender">
+              <option value="">不指定</option>
+              <option value="f">女声 (f)</option>
+              <option value="m">男声 (m)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">创建模式</label>
+            <select id="create_mode">
+              <option value="">默认</option>
+              <option value="custom">自定义 (custom)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 续写/翻唱参数 -->
+        <details style="margin-bottom: 16px;">
+          <summary style="cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-secondary); padding: 8px 0;">🔗 续写 / 翻唱参数</summary>
+          <div style="padding-top: 12px;">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">续写时间（秒）</label>
+                <input type="number" id="continue_at" placeholder="例如：10" step="0.1" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">续写 ID（clip_id）</label>
+                <input type="text" id="continue_clip_id" placeholder="要续写的音乐ID">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">翻唱 ID（cover_clip_id）</label>
+              <input type="text" id="cover_clip_id" placeholder="要翻唱的音乐ID">
+            </div>
+          </div>
+        </details>
+
+        <!-- 高级控制滑块 -->
+        <details style="margin-bottom: 16px;">
+          <summary style="cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-secondary); padding: 8px 0;">🎛️ v4.5 高级控制滑块</summary>
+          <div style="padding-top: 12px;">
+            <div class="form-group">
+              <label class="form-label">风格参考度 (style_weight) <span id="styleWeightVal">0.87</span></label>
+              <input type="range" id="style_weight" min="0" max="1" step="0.01" value="0.87" style="width: 100%;" oninput="document.getElementById('styleWeightVal').textContent=this.value">
+            </div>
+            <div class="form-group">
+              <label class="form-label">怪异约束度 (weirdness_constraint) <span id="weirdnessVal">0.75</span></label>
+              <input type="range" id="weirdness_constraint" min="0" max="1" step="0.01" value="0.75" style="width: 100%;" oninput="document.getElementById('weirdnessVal').textContent=this.value">
+            </div>
+            <div class="form-group">
+              <label class="form-label">音频参考度 (audio_weight) <span id="audioWeightVal">0.89</span> <span class="hint">（仅上传音乐的延长/翻唱）</span></label>
+              <input type="range" id="audio_weight" min="0" max="1" step="0.01" value="0.89" style="width: 100%;" oninput="document.getElementById('audioWeightVal').textContent=this.value">
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+              启用高级控制后将发送 metadata 参数。如需禁用，将创建模式设为"不指定"且声音性别设为"不指定"。
+            </div>
+          </div>
+        </details>
+
+        <div style="margin-top: 20px;">
+          <button class="btn btn-primary" id="generateBtn" onclick="generateMusic()" style="padding: 12px 32px; font-size: 15px;">
+            🚀 开始生成
+          </button>
+          <span style="margin-left: 12px; font-size: 13px; color: var(--text-muted;">每次生成会返回2个版本</span>
+        </div>
+      </div>
+
+      <!-- 生成结果 -->
+      <div id="generateResults"></div>
+    </div>
+
+    <!-- 生成歌词页面 -->
+    <div class="page" id="page-lyrics">
+      <div class="page-title">生成歌词</div>
+      <div class="page-desc">根据主题描述生成完整歌词，可直接用于自定义模式生成音乐</div>
+
+      <div class="card">
+        <div class="card-title">📝 歌词生成</div>
+        <div class="form-group">
+          <label class="form-label">主题描述 <span class="required">*</span></label>
+          <textarea id="lyricsPrompt" placeholder="例如：一首关于离别的抒情歌曲，表达对过去的怀念和对未来的期待" style="min-height: 80px;"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="generateLyrics()">✨ 生成歌词</button>
+      </div>
+
+      <div id="lyricsResult"></div>
+    </div>
+
+    <!-- 任务查询页面 -->
+    <div class="page" id="page-query">
+      <div class="page-title">任务查询</div>
+      <div class="page-desc">通过 task_id 查询音乐生成任务的状态和结果</div>
+
+      <div class="card">
+        <div class="card-title">🔍 查询任务</div>
+        <div class="form-group">
+          <label class="form-label">Task ID</label>
+          <input type="text" id="queryTaskId" placeholder="输入生成音乐返回的 task_id">
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button class="btn btn-primary" onclick="queryTask()">查询</button>
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
+            <input type="checkbox" id="autoPoll" checked style="width: auto;"> 自动轮询（直到完成）
+          </label>
+        </div>
+      </div>
+
+      <div id="queryResult"></div>
+    </div>
+
+    <!-- 音频处理工具页面 -->
+    <div class="page" id="page-tools" style="display:none">
+      <div class="page-title">音频处理工具</div>
+      <div class="page-desc">对已生成的音乐进行转WAV、变速、裁剪、生成MIDI等操作</div>
+
+      <div class="card">
+        <div class="card-title">⚡ 快速操作</div>
+        <div class="form-group">
+          <label class="form-label">Task ID <span class="required">*</span> <span class="hint">（已生成的音乐任务ID）</span></label>
+          <input type="text" id="toolTaskId" placeholder="输入音乐 task_id">
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+          <button class="btn" onclick="toolAction('wav')">📀 转 WAV</button>
+          <button class="btn" onclick="toolAction('midi')">🎹 生成 MIDI</button>
+          <button class="btn" onclick="toolAction('video')">🎬 生成视频</button>
+          <button class="btn" onclick="toolAction('timing')">⏱️ 歌词时间线</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎚️ 调整速度</div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label">速度倍率</label>
+            <input type="number" id="speedMultiplier" value="1" step="0.25" min="0.25" max="4">
+          </div>
+          <div class="form-group">
+            <label class="form-label">保持音调</label>
+            <select id="keepPitch">
+              <option value="true" selected>是</option>
+              <option value="false">否</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">输出标题</label>
+            <input type="text" id="speedTitle" placeholder="可选">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="adjustSpeed()">应用变速</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">✂️ 裁剪音乐</div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label">开始时间（秒）</label>
+            <input type="number" id="cropStart" value="0" step="0.1" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">结束时间（秒）</label>
+            <input type="number" id="cropEnd" value="30" step="0.1" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">删除选中部分</label>
+            <select id="cropRemove">
+              <option value="false" selected>保留选中部分</option>
+              <option value="true">删除选中部分</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="cropMusic()">裁剪</button>
+      </div>
+
+      <div id="toolResult"></div>
+    </div>
+
+    <!-- 上传音频页面 -->
+    <div class="page" id="page-upload">
+      <div class="page-title">上传音频</div>
+      <div class="page-desc">上传外部音频文件用于翻唱、续写等操作</div>
+
+      <div class="card">
+        <div class="card-title">📤 上传音频</div>
+        <div class="form-group">
+          <label class="form-label">音频文件 URL <span class="required">*</span> <span class="hint">（需为互联网可访问的音频链接）</span></label>
+          <input type="text" id="uploadFileUrl" placeholder="https://example.com/audio.mp3">
+        </div>
+        <div class="form-group">
+          <label class="form-label">文件扩展名</label>
+          <select id="uploadExtension">
+            <option value="mp3" selected>mp3</option>
+            <option value="wav">wav</option>
+            <option value="m4a">m4a</option>
+            <option value="flac">flac</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="uploadAudio()">上传</button>
+      </div>
+
+      <div id="uploadResult"></div>
+    </div>
+
+    <!-- 声曲分离页面 -->
+    <div class="page" id="page-stem">
+      <div class="page-title">声曲分离</div>
+      <div class="page-desc">使用 chirp-auk 模型将歌曲分离为独立音轨（人声/伴奏等），支持2组或最多12组分离</div>
+
+      <div class="card">
+        <div class="card-title">🎚️ 全轨声曲分离</div>
+        <div class="form-group">
+          <label class="form-label">音乐 ID (clip_id) <span class="required">*</span> <span class="hint">（suno官方音乐ID，即生成音乐返回的 clip_id）</span></label>
+          <input type="text" id="stem_clip_id" placeholder="例如：23c334d7-2e25-4fc9-a58b-9eb5a8d64220">
+        </div>
+        <div class="form-group">
+          <label class="form-label">分离模式 <span class="required">*</span></label>
+          <div class="toggle-group">
+            <div class="toggle-btn active" id="stemTwo" onclick="setStemMode('two')">🎵 分离2组（2倍计费）</div>
+            <div class="toggle-btn" id="stemTwelve" onclick="setStemMode('twelve')">🎛️ 分离12组（5倍计费）</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">回调 URL <span class="hint">（可选，任务完成后回调通知）</span></label>
+          <input type="text" id="stem_callback" placeholder="https://your-webhook-url.com">
+        </div>
+        <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 12px; font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+          <strong>说明：</strong>声曲分离使用 chirp-auk 模型，task 为 gen_stem。可跨账号使用。分离生成两组按2倍音乐生成计费，12组按5倍基础价格计费。
+        </div>
+        <button class="btn btn-primary" onclick="generateStem()" style="padding: 12px 32px; font-size: 15px;">
+          🚀 开始分离
+        </button>
+      </div>
+
+      <div id="stemResults"></div>
+    </div>
+
+    <!-- 翻唱页面 -->
+    <div class="page" id="page-cover">
+      <div class="page-title">翻唱</div>
+      <div class="page-desc">基于已有音乐进行翻唱，传入原音乐 ID 和新歌词/描述即可生成翻唱版本</div>
+
+      <!-- 上传本地音乐 -->
+      <div class="card">
+        <div class="card-title">📤 上传本地音乐（可选）</div>
+        <div class="form-group">
+          <label class="form-label">选择本地音频文件 <span class="hint">（支持 mp3/wav/m4a/flac，上传后自动获取 audio_id 用于翻唱）</span></label>
+          <input type="file" id="coverFileInput" accept="audio/*" style="padding: 10px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); width: 100%;">
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="uploadLocalAudioForCover()" id="uploadCoverBtn">⬆️ 上传并获取 ID</button>
+          <span id="uploadCoverStatus" style="font-size: 13px; color: var(--text-secondary);"></span>
+        </div>
+        <div id="uploadCoverProgress" style="display: none; margin-top: 12px;">
+          <div class="progress-bar"><div class="progress-fill" id="uploadCoverProgressBar" style="width: 0%;"></div></div>
+          <div id="uploadCoverProgressText" style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">准备上传...</div>
+        </div>
+        <div style="margin-top: 12px; font-size: 12px; color: var(--text-muted);">
+          说明：本地文件会先上传到临时文件托管服务获取公开 URL，再调用 API 上传音频。文件仅用于本次翻唱，不会长期保存。
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎤 翻唱参数</div>
+
+        <div class="form-group">
+          <label class="form-label">原音乐 ID (cover_clip_id) <span class="required">*</span> <span class="hint">（要翻唱的音乐 clip_id，即生成音乐返回的官方ID）</span></label>
+          <input type="text" id="cover_clip_id_input" placeholder="例如：23c334d7-2e25-4fc9-a58b-9eb5a8d64220">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">模型版本</label>
+            <select id="cover_mv">
+              <option value="chirp-v4-5">chirp-v4-5 (最新)</option>
+              <option value="chirp-fenix">chirp-fenix (5.5)</option>
+              <option value="chirp-v4">chirp-v4</option>
+              <option value="chirp-v3-5" selected>chirp-v3-5 (默认)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">歌曲标题</label>
+            <input type="text" id="cover_title" placeholder="翻唱版本标题">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">翻唱歌词/描述 <span class="hint">（自定义歌词模式下填写新歌词；灵感模式下填写风格描述）</span></label>
+          <textarea id="cover_prompt" placeholder="[Verse]&#10;新的歌词内容...&#10;&#10;[Chorus]&#10;..." style="min-height: 120px;"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">生成模式</label>
+            <div class="toggle-group">
+              <div class="toggle-btn active" id="coverModeInspire" onclick="setCoverMode(0)">✨ 灵感模式</div>
+              <div class="toggle-btn" id="coverModeCustom" onclick="setCoverMode(1)">📝 自定义歌词</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">声音性别</label>
+            <select id="cover_vocal_gender">
+              <option value="">不指定</option>
+              <option value="f">女声 (f)</option>
+              <option value="m">男声 (m)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">风格标签 <span class="hint">（可选，覆盖原曲风格）</span></label>
+          <input type="text" id="cover_tags" placeholder="例如：rock, acoustic, male vocal">
+        </div>
+
+        <details style="margin-bottom: 16px;">
+          <summary style="cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-secondary); padding: 8px 0;">🎛️ 高级控制滑块</summary>
+          <div style="padding-top: 12px;">
+            <div class="form-group">
+              <label class="form-label">风格参考度 (style_weight) <span id="coverStyleWeightVal">0.87</span></label>
+              <input type="range" id="cover_style_weight" min="0" max="1" step="0.01" value="0.87" style="width: 100%;" oninput="document.getElementById('coverStyleWeightVal').textContent=this.value">
+            </div>
+            <div class="form-group">
+              <label class="form-label">怪异约束度 (weirdness_constraint) <span id="coverWeirdnessVal">0.75</span></label>
+              <input type="range" id="cover_weirdness_constraint" min="0" max="1" step="0.01" value="0.75" style="width: 100%;" oninput="document.getElementById('coverWeirdnessVal').textContent=this.value">
+            </div>
+            <div class="form-group">
+              <label class="form-label">音频参考度 (audio_weight) <span id="coverAudioWeightVal">0.89</span> <span class="hint">（翻唱时建议调高，保留原曲旋律）</span></label>
+              <input type="range" id="cover_audio_weight" min="0" max="1" step="0.01" value="0.89" style="width: 100%;" oninput="document.getElementById('coverAudioWeightVal').textContent=this.value">
+            </div>
+          </div>
+        </details>
+
+        <div style="background: var(--bg-input); border-radius: var(--radius-sm); padding: 12px; font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+          <strong>翻唱说明：</strong>传入原音乐的 clip_id，配合新歌词或风格描述，即可生成翻唱版本。自定义歌词模式下会使用你提供的歌词；灵感模式下 AI 会基于原曲风格自动创作。<br><br>
+          <strong style="color: var(--warning);">⚠️ 注意：</strong>翻唱功能建议使用 <strong>chirp-v3-5</strong> 或 <strong>chirp-v4</strong> 模型，<strong>chirp-fenix 等新模型可能不支持翻唱</strong>。音频参考度建议调高以保留原曲旋律特征。
+        </div>
+
+        <button class="btn btn-primary" onclick="generateCover()" style="padding: 12px 32px; font-size: 15px;">
+          🎤 开始翻唱
+        </button>
+      </div>
+
+      <div id="coverResults"></div>
+    </div>
+
+    <!-- 历史记录页面 -->
+    <div class="page" id="page-history">
+      <div class="page-title">历史记录</div>
+      <div class="page-desc">本地保存的生成历史记录（数据仅保存在浏览器中）</div>
+
+      <div class="card" style="padding: 0;">
+        <div id="historyList"></div>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑️ 清空历史记录</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 设置模态框 -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-title">⚙️ API 设置</div>
+    <div class="form-group">
+      <label class="form-label">API Key <span class="required">*</span></label>
+      <input type="text" id="apiKeyInput" placeholder="输入你的 API Key">
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">
+        API Key 仅保存在本地浏览器中，不会上传到任何服务器
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">API 基础地址</label>
+      <input type="text" id="apiBaseInput" placeholder="http(s)://api.wanwuhuanxin.cn">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeSettings()">取消</button>
+      <button class="btn btn-primary" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast 容器 -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ==================== 全局状态 ====================
+// API 地址自动匹配协议：页面是 HTTPS(对象存储/服务器) 时自动用 https 调用，避免混合内容被拦截
+// api.wanwuhuanxin.cn 网关已开放 CORS，直接使用 https 直连即可（避免 file:// 时误用 http）
+const DEFAULT_API_BASE = 'https://api.wanwuhuanxin.cn';
+let savedBase = localStorage.getItem('suno_api_base') || '';
+// 若页面是 HTTPS 但已存的是 HTTP 地址，自动修正为 HTTPS（解决对象存储混合内容拦截）
+if (window.location.protocol === 'https:' && savedBase.startsWith('http://api.wanwuhuanxin.cn')) {
+  savedBase = 'https://api.wanwuhuanxin.cn';
+  localStorage.setItem('suno_api_base', savedBase);
+}
+let config = {
+  apiKey: localStorage.getItem('suno_api_key') || '',
+  apiBase: savedBase || DEFAULT_API_BASE
+};
+let currentMode = 0; // 0=灵感模式, 1=自定义模式
+let currentInstrumental = 0; // 0=带人声, 1=纯音乐
+let currentStemMode = 'two'; // 声曲分离模式: two/twelve
+let currentCoverMode = 0; // 翻唱模式: 0=灵感模式, 1=自定义歌词
+let pollTimers = {}; // 轮询定时器
+
+// ==================== 初始化 ====================
+function init() {
+  updateApiStatus();
+  renderHistory();
+  // 如果没有配置API Key，自动弹出设置
+  if (!config.apiKey) {
+    setTimeout(openSettings, 500);
+  }
+}
+
+// ==================== API 状态 ====================
+function updateApiStatus() {
+  const dot = document.getElementById('apiStatusDot');
+  const text = document.getElementById('apiStatusText');
+  if (config.apiKey) {
+    dot.classList.add('active');
+    text.textContent = 'API 已配置';
+  } else {
+    dot.classList.remove('active');
+    text.textContent = '未配置 API Key';
+  }
+}
+
+// ==================== 设置 ====================
+function openSettings() {
+  document.getElementById('apiKeyInput').value = config.apiKey;
+  document.getElementById('apiBaseInput').value = config.apiBase;
+  document.getElementById('settingsModal').classList.add('active');
+}
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('active');
+}
+function saveSettings() {
+  config.apiKey = document.getElementById('apiKeyInput').value.trim();
+  config.apiBase = document.getElementById('apiBaseInput').value.trim() || DEFAULT_API_BASE;
+  localStorage.setItem('suno_api_key', config.apiKey);
+  localStorage.setItem('suno_api_base', config.apiBase);
+  updateApiStatus();
+  closeSettings();
+  showToast('API 设置已保存', 'success');
+}
+
+// ==================== 页面切换 ====================
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+  document.querySelector(`.mobile-nav-item[data-page="${page}"]`).classList.add('active');
+}
+
+// ==================== 模式切换 ====================
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeInspire').classList.toggle('active', mode === 0);
+  document.getElementById('modeCustom').classList.toggle('active', mode === 1);
+  const label = document.getElementById('promptLabel');
+  const input = document.getElementById('prompt');
+  if (mode === 0) {
+    label.innerHTML = '音乐描述 <span class="hint">（灵感模式，最多200字，描述你想要的音乐风格和主题）</span>';
+    input.placeholder = '例如：一首充满夏日气息的流行歌曲，轻快的旋律，关于青春和友谊';
+  } else {
+    label.innerHTML = '自定义歌词 <span class="hint">（自定义模式，最多3000字，支持 [Verse] [Chorus] 等结构标记）</span>';
+    input.placeholder = '[Verse]\n夜晚的微风轻轻吹过\n...\n\n[Chorus]\n...';
+  }
+}
+
+function setInstrumental(val) {
+  currentInstrumental = val;
+  document.getElementById('vocalNo').classList.toggle('active', val === 0);
+  document.getElementById('vocalYes').classList.toggle('active', val === 1);
+}
+
+// ==================== API 请求封装 ====================
+// ==================== New API Suno 适配 ====================
+function parseBoolLike(v) {
+  if (v === true || v === 'true' || v === 1 || v === '1') return true;
+  return false;
+}
+
+function isOkResult(result) {
+  return !!(result && (result.code === 'success' || result.code === 200 || result.code === '1' || result.code === 0));
+}
+function mapApiEndpoint(endpoint) {
+  const base = config.apiBase || DEFAULT_API_BASE;
+  const feedMatch = endpoint.match(/^\/api\/suno\/feed\?task_id=([^&]+)/);
+  if (feedMatch) return { url: base + '/suno/fetch/' + decodeURIComponent(feedMatch[1]), method: 'GET' };
+  const toolMap = {
+    '/api/suno/speed': '/suno/submit/speed',
+    '/api/suno/crop': '/suno/submit/crop',
+    '/api/suno/wav': '/suno/submit/wav',
+    '/api/suno/midi': '/suno/submit/midi',
+    '/api/suno/video': '/suno/submit/video',
+    '/api/suno/timing': '/suno/submit/timing'
+  };
+  if (toolMap[endpoint]) return { url: base + toolMap[endpoint], method: 'POST' };
+  if (endpoint === '/api/suno/generate') return { url: base + '/suno/submit/music', method: 'POST', newApiModel: 'suno_music' };
+  if (endpoint === '/api/suno/lyrics') return { url: base + '/suno/submit/lyrics', method: 'POST', newApiModel: 'suno_lyrics' };
+  if (endpoint === '/api/suno/uploads/audio') return { url: base + '/suno/uploads/audio-url', method: 'POST' };
+  return { url: base + endpoint, method: null };
+}
+const NEWAPI_STATUS_STATE = { NOT_START:'pending', SUBMITTED:'pending', QUEUED:'pending', IN_PROGRESS:'running', SUCCESS:'succeeded', FAILURE:'failed' };
+function normalizeApiResponse(endpoint, result) {
+  const ok = isOkResult(result);
+  if (/\/api\/suno\/feed/.test(endpoint)) {
+    const task = (result && result.data) || {};
+    if (task && typeof task === 'object' && NEWAPI_STATUS_STATE[task.status]) task.state = NEWAPI_STATUS_STATE[task.status];
+    return { code: ok ? 200 : (result && result.code) || 0, msg: (result && (result.message || result.msg)) || '', data: task };
+  }
+  if (ok && result && result.data !== undefined && result.data !== null) {
+    const d = result.data;
+    let id = null;
+    if (typeof d === 'string' || typeof d === 'number') id = String(d);
+    else if (d && d.task_id) id = String(d.task_id);
+    else if (Array.isArray(d) && d[0]) id = d[0].task_id || d[0];
+    return { code: 200, msg: (result.message || result.msg) || '成功', data: id ? [{ task_id: id }] : (Array.isArray(d) ? d : []) };
+  }
+  return { code: ok ? 200 : (result && result.code) || 0, msg: (result && (result.message || result.msg)) || '未知错误', data: result && result.data };
+}
+function extractTaskIds(result) {
+  const d = result && result.data;
+  if (Array.isArray(d)) return d.map(x => x && (x.task_id || x)).filter(Boolean);
+  if (typeof d === 'string' || typeof d === 'number') return [String(d)];
+  if (d && d.task_id) return [String(d.task_id)];
+  return [];
+}
+
+async function apiRequest(endpoint, method = 'GET', data = null, isJson = true) {
+  if (!config.apiKey) {
+    showToast('请先配置 API Key', 'error');
+    openSettings();
+    throw new Error('No API Key');
+  }
+
+  const _m = mapApiEndpoint(endpoint);
+  const url = _m.url;
+  const _method = _m.method || method;
+  const headers = {
+    'Authorization': 'Bearer ' + config.apiKey
+  };
+
+  let body = null;
+  if (data) {
+    const payload = { ...data };
+    if (_m.newApiModel && !payload.model) payload.model = _m.newApiModel;
+    // New API 的 Go 结构体要求 make_instrumental / custom_mode 为 bool（前端可能传 0/1）
+    if (payload.make_instrumental !== undefined) payload.make_instrumental = parseBoolLike(payload.make_instrumental);
+    if (payload.custom_mode !== undefined) payload.custom_mode = parseBoolLike(payload.custom_mode);
+    headers['Content-Type'] = 'application/json';
+    body = JSON.stringify(payload);
+  }
+
+  try {
+    const res = await fetch(url, { method: _method, headers, body });
+    const result = await res.json();
+    return normalizeApiResponse(endpoint, result);
+  } catch (err) {
+    console.error('API Request Error:', err);
+    if (err.message.includes('Failed to fetch') || err.message.includes('CORS')) {
+      showToast('网络请求失败，可能是跨域(CORS)限制。请确保API服务允许跨域访问，或使用浏览器插件解决。', 'error', 5000);
+    } else {
+      showToast('请求失败: ' + err.message, 'error');
+    }
+    throw err;
+  }
+}
+
+// ==================== 生成音乐 ====================
+async function generateMusic() {
+  const prompt = document.getElementById('prompt').value.trim();
+  const title = document.getElementById('title').value.trim();
+  const tags = document.getElementById('tags').value.trim();
+  const negative_tags = document.getElementById('negative_tags').value.trim();
+  const mv = document.getElementById('mv').value;
+  const gpt_description_prompt = document.getElementById('gpt_description_prompt').value.trim();
+  const continue_at = document.getElementById('continue_at').value;
+  const continue_clip_id = document.getElementById('continue_clip_id').value.trim();
+  const cover_clip_id = document.getElementById('cover_clip_id').value.trim();
+  const vocal_gender = document.getElementById('vocal_gender').value;
+  const create_mode = document.getElementById('create_mode').value;
+  const style_weight = parseFloat(document.getElementById('style_weight').value);
+  const weirdness_constraint = parseFloat(document.getElementById('weirdness_constraint').value);
+  const audio_weight = parseFloat(document.getElementById('audio_weight').value);
+
+  if (!prompt && currentMode === 0) {
+    showToast('请输入音乐描述', 'error');
+    return;
+  }
+  if (!prompt && currentMode === 1) {
+    showToast('请输入自定义歌词', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"><span class="spinner"></span> 生成中...</span>';
+
+  try {
+    // 构建基础参数
+    const params = {
+      custom_mode: currentMode === 1,
+      make_instrumental: currentInstrumental === 1,
+      prompt: prompt,
+      mv: mv
+    };
+    if (title) params.title = title;
+    if (tags) params.tags = tags;
+    if (negative_tags) params.negative_tags = negative_tags;
+    if (gpt_description_prompt) params.gpt_description_prompt = gpt_description_prompt;
+    if (continue_at) params.continue_at = parseFloat(continue_at);
+    if (continue_clip_id) params.continue_clip_id = continue_clip_id;
+    if (cover_clip_id) params.cover_clip_id = cover_clip_id;
+
+    // 构建 metadata 高级参数
+    const hasAdvanced = vocal_gender || create_mode;
+    if (hasAdvanced) {
+      const metadata = {
+        control_sliders: {
+          style_weight: style_weight,
+          weirdness_constraint: weirdness_constraint,
+          audio_weight: audio_weight
+        },
+        can_control_sliders: ["style_weight", "weirdness_constraint", "audio_weight"]
+      };
+      if (create_mode) metadata.create_mode = create_mode;
+      if (vocal_gender) metadata.vocal_gender = vocal_gender;
+      params.metadata = metadata;
+    }
+
+    // 判断是否使用 JSON 格式（有高级参数或续写/翻唱参数时用JSON）
+    const useJson = hasAdvanced || !!(continue_at || continue_clip_id || cover_clip_id || gpt_description_prompt);
+    const result = await apiRequest('/api/suno/generate', 'POST', params, useJson);
+
+    if (result.code === 200 && result.data && result.data.length > 0) {
+      showToast('生成任务已提交，共 ' + result.data.length + ' 个版本', 'success');
+      // 展示结果并开始轮询（失败自动重试3次）
+      const container = document.getElementById('generateResults');
+      const retryInfo = {
+        params: params,
+        useJson: useJson,
+        attempt: 1,
+        maxAttempt: 3
+      };
+      result.data.forEach((task, index) => {
+        const cardId = 'gen-' + task.task_id;
+        container.insertAdjacentHTML('afterbegin', createResultCard(task.task_id, title || prompt, index + 1));
+        // 保存到历史
+        saveToHistory(task.task_id, title || prompt, tags);
+        // 开始轮询（失败自动重试）
+        startPolling(task.task_id, cardId, retryInfo);
+      });
+    } else {
+      showToast('生成失败: ' + (result.msg || '未知错误'), 'error');
+      // 显示详细错误
+      const container = document.getElementById('generateResults');
+      container.insertAdjacentHTML('afterbegin', `
+        <div class="result-card">
+          <div class="result-header">
+            <div class="result-title">生成失败</div>
+            <span class="result-status status-failed">失败</span>
+          </div>
+          <div class="result-body">
+            <div style="color: var(--danger);">❌ ${escapeHtml(result.msg || '未知错误')}</div>
+            <details style="margin-top:10px;">
+              <summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">查看完整响应</summary>
+              <pre style="margin-top:8px;font-size:11px;color:var(--text-muted);white-space:pre-wrap;">${escapeHtml(JSON.stringify(result, null, 2))}</pre>
+            </details>
+          </div>
+        </div>
+      `);
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🚀 开始生成';
+  }
+}
+
+// ==================== 声曲分离 ====================
+function setStemMode(mode) {
+  currentStemMode = mode;
+  document.getElementById('stemTwo').classList.toggle('active', mode === 'two');
+  document.getElementById('stemTwelve').classList.toggle('active', mode === 'twelve');
+}
+
+async function generateStem() {
+  const clip_id = document.getElementById('stem_clip_id').value.trim();
+  const callback_url = document.getElementById('stem_callback').value.trim();
+
+  if (!clip_id) {
+    showToast('请输入音乐 ID (clip_id)', 'error');
+    return;
+  }
+
+  const params = {
+    task: 'gen_stem',
+    continue_clip_id: clip_id,
+    stem_task: currentStemMode,
+    mv: 'chirp-auk'
+  };
+  if (callback_url) params.callback_url = callback_url;
+
+  try {
+    const result = await apiRequest('/api/suno/generate', 'POST', params, true);
+
+    if (result.code === 200 && result.data && result.data.length > 0) {
+      showToast('声曲分离任务已提交，共 ' + result.data.length + ' 个任务', 'success');
+      const container = document.getElementById('stemResults');
+      const retryInfo = { params: params, useJson: true, attempt: 1, maxAttempt: 3 };
+      result.data.forEach((task, index) => {
+        const cardId = 'stem-' + task.task_id;
+        container.insertAdjacentHTML('afterbegin', createResultCard(task.task_id, '声曲分离-' + (currentStemMode === 'two' ? '2组' : '12组') + ' (任务' + (index+1) + ')', null));
+        startPolling(task.task_id, cardId, retryInfo);
+      });
+    } else {
+      showToast('分离失败: ' + (result.msg || '未知错误'), 'error');
+      const container = document.getElementById('stemResults');
+      container.insertAdjacentHTML('afterbegin', `
+        <div class="result-card">
+          <div class="result-header"><div class="result-title">分离失败</div><span class="result-status status-failed">失败</span></div>
+          <div class="result-body">
+            <div style="color: var(--danger);">❌ ${escapeHtml(result.msg || '未知错误')}</div>
+            <details style="margin-top:10px;"><summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">查看完整响应</summary>
+            <pre style="margin-top:8px;font-size:11px;color:var(--text-muted);white-space:pre-wrap;">${escapeHtml(JSON.stringify(result, null, 2))}</pre></details>
+          </div>
+        </div>
+      `);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ==================== 翻唱 ====================
+function setCoverMode(mode) {
+  currentCoverMode = mode;
+  document.getElementById('coverModeInspire').classList.toggle('active', mode === 0);
+  document.getElementById('coverModeCustom').classList.toggle('active', mode === 1);
+}
+
+async function generateCover() {
+  const cover_clip_id = document.getElementById('cover_clip_id_input').value.trim();
+  const prompt = document.getElementById('cover_prompt').value.trim();
+  const title = document.getElementById('cover_title').value.trim();
+  const tags = document.getElementById('cover_tags').value.trim();
+  const mv = document.getElementById('cover_mv').value;
+  const vocal_gender = document.getElementById('cover_vocal_gender').value;
+  const style_weight = parseFloat(document.getElementById('cover_style_weight').value);
+  const weirdness_constraint = parseFloat(document.getElementById('cover_weirdness_constraint').value);
+  const audio_weight = parseFloat(document.getElementById('cover_audio_weight').value);
+
+  if (!cover_clip_id) {
+    showToast('请输入原音乐 ID (cover_clip_id)', 'error');
+    return;
+  }
+  if (!prompt && currentCoverMode === 0) {
+    showToast('请输入翻唱风格描述', 'error');
+    return;
+  }
+  if (!prompt && currentCoverMode === 1) {
+    showToast('请输入翻唱歌词', 'error');
+    return;
+  }
+
+  // 检查模型兼容性
+  if (mv === 'chirp-fenix' || mv === 'chirp-v4-5') {
+    if (!confirm('注意：' + mv + ' 模型可能不支持翻唱功能，建议使用 chirp-v3-5 或 chirp-v4。是否仍要继续？')) {
+      return;
+    }
+  }
+
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"><span class="spinner"></span> 翻唱中...</span>';
+
+  try {
+    // 使用 form-data 格式（翻唱兼容性更好）
+    const params = {
+      custom_mode: currentCoverMode === 1,
+      make_instrumental: false,
+      prompt: prompt,
+      mv: mv,
+      cover_clip_id: cover_clip_id
+    };
+    if (title) params.title = title;
+    if (tags) params.tags = tags;
+
+    // 只有选择了声音性别时才添加 metadata（高级参数可选）
+    if (vocal_gender) {
+      const metadata = {
+        create_mode: 'custom',
+        vocal_gender: vocal_gender,
+        control_sliders: {
+          style_weight: style_weight,
+          weirdness_constraint: weirdness_constraint,
+          audio_weight: audio_weight
+        },
+        can_control_sliders: ["style_weight", "weirdness_constraint", "audio_weight"]
+      };
+      params.metadata = JSON.stringify(metadata);
+    }
+
+    // 使用 form-data 格式
+    const result = await apiRequest('/api/suno/generate', 'POST', params, false);
+
+    if (result.code === 200 && result.data && result.data.length > 0) {
+      showToast('翻唱任务已提交，共 ' + result.data.length + ' 个版本', 'success');
+      const container = document.getElementById('coverResults');
+      const retryInfo = { params: params, useJson: false, attempt: 1, maxAttempt: 3 };
+      result.data.forEach((task, index) => {
+        const cardId = 'cover-' + task.task_id;
+        container.insertAdjacentHTML('afterbegin', createResultCard(task.task_id, '翻唱-' + (title || '版本') + ' (版本' + (index+1) + ')', null));
+        saveToHistory(task.task_id, '翻唱: ' + (title || prompt), tags);
+        startPolling(task.task_id, cardId, retryInfo);
+      });
+    } else {
+      showToast('翻唱失败: ' + (result.msg || '未知错误'), 'error');
+      const container = document.getElementById('coverResults');
+      container.insertAdjacentHTML('afterbegin', `
+        <div class="result-card">
+          <div class="result-header"><div class="result-title">翻唱失败</div><span class="result-status status-failed">失败</span></div>
+          <div class="result-body">
+            <div style="color: var(--danger);">❌ ${escapeHtml(result.msg || '未知错误')}</div>
+            <div style="margin-top:8px;font-size:12px;color:var(--text-secondary);">建议：尝试切换到 chirp-v3-5 模型，或检查 cover_clip_id 是否正确。</div>
+            <details style="margin-top:10px;"><summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">查看完整响应</summary>
+            <pre style="margin-top:8px;font-size:11px;color:var(--text-muted);white-space:pre-wrap;">${escapeHtml(JSON.stringify(result, null, 2))}</pre></details>
+          </div>
+        </div>
+      `);
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🎤 开始翻唱';
+  }
+}
+
+// ==================== 上传本地音乐用于翻唱 ====================
+async function uploadLocalAudioForCover() {
+  const fileInput = document.getElementById('coverFileInput');
+  const file = fileInput.files[0];
+  
+  if (!file) {
+    showToast('请先选择音频文件', 'error');
+    return;
+  }
+  
+  if (file.size > 50 * 1024 * 1024) {
+    showToast('文件大小不能超过 50MB', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('uploadCoverBtn');
+  const statusEl = document.getElementById('uploadCoverStatus');
+  const progressEl = document.getElementById('uploadCoverProgress');
+  const progressBar = document.getElementById('uploadCoverProgressBar');
+  const progressText = document.getElementById('uploadCoverProgressText');
+  
+  btn.disabled = true;
+  progressEl.style.display = 'block';
+  
+  try {
+    // 步骤1: 上传到临时文件托管服务获取公开URL
+    progressText.textContent = '正在上传文件到托管服务...';
+    progressBar.style.width = '15%';
+    
+    const fileUrl = await uploadToFileHost(file);
+    console.log('文件托管URL:', fileUrl);
+    
+    if (!fileUrl) {
+      throw new Error('文件上传失败，未获取到URL');
+    }
+    
+    progressBar.style.width = '40%';
+    progressText.textContent = '文件上传成功，正在调用API上传音频...';
+    
+    // 获取文件扩展名
+    const ext = file.name.split('.').pop().toLowerCase() || 'mp3';
+    
+    // 步骤2: 调用API上传音频接口
+    const uploadResult = await apiRequest('/api/suno/uploads/audio', 'POST', {
+      file: fileUrl,
+      extension: ext
+    }, true);
+    
+    console.log('API上传结果:', uploadResult);
+    
+    const uploadIds = extractTaskIds(uploadResult);
+    if (uploadResult.code !== 200 || uploadIds.length === 0) {
+      throw new Error(uploadResult.msg || 'API上传失败');
+    }
+    
+    const audioTaskId = uploadIds[0];
+    
+    progressBar.style.width = '60%';
+    progressText.textContent = '音频已提交，正在处理中（等待转码完成）...';
+    
+    // 步骤3: 轮询查询上传音频的任务状态，直到完成，获取官方 clip_id
+    let officialClipId = null;
+    let pollCount = 0;
+    const maxPoll = 60; // 最多轮询5分钟
+    
+    while (pollCount < maxPoll) {
+      pollCount++;
+      await new Promise(r => setTimeout(r, 5000));
+      
+      try {
+        const queryResult = await apiRequest('/api/suno/feed?task_id=' + encodeURIComponent(audioTaskId), 'GET');
+        
+        if (queryResult.code === 200 && queryResult.data) {
+          const taskData = queryResult.data;
+          const status = taskData.status;
+          const state = taskData.state;
+          
+          // 更新进度
+          const progress = 60 + Math.min(pollCount * 0.5, 30);
+          progressBar.style.width = progress + '%';
+          progressText.textContent = '音频处理中... (' + pollCount + '/' + maxPoll + ')';
+          
+          // 检查是否完成
+          if (status === '3' || status === 3 || state === 'succeeded' || state === 'complete') {
+            // 从查询结果中获取官方 clip_id
+            // 可能在顶层 clip_id，也可能在 data[0].id
+            if (taskData.clip_id && taskData.clip_id !== audioTaskId) {
+              officialClipId = taskData.clip_id;
+            } else if (taskData.data && Array.isArray(taskData.data) && taskData.data.length > 0 && taskData.data[0].id) {
+              officialClipId = taskData.data[0].id;
+            }
+            break;
+          }
+          
+          // 检查是否失败
+          if (status === '0' || status === 0 || state === 'failed' || state === 'error') {
+            throw new Error('音频处理失败: ' + (taskData.msg || '未知错误'));
+          }
+        }
+      } catch (e) {
+        if (e.message.includes('音频处理失败')) throw e;
+        console.log('查询失败，继续轮询:', e.message);
+      }
+    }
+    
+    if (!officialClipId) {
+      // 如果轮询超时但任务可能还在处理，用 audioTaskId 作为备选，并提示用户
+      officialClipId = audioTaskId;
+      statusEl.innerHTML = '<span style="color: var(--warning);">⚠️ 音频仍在处理中，已填入任务ID，可稍后重试查询获取clip_id</span>';
+    } else {
+      progressBar.style.width = '100%';
+      progressText.textContent = '上传成功！官方 clip_id: ' + officialClipId;
+      statusEl.innerHTML = '<span style="color: var(--success);">✅ 上传成功，已自动填入翻唱ID</span>';
+    }
+    
+    // 自动填入 cover_clip_id
+    document.getElementById('cover_clip_id_input').value = officialClipId;
+    
+    showToast('音频上传成功，clip_id 已自动填入', 'success');
+    
+    // 保存到历史
+    saveToHistory(officialClipId, '上传音频: ' + file.name, '');
+    
+  } catch (err) {
+    console.error('上传失败:', err);
+    progressText.textContent = '上传失败: ' + err.message;
+    statusEl.innerHTML = '<span style="color: var(--danger);">❌ ' + err.message + '</span>';
+    showToast('上传失败: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// 上传文件到临时托管服务，返回公开URL
+async function uploadToFileHost(file) {
+  // 优先使用 litterbox.catbox.moe（支持 CORS，文件保留1小时）
+  try {
+    const formData = new FormData();
+    formData.append('reqtype', 'fileupload');
+    formData.append('time', '1h');
+    formData.append('fileToUpload', file);
+    
+    const res = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (res.ok) {
+      const url = await res.text();
+      if (url && url.startsWith('http')) {
+        return url.trim();
+      }
+    }
+  } catch (e) {
+    console.log('litterbox 上传失败，尝试 catbox:', e.message);
+  }
+  
+  // 备用: catbox.moe（永久保存）
+  try {
+    const formData = new FormData();
+    formData.append('reqtype', 'fileupload');
+    formData.append('fileToUpload', file);
+    
+    const res = await fetch('https://catbox.moe/user/api.php', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (res.ok) {
+      const url = await res.text();
+      if (url && url.startsWith('http')) {
+        return url.trim();
+      }
+    }
+  } catch (e) {
+    console.log('catbox 上传失败:', e.message);
+  }
+  
+  throw new Error('文件托管服务上传失败，请检查网络或手动提供音频URL');
+}
+
+// ==================== 生成歌词 ====================
+async function generateLyrics() {
+  const prompt = document.getElementById('lyricsPrompt').value.trim();
+  if (!prompt) {
+    showToast('请输入主题描述', 'error');
+    return;
+  }
+
+  const resultDiv = document.getElementById('lyricsResult');
+  resultDiv.innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span> 正在生成歌词...</div></div>';
+
+  try {
+    const result = await apiRequest('/api/suno/lyrics', 'POST', { prompt }, true);
+    const ids = extractTaskIds(result);
+    if (result.code !== 200 || ids.length === 0) {
+      resultDiv.innerHTML = '';
+      showToast('歌词提交失败: ' + (result.msg || '未知错误'), 'error');
+      return;
+    }
+    resultDiv.innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span> 正在生成歌词...</div></div>';
+    let lyrics = null;
+    for (let i = 0; i < 24; i++) {
+      await new Promise(r => setTimeout(r, 5000));
+      const q = await apiRequest('/api/suno/feed?task_id=' + encodeURIComponent(ids[0]), 'GET');
+      const t = q && q.data;
+      if (!t) continue;
+      const state = t.state || t.status;
+      if (state === 'failed' || state === 'FAILURE') break;
+      if (state === 'succeeded' || state === 'complete' || state === 'SUCCESS') {
+        const n = t.data || {};
+        const a = n.ret_a || (Array.isArray(n) ? n[0] : null);
+        const b = n.ret_b || (Array.isArray(n) ? n[1] : null);
+        const text = (a && a.text) || (b && b.text) || '';
+        const title = (a && a.title) || (b && b.title) || '';
+        lyrics = { text, title };
+        break;
+      }
+    }
+    if (lyrics && lyrics.text) {
+      resultDiv.innerHTML = `
+        <div class="card">
+          <div class="card-title">✅ 生成成功${lyrics.title ? ' - ' + lyrics.title : ''}</div>
+          <div class="lyrics-box" id="lyricsText">${escapeHtml(lyrics.text || '')}</div>
+          <div style="margin-top: 14px; display: flex; gap: 10px;">
+            <button class="btn btn-sm" onclick="copyLyrics()">📋 复制歌词</button>
+            <button class="btn btn-sm btn-primary" onclick="useLyricsForGenerate()">🎼 用于生成音乐</button>
+          </div>
+        </div>
+      `;
+      window._lastLyrics = lyrics.text;
+      window._lastLyricsTitle = lyrics.title;
+      showToast('歌词生成成功', 'success');
+    } else {
+      resultDiv.innerHTML = '';
+      showToast('歌词生成失败或超时', 'error');
+    }  } catch (err) {
+    resultDiv.innerHTML = '';
+  }
+}
+
+function copyLyrics() {
+  const text = document.getElementById('lyricsText').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('歌词已复制到剪贴板', 'success');
+  });
+}
+
+function useLyricsForGenerate() {
+  switchPage('generate');
+  setMode(1);
+  document.getElementById('prompt').value = window._lastLyrics || '';
+  if (window._lastLyricsTitle) {
+    document.getElementById('title').value = window._lastLyricsTitle;
+  }
+  showToast('歌词已填入，可直接生成音乐', 'info');
+}
+
+// ==================== 任务查询 ====================
+async function queryTask() {
+  const taskId = document.getElementById('queryTaskId').value.trim();
+  if (!taskId) {
+    showToast('请输入 Task ID', 'error');
+    return;
+  }
+
+  const resultDiv = document.getElementById('queryResult');
+  const cardId = 'query-' + taskId;
+
+  resultDiv.innerHTML = createResultCard(taskId, taskId, null);
+  const autoPoll = document.getElementById('autoPoll').checked;
+  if (autoPoll) {
+    startPolling(taskId, cardId);
+  } else {
+    fetchTaskStatus(taskId, cardId);
+  }
+}
+
+// ==================== 轮询任务状态 ====================
+async function fetchTaskStatus(taskId, cardId) {
+  try {
+    const result = await apiRequest('/api/suno/feed?task_id=' + encodeURIComponent(taskId), 'GET');
+
+    if (result.code === 200 && result.data) {
+      updateResultCard(cardId, result.data);
+      return result.data;
+    } else {
+      // 显示详细错误信息
+      const safeId = taskId.replace(/[^a-zA-Z0-9]/g, '');
+      const bodyEl = document.getElementById('body-' + safeId);
+      if (bodyEl) {
+        bodyEl.innerHTML = `<div style="color: var(--danger);">❌ 查询失败</div>
+          <div style="margin-top:8px;font-size:12px;color:var(--text-muted);white-space:pre-wrap;">${escapeHtml(JSON.stringify(result, null, 2))}</div>`;
+      }
+      updateCardStatus(cardId, 'failed', '查询失败');
+      return null;
+    }
+  } catch (err) {
+    console.error('Poll error:', err);
+    return null;
+  }
+}
+
+// 标准化任务数据：兼容旧模型(扁平结构)和 chirp-fenix(嵌套 data.data[] 结构)
+function normalizeTaskData(data) {
+  // 如果是 fenix 格式（有 data 数组且非空），合并 data[0] 到顶层
+  if (data && Array.isArray(data.data) && data.data.length > 0) {
+    const item = data.data[0];
+    return {
+      ...data,
+      title: item.title || data.title,
+      audio_url: item.audio_url || data.audio_url,
+      image_url: item.image_url || data.image_url,
+      image_large_url: item.image_large_url || data.image_large_url,
+      video_url: item.video_url || data.video_url,
+      tags: (item.metadata && item.metadata.tags) || data.tags,
+      prompt: (item.metadata && item.metadata.prompt) || data.prompt,
+      duration: (item.metadata && item.metadata.duration) || null,
+      _isFenix: true,
+      _rawItem: item
+    };
+  }
+  return data;
+}
+
+function startPolling(taskId, cardId, retryInfo) {
+  // 清除已有定时器
+  if (pollTimers[cardId]) {
+    clearInterval(pollTimers[cardId]);
+  }
+
+  // 记录重试信息，供 updateResultCard 判断是否显示"准备自动重试"
+  if (retryInfo) {
+    if (!window._cardRetryMap) window._cardRetryMap = {};
+    window._cardRetryMap[cardId] = { ...retryInfo };
+  }
+
+  let count = 0;
+  const maxCount = 120; // 最多轮询10分钟 (5秒*120)
+
+  const checkAndRetry = (data) => {
+    if (!data) return false;
+    if (!isCompleted(data.status, data.state)) return false;
+    // 已完成但状态为失败，且配置了重试且未超次数 → 自动重试
+    if (isFailedStatus(data.status, data.state) && retryInfo && retryInfo.attempt < retryInfo.maxAttempt) {
+      handleRetry(cardId, retryInfo);
+      return true;
+    }
+    return false;
+  };
+
+  // 立即查询一次
+  fetchTaskStatus(taskId, cardId).then(data => {
+    if (data && checkAndRetry(data)) {
+      return;
+    }
+    if (data && isCompleted(data.status, data.state)) {
+      return;
+    }
+    pollTimers[cardId] = setInterval(async () => {
+      count++;
+      const data = await fetchTaskStatus(taskId, cardId);
+      if (data && checkAndRetry(data)) {
+        clearInterval(pollTimers[cardId]);
+        delete pollTimers[cardId];
+        return;
+      }
+      if (data && isCompleted(data.status, data.state)) {
+        clearInterval(pollTimers[cardId]);
+        delete pollTimers[cardId];
+        return;
+      }
+      if (count >= maxCount) {
+        clearInterval(pollTimers[cardId]);
+        delete pollTimers[cardId];
+        updateCardStatus(cardId, 'failed', '轮询超时');
+      }
+    }, 5000);
+  });
+}
+
+// 判断是否为失败状态
+// 注意：status="0" + state="pending" 是新模型(chirp-v3-5等)提交后的"排队初始"状态，不是失败，必须继续轮询
+// 只有 state 明确为 failed/error，或旧模型无 state 字段时的 status=0，才算真正失败
+function isFailedStatus(status, state) {
+  if (state === 'failed' || state === 'error') return true;
+  // 有 state 字段但非 failed（如 pending/running），即使 status=0 也不算失败
+  if (state) return false;
+  // 无 state 字段（旧模型扁平结构），status=0 视为失败
+  if (status === '0' || status === 0) return true;
+  return false;
+}
+
+// 失败自动重试：重新提交任务并继续轮询
+async function handleRetry(cardId, retryInfo) {
+  const retryNum = retryInfo.attempt + 1;
+  const safeId = cardId.replace(/[^a-zA-Z0-9]/g, '');
+  const statusEl = document.getElementById('status-' + safeId);
+  const bodyEl = document.getElementById('body-' + safeId);
+
+  // 更新卡片显示重试中
+  if (statusEl) {
+    statusEl.className = 'result-status status-pending';
+    statusEl.textContent = `重试 ${retryNum}/${retryInfo.maxAttempt}`;
+  }
+  if (bodyEl) {
+    bodyEl.innerHTML = `
+      <div class="loading"><span class="spinner"></span> 检测到任务失败，正在自动重试 (第${retryNum}/${retryInfo.maxAttempt}次)...</div>
+      <div class="progress-bar"><div class="progress-fill" style="width: ${(retryNum/retryInfo.maxAttempt)*100}%"></div></div>
+    `;
+  }
+
+  try {
+    const result = await apiRequest('/api/suno/generate', 'POST', retryInfo.params, retryInfo.useJson);
+    if (result.code === 200 && result.data && result.data.length > 0) {
+      const task = result.data[0];
+      if (bodyEl) {
+        bodyEl.innerHTML = `
+          <div class="loading"><span class="spinner"></span> 重试任务已提交，继续轮询...</div>
+          <div style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">新 Task ID: ${task.task_id}</div>
+        `;
+      }
+      // 继续轮询新任务
+      startPolling(task.task_id, cardId, { ...retryInfo, attempt: retryNum });
+    } else {
+      // 重试提交也失败
+      if (statusEl) {
+        statusEl.className = 'result-status status-failed';
+        statusEl.textContent = '失败';
+      }
+      if (bodyEl) {
+        bodyEl.innerHTML = `
+          <div style="color: var(--danger);">❌ 重试提交失败: ${escapeHtml(result.msg || '未知错误')}</div>
+          <details style="margin-top:10px;">
+            <summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">查看完整响应</summary>
+            <pre style="margin-top:8px;font-size:11px;color:var(--text-muted);white-space:pre-wrap;">${escapeHtml(JSON.stringify(result, null, 2))}</pre>
+          </details>
+        `;
+      }
+    }
+  } catch (err) {
+    console.error('重试失败:', err);
+    if (statusEl) {
+      statusEl.className = 'result-status status-failed';
+      statusEl.textContent = '失败';
+    }
+    if (bodyEl) {
+      bodyEl.innerHTML = `<div style="color: var(--danger);">❌ 重试失败: ${escapeHtml(err.message || '网络错误')}</div>`;
+    }
+  }
+}
+
+function isCompleted(status, state) {
+  // status: "1"=排队, "2"=生成中, "3"=完成, "0"=可能是排队初始(新模型)或失败(旧模型)
+  // fenix 等新模型额外用 state: "running"/"succeeded"/"failed"
+  if (status === '3' || status === 3) return true;
+  if (state === 'succeeded' || state === 'complete') return true;
+  // 真正失败才结束轮询
+  if (isFailedStatus(status, state)) return true;
+  // 其余情况（含 status=0 + state=pending）继续轮询
+  return false;
+}
+
+function getStatusText(status) {
+  const map = {
+    '1': '排队中', '2': '生成中', '3': '已完成', '0': '失败',
+    1: '排队中', 2: '生成中', 3: '已完成', 0: '失败',
+    NOT_START: '排队中', SUBMITTED: '排队中', QUEUED: '排队中',
+    IN_PROGRESS: '生成中', SUCCESS: '已完成', FAILURE: '失败',
+    FAIL: '失败', ERROR: '失败'
+  };
+  return map[status] || '未知(' + status + ')';
+}
+
+function getStatusClass(status) {
+  if (status === '3' || status === 3) return 'success';
+  if (status === '0' || status === 0) return 'failed';
+  if (status === '2' || status === 2) return 'running';
+  return 'pending';
+}
+
+// ==================== 结果卡片 ====================
+function createResultCard(taskId, title, version) {
+  return `
+    <div class="result-card" id="${'card-' + taskId.replace(/[^a-zA-Z0-9]/g, '')}">
+      <div class="result-header">
+        <div class="result-title">${escapeHtml(title)}${version ? ` (版本${version})` : ''}</div>
+        <span class="result-status status-pending" id="status-${taskId.replace(/[^a-zA-Z0-9]/g, '')}">等待中</span>
+      </div>
+      <div class="result-body" id="body-${taskId.replace(/[^a-zA-Z0-9]/g, '')}">
+        <div class="loading"><span class="spinner"></span> 任务已提交，正在查询状态...</div>
+        <div style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">Task ID: ${taskId}</div>
+      </div>
+    </div>
+  `;
+}
+
+function updateResultCard(cardId, data) {
+  // 标准化数据（兼容 fenix 嵌套结构）
+  const norm = normalizeTaskData(data);
+  const taskId = norm.task_id || cardId;
+  const safeId = taskId.replace(/[^a-zA-Z0-9]/g, '');
+  const statusEl = document.getElementById('status-' + safeId);
+  const bodyEl = document.getElementById('body-' + safeId);
+
+  if (!statusEl || !bodyEl) return;
+
+  // 同时检查 status 和 state 字段（fenix 用 state=succeeded）
+  const isSuccess = norm.status === '3' || norm.status === 3 || norm.state === 'succeeded' || norm.state === 'complete';
+  const isFailed = isFailedStatus(norm.status, norm.state);
+
+  let statusClass, statusText;
+  if (isSuccess) { statusClass = 'success'; statusText = '已完成'; }
+  else if (isFailed) {
+    const retry = window._cardRetryMap && window._cardRetryMap[cardId];
+    if (retry && retry.attempt < retry.maxAttempt) {
+      statusClass = 'pending';
+      statusText = `重试中 ${retry.attempt+1}/${retry.maxAttempt}`;
+    } else {
+      statusClass = 'failed'; statusText = '失败';
+    }
+  }
+  // status=0 + state=pending = 排队初始（新模型），非失败
+  else if ((norm.status === '0' || norm.status === 0) && norm.state === 'pending') { statusClass = 'pending'; statusText = '排队中'; }
+  else if (norm.status === '2' || norm.status === 2 || norm.state === 'running') { statusClass = 'running'; statusText = '生成中'; }
+  else { statusClass = 'pending'; statusText = getStatusText(norm.status) || '等待中'; }
+
+  statusEl.className = 'result-status status-' + statusClass;
+  statusEl.textContent = statusText;
+
+  if (isSuccess) {
+    // 完成：New API 返回的 data.data 可能是多首 song 数组，全部渲染
+    const songs = (Array.isArray(data.data) && data.data.length > 0) ? data.data : [data];
+    let html = '';
+    if (songs.length > 1) {
+      html += `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">本任务共生成 ${songs.length} 首：</div>`;
+    }
+    songs.forEach((song, idx) => {
+      const audioUrl = song.audio_url || norm.audio_url;
+      const videoUrl = song.video_url || norm.video_url;
+      const imageUrl = song.image_large_url || song.image_url || norm.image_large_url || norm.image_url;
+      const title = song.title || norm.title;
+      const tags = (song.metadata && song.metadata.tags) || song.tags || norm.tags;
+      const duration = (song.metadata && song.metadata.duration) || song.duration || norm.duration;
+      const mv = song.mv || song.model_name || norm.mv;
+      html += '<div class="result-media">';
+      if (imageUrl) {
+        html += `<img class="result-cover" src="${imageUrl}" alt="cover" onerror="this.style.display='none'">`;
+      } else {
+        html += '<div class="result-cover" style="display:flex;align-items:center;justify-content:center;font-size:48px;">🎵</div>';
+      }
+      html += '<div class="result-info">';
+      if (songs.length > 1) html += `<div class="result-meta">版本 ${idx+1}</div>`;
+      if (title) html += `<div style="font-size:16px;font-weight:600;">${escapeHtml(title)}</div>`;
+      if (tags) html += `<div class="result-meta">风格: <span>${escapeHtml(tags)}</span></div>`;
+      if (mv) html += `<div class="result-meta">模型: <span>${escapeHtml(mv)}</span></div>`;
+      if (duration) html += `<div class="result-meta">时长: <span>${Math.floor(duration)}秒</span></div>`;
+      html += `<div class="result-meta">Task ID: <span style="font-family:monospace;font-size:11px;">${taskId}</span></div>`;
+      if (audioUrl) html += `<audio controls src="${audioUrl}" preload="metadata"></audio>`;
+      if (videoUrl) html += `<video controls src="${videoUrl}" preload="metadata" style="margin-top:8px;"></video>`;
+      html += '<div class="result-actions">';
+      if (audioUrl) html += `<a class="btn btn-sm" href="${audioUrl}" download target="_blank">⬇️ 下载音频</a>`;
+      if (videoUrl) html += `<a class="btn btn-sm" href="${videoUrl}" download target="_blank">⬇️ 下载视频</a>`;
+      if (imageUrl) html += `<a class="btn btn-sm" href="${imageUrl}" download target="_blank">🖼️ 下载封面</a>`;
+      html += `<button class="btn btn-sm" onclick="copyTaskId('${taskId}')">📋 复制ID</button>`;
+      html += '</div></div></div>';
+    });
+
+    if (norm.prompt) {
+      html += `<div class="result-prompt"><strong>歌词/描述:</strong>\n${escapeHtml(norm.prompt)}</div>`;
+    }
+
+    bodyEl.innerHTML = html;
+
+    // 更新历史记录状态
+    updateHistoryStatus(taskId, 'completed');
+
+  } else if (isFailed) {
+    // 失败 - 检查是否有自动重试配置
+    const retry = window._cardRetryMap && window._cardRetryMap[cardId];
+    if (retry && retry.attempt < retry.maxAttempt) {
+      // 会自动重试，先显示等待重试
+      const retryNum = retry.attempt + 1;
+      bodyEl.innerHTML = `
+        <div style="color: var(--warning);">⚠️ 检测到任务失败，正在自动重试 (第${retryNum}/${retry.maxAttempt}次)...</div>
+        <div class="progress-bar"><div class="progress-fill" style="width: ${(retryNum/retry.maxAttempt)*100}%"></div></div>
+        <details style="margin-top:10px;">
+          <summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">查看失败详情</summary>
+          <pre style="margin-top:8px;font-size:11px;color:var(--text-muted);white-space:pre-wrap;max-height:200px;overflow:auto;">${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+        </details>
+      `;
+    } else {
+      // 最终失败 - 显示详细错误信息
+      let errorDetail = '';
+      if (norm.error_message) errorDetail = norm.error_message;
+      else if (norm.msg) errorDetail = norm.msg;
+      else if (data.data && typeof data.data === 'string') errorDetail = data.data;
+
+      bodyEl.innerHTML = `
+        <div style="color: var(--danger);">❌ 生成失败</div>
+        ${errorDetail ? `<div style="margin-top:6px;font-size:13px;color:var(--text-secondary);">${escapeHtml(errorDetail)}</div>` : ''}
+        <details style="margin-top:10px;">
+          <summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">查看完整响应</summary>
+          <pre style="margin-top:8px;font-size:11px;color:var(--text-muted);white-space:pre-wrap;max-height:200px;overflow:auto;">${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+        </details>
+        <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">Task ID: ${taskId}</div>
+      `;
+      updateHistoryStatus(taskId, 'failed');
+    }
+  } else {
+    // 进行中
+    bodyEl.innerHTML = `
+      <div class="loading"><span class="spinner"></span> ${statusText}...</div>
+      <div class="progress-bar"><div class="progress-fill" style="width: ${norm.status === '2' || norm.state === 'running' ? '60%' : '20%'}"></div></div>
+      <div style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">Task ID: ${taskId}</div>
+    `;
+  }
+}
+
+function updateCardStatus(cardId, status, text) {
+  // 简化的状态更新
+  const safeId = cardId.replace(/[^a-zA-Z0-9]/g, '');
+  const statusEl = document.getElementById('status-' + safeId);
+  if (statusEl) {
+    statusEl.className = 'result-status status-' + status;
+    statusEl.textContent = text;
+  }
+}
+
+function copyTaskId(taskId) {
+  navigator.clipboard.writeText(taskId).then(() => {
+    showToast('Task ID 已复制', 'success');
+  });
+}
+
+function fillToolTaskId(taskId) {
+  switchPage('tools');
+  document.getElementById('toolTaskId').value = taskId;
+  showToast('已填入音频处理工具', 'info');
+}
+
+// ==================== 音频处理工具 ====================
+async function toolAction(action) {
+  const taskId = document.getElementById('toolTaskId').value.trim();
+  if (!taskId) {
+    showToast('请输入 Task ID', 'error');
+    return;
+  }
+
+  const resultDiv = document.getElementById('toolResult');
+  resultDiv.innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span> 处理中...</div></div>';
+
+  try {
+    let endpoint, data;
+    switch (action) {
+      case 'wav':
+        endpoint = '/api/suno/wav';
+        data = { task_id: taskId };
+        break;
+      case 'midi':
+        endpoint = '/api/suno/midi';
+        data = { task_id: taskId, clip_id: '' };
+        break;
+      case 'video':
+        endpoint = '/api/suno/video';
+        data = { task_id: taskId };
+        break;
+      case 'timing':
+        endpoint = '/api/suno/timing';
+        data = { task_id: taskId, clip_id: '' };
+        break;
+    }
+
+    const result = await apiRequest(endpoint, 'POST', data, true);
+    resultDiv.innerHTML = `<div class="card"><pre style="color:var(--text-secondary);font-size:13px;white-space:pre-wrap;">${escapeHtml(JSON.stringify(result, null, 2))}</pre></div>`;
+
+    if (result.code === 200) {
+      showToast('操作成功', 'success');
+      const ids = extractTaskIds(result);
+      if (ids.length > 0) {
+        resultDiv.innerHTML += createResultCard(ids[0], action + ' 结果', null);
+        startPolling(ids[0], 'tool-' + ids[0]);
+      }
+    } else {
+      showToast('操作失败: ' + (result.msg || ''), 'error');
+    }
+  } catch (err) {
+    resultDiv.innerHTML = '';
+  }
+}
+
+async function adjustSpeed() {
+  const taskId = document.getElementById('toolTaskId').value.trim();
+  if (!taskId) { showToast('请输入 Task ID', 'error'); return; }
+
+  const data = {
+    task_id: taskId,
+    speed_multiplier: parseFloat(document.getElementById('speedMultiplier').value),
+    keep_pitch: document.getElementById('keepPitch').value === 'true',
+    title: document.getElementById('speedTitle').value.trim()
+  };
+
+  const resultDiv = document.getElementById('toolResult');
+  resultDiv.innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span> 变速处理中...</div></div>';
+
+  try {
+    const result = await apiRequest('/api/suno/speed', 'POST', data, true);
+    const ids = extractTaskIds(result);
+    if (result.code === 200 && ids.length > 0) {
+      showToast('变速任务已提交', 'success');
+      resultDiv.innerHTML = createResultCard(ids[0], '变速结果', null);
+      startPolling(ids[0], 'speed-' + ids[0]);
+    } else {
+      resultDiv.innerHTML = `<div class="card"><pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre></div>`;
+      showToast('操作失败', 'error');
+    }
+  } catch (err) {
+    resultDiv.innerHTML = '';
+  }
+}
+
+async function cropMusic() {
+  const taskId = document.getElementById('toolTaskId').value.trim();
+  if (!taskId) { showToast('请输入 Task ID', 'error'); return; }
+
+  const data = {
+    task_id: taskId,
+    crop_start_s: parseFloat(document.getElementById('cropStart').value),
+    crop_end_s: parseFloat(document.getElementById('cropEnd').value),
+    is_crop_remove: document.getElementById('cropRemove').value === 'true'
+  };
+
+  const resultDiv = document.getElementById('toolResult');
+  resultDiv.innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span> 裁剪中...</div></div>';
+
+  try {
+    const result = await apiRequest('/api/suno/crop', 'POST', data, true);
+    const ids = extractTaskIds(result);
+    if (result.code === 200 && ids.length > 0) {
+      showToast('裁剪任务已提交', 'success');
+      resultDiv.innerHTML = `<div class="card"><pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre></div>`;
+    } else {
+      showToast('操作失败', 'error');
+    }
+  } catch (err) {
+    resultDiv.innerHTML = '';
+  }
+}
+
+// ==================== 上传音频 ====================
+async function uploadAudio() {
+  const fileUrl = document.getElementById('uploadFileUrl').value.trim();
+  const extension = document.getElementById('uploadExtension').value;
+  if (!fileUrl) {
+    showToast('请输入音频文件 URL', 'error');
+    return;
+  }
+
+  const resultDiv = document.getElementById('uploadResult');
+  resultDiv.innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span> 上传中...</div></div>';
+
+  try {
+    const result = await apiRequest('/api/suno/uploads/audio', 'POST', {
+      file: fileUrl,
+      extension: extension
+    }, true);
+
+    const uploadIds = extractTaskIds(result);
+    if (result.code === 200 && uploadIds.length > 0) {
+      const audioId = uploadIds[0];
+      resultDiv.innerHTML = `
+        <div class="card">
+          <div class="card-title">✅ 上传成功</div>
+          <div class="result-meta" style="margin-bottom:10px;">音频 ID: <span style="font-family:monospace;">${audioId}</span></div>
+          <div class="result-actions">
+            <button class="btn btn-sm" onclick="copyTaskId('${audioId}')">📋 复制ID</button>
+          </div>
+        </div>
+      `;
+      showToast('音频上传成功', 'success');
+    } else {
+      resultDiv.innerHTML = `<div class="card"><pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre></div>`;
+      showToast('上传失败', 'error');
+    }
+  } catch (err) {
+    resultDiv.innerHTML = '';
+  }
+}
+
+// ==================== 历史记录 ====================
+function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem('suno_history') || '[]');
+  } catch { return []; }
+}
+
+function saveToHistory(taskId, title, tags) {
+  const history = getHistory();
+  history.unshift({
+    task_id: taskId,
+    title: title,
+    tags: tags || '',
+    status: 'pending',
+    created_at: new Date().toISOString()
+  });
+  // 最多保存100条
+  if (history.length > 100) history.length = 100;
+  localStorage.setItem('suno_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function updateHistoryStatus(taskId, status) {
+  const history = getHistory();
+  const item = history.find(h => h.task_id === taskId);
+  if (item) {
+    item.status = status;
+    localStorage.setItem('suno_history', JSON.stringify(history));
+    renderHistory();
+  }
+}
+
+function renderHistory() {
+  const history = getHistory();
+  const container = document.getElementById('historyList');
+  if (!container) return;
+
+  if (history.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎵</div><div>暂无历史记录</div></div>';
+    return;
+  }
+
+  container.innerHTML = history.map(item => {
+    const date = new Date(item.created_at);
+    const dateStr = date.toLocaleString('zh-CN');
+    const statusClass = item.status === 'completed' ? 'status-success' : item.status === 'failed' ? 'status-failed' : 'status-pending';
+    const statusText = item.status === 'completed' ? '已完成' : item.status === 'failed' ? '失败' : '进行中';
+    return `
+      <div class="history-item" onclick="viewHistoryItem('${item.task_id}')">
+        <div class="history-thumb" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🎵</div>
+        <div class="history-info">
+          <div class="history-title">${escapeHtml(item.title || item.task_id)}</div>
+          <div class="history-meta">${dateStr} · ${item.tags ? escapeHtml(item.tags) : ''}</div>
+        </div>
+        <span class="result-status ${statusClass}">${statusText}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function viewHistoryItem(taskId) {
+  switchPage('query');
+  document.getElementById('queryTaskId').value = taskId;
+  queryTask();
+}
+
+function clearHistory() {
+  if (confirm('确定要清空所有历史记录吗？')) {
+    localStorage.removeItem('suno_history');
+    renderHistory();
+    showToast('历史记录已清空', 'success');
+  }
+}
+
+// ==================== 工具函数 ====================
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function showToast(message, type = 'info', duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// ==================== 启动 ====================
+init();
+</script>
+</body>
+</html>
