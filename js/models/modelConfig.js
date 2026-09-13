@@ -84,6 +84,14 @@ export function gptImageModelTier(modelName) {
     return '1K';
 }
 
+// 走异步 /v1/videos 的 gpt-image 模型：大写 2K/4K 后缀与 2.5；
+// 其余（如 gpt-image-2）在网关上是同步模型，走 /v1/images/generations
+export function isAsyncGPTImageModel(modelName) {
+    if (!isGPTImageModel(modelName)) return false;
+    const name = String(modelName);
+    return /-(2K|4K)$/.test(name) || /2\.5/.test(name);
+}
+
 // gpt-image 系列「宽高比 → 像素尺寸」对照表（依据「gpt-image-2（异步）」接口文档）
 export const GPT_IMAGE_PIXEL_SIZES = {
     '1K': {

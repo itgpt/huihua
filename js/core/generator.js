@@ -3,7 +3,7 @@ import { createCallLogger } from '../utils/logger.js';
 import { maskApiKey } from '../utils/format.js';
 import { showSuccess, showError, showVideoSuccessToast } from '../ui/components/toast.js';
 import { updateModeIndicator } from '../ui/status.js';
-import { isVideoModel, isGeminiModel, isGemini3ProImage, isGPTImageModel, isGPTImageModel2K, isGPTImageModel4K, isGPTImageTierSelectable, gptImageModelTier, isGrokImageModel, mapAspectRatioToPixelSize, mapAspectRatioToPixelSize2K, mapAspectRatioToPixelSize4K } from '../models/modelConfig.js';
+import { isVideoModel, isGeminiModel, isGemini3ProImage, isGPTImageModel, isGPTImageModel2K, isGPTImageModel4K, isGPTImageTierSelectable, gptImageModelTier, isAsyncGPTImageModel, isGrokImageModel, mapAspectRatioToPixelSize, mapAspectRatioToPixelSize2K, mapAspectRatioToPixelSize4K } from '../models/modelConfig.js';
 import { optimizePrompt } from '../api/optimizer.js';
 import { generateImage, editImage, createImageTask, pollImageTask, extractImageUrlFromTask } from '../api/image.js';
 import { createVideoTask } from '../api/video.js';
@@ -348,7 +348,7 @@ export class Generator {
             }
             
             // ========== 处理 GPT 图片模型（异步 /v1/videos） ==========
-            if (isGPTImageModel(modelName)) {
+            if (isAsyncGPTImageModel(modelName)) {
                 const finalPrompt = optimizedPrompt;
                 const tierSelectable = isGPTImageTierSelectable(modelName);
                 const tier = gptImageModelTier(modelName)
