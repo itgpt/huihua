@@ -38,6 +38,8 @@ export class DOMManager {
             historyGrid: 'historyGrid',
             geminiImageSize: 'geminiImageSize',
             geminiResolutionGroup: 'geminiResolutionGroup',
+            gptImageSize: 'gptImageSize',
+            gptImageResolutionGroup: 'gptImageResolutionGroup',
             responseFormatGroup: 'responseFormatGroup',
             sizeParamGroup: 'size-param-group',
             jimengVideoParamsGroup: 'jimengVideoParamsGroup',

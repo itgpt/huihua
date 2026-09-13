@@ -162,6 +162,10 @@ class App {
         // 恢复 Gemini 分辨率
         const geminiSize = this.storage.get('aiPaintingGeminiImageSize') || '1K';
         if (this.dom.geminiImageSize) this.dom.geminiImageSize.value = geminiSize;
+
+        // 恢复 GPT 图片模型分辨率（gpt-image-2.5-flare / sunburst）
+        const gptSize = this.storage.get('aiPaintingGptImageSize') || '1K';
+        if (this.dom.gptImageSize) this.dom.gptImageSize.value = gptSize;
         
         // 恢复即梦参数
         const jimengSeconds = this.storage.get('aiPaintingJimengSeconds') || '12';
@@ -386,6 +390,9 @@ class App {
             },
             
             onGeminiSizeChange: () => this.modelSelector.updateAspectRatioOptions(this.modelSelector.getSelectedModels()),
+            onGptSizeChange: () => {
+                if (this.dom.gptImageSize) this.storage.set('aiPaintingGptImageSize', this.dom.gptImageSize.value);
+            },
             onJimengParamChange: () => {
                 if (this.dom.jimengSeconds) this.storage.set('aiPaintingJimengSeconds', this.dom.jimengSeconds.value);
                 if (this.dom.jimengRatio) this.storage.set('aiPaintingJimengRatio', this.dom.jimengRatio.value);

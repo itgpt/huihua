@@ -61,57 +61,83 @@ export function isGPTImageModel4K(modelName) {
     return isGPTImageModel(modelName) && modelName.toLowerCase().includes('4k');
 }
 
-// 将宽高比映射为像素尺寸（gpt-image-2 API 使用像素尺寸）
-export function mapAspectRatioToPixelSize(aspectRatio) {
-    const map = {
+// 判断是否为 gpt-image-2.5 系列模型
+export function isGPTImage25Model(modelName) {
+    if (!modelName) return false;
+    return isGPTImageModel(modelName) && modelName.toLowerCase().includes('2.5');
+}
+
+// 判断是否为可用参数选档的 gpt-image 模型（flare / sunburst 通过参数选 1K/2K/4K）
+export function isGPTImageTierSelectable(modelName) {
+    if (!modelName) return false;
+    const lower = modelName.toLowerCase();
+    return isGPTImageModel(modelName) && (lower.includes('flare') || lower.includes('sunburst'));
+}
+
+// 返回模型固定的分辨率档位；可参数选档（flare / sunburst）返回 null
+export function gptImageModelTier(modelName) {
+    if (!modelName) return '1K';
+    if (isGPTImageTierSelectable(modelName)) return null;
+    const lower = modelName.toLowerCase();
+    if (lower.includes('4k')) return '4K';
+    if (lower.includes('2k')) return '2K';
+    return '1K';
+}
+
+// gpt-image 系列「宽高比 → 像素尺寸」对照表（依据「gpt-image-2（异步）」接口文档）
+export const GPT_IMAGE_PIXEL_SIZES = {
+    '1K': {
         '1:1': '1024x1024',
-        '16:9': '1792x1024',
-        '9:16': '1024x1792',
-        '4:3': '1536x1024',
-        '3:4': '1024x1536',
-        '3:2': '1536x1024',
-        '2:3': '1024x1536',
-        '5:4': '1280x1024',
-        '4:5': '1024x1280',
-        '21:9': '1792x768',
-    };
-    return map[aspectRatio] || '1024x1024';
-}
-
-// 将宽高比映射为 2K 像素尺寸（gpt-image-2-2k 使用，基准 2048）
-export function mapAspectRatioToPixelSize2K(aspectRatio) {
-    // 所有尺寸满足：max edge ≤ 2048, 均为 16px 倍数, px ≤ 8,294,400
-    const map = {
-        '1:1': '2048x2048',      // API 枚举值
-        '16:9': '2048x1152',     // API 枚举值
-        '9:16': '1152x2048',
-        '4:3': '2048x1536',
-        '3:4': '1536x2048',
-        '3:2': '2048x1360',      // 2048x1360=2,785,280
-        '2:3': '1360x2048',
-        '5:4': '2048x1632',      // 2048x1632=3,342,336
-        '4:5': '1632x2048',
-        '21:9': '2048x880',      // 2048x880=1,802,240
-    };
-    return map[aspectRatio] || '2048x2048';
-}
-
-// 将宽高比映射为 4K 像素尺寸（gpt-image-2-4k 使用，基准 3840）
-export function mapAspectRatioToPixelSize4K(aspectRatio) {
-    // 所有尺寸满足：max edge ≤ 3840, 均为 16px 倍数, px ≤ 8,294,400
-    const map = {
-        '1:1': '2880x2880',      // 2880x2880=8,294,400 ← 像素上限
-        '16:9': '3840x2160',     // API 枚举值 4K 横向
-        '9:16': '2160x3840',     // API 枚举值 4K 纵向
-        '4:3': '3264x2448',      // 3264x2448=7,990,272
-        '3:4': '2448x3264',
-        '3:2': '3504x2336',      // 3504x2336=8,185,344
+        '16:9': '1280x720',
+        '9:16': '720x1280',
+        '3:2': '1248x832',
+        '2:3': '832x1248',
+        '4:3': '1152x864',
+        '3:4': '864x1152',
+        '5:4': '1120x896',
+        '4:5': '896x1120',
+        '21:9': '1456x624',
+    },
+    '2K': {
+        '1:1': '2048x2048',
+        '16:9': '2560x1440',
+        '9:16': '1440x2560',
+        '3:2': '2496x1664',
+        '2:3': '1664x2496',
+        '4:3': '2304x1728',
+        '3:4': '1728x2304',
+        '5:4': '2240x1792',
+        '4:5': '1792x2240',
+        '21:9': '3024x1296',
+    },
+    '4K': {
+        '1:1': '2880x2880',
+        '16:9': '3840x2160',
+        '9:16': '2160x3840',
+        '3:2': '3504x2336',
         '2:3': '2336x3504',
-        '5:4': '3200x2560',      // 3200x2560=8,192,000
+        '4:3': '3264x2448',
+        '3:4': '2448x3264',
+        '5:4': '3200x2560',
         '4:5': '2560x3200',
-        '21:9': '3840x1648',     // 3840x1648=6,328,320
-    };
-    return map[aspectRatio] || '2880x2880';
+        '21:9': '3696x1584',
+    },
+};
+
+// 将宽高比映射为像素尺寸（gpt-image-2 系列，默认 1K 档）
+export function mapAspectRatioToPixelSize(aspectRatio, tier = '1K') {
+    const table = GPT_IMAGE_PIXEL_SIZES[tier] || GPT_IMAGE_PIXEL_SIZES['1K'];
+    return table[aspectRatio] || table['1:1'];
+}
+
+// 2K 档像素尺寸
+export function mapAspectRatioToPixelSize2K(aspectRatio) {
+    return mapAspectRatioToPixelSize(aspectRatio, '2K');
+}
+
+// 4K 档像素尺寸
+export function mapAspectRatioToPixelSize4K(aspectRatio) {
+    return mapAspectRatioToPixelSize(aspectRatio, '4K');
 }
 
 // 判断是否为 Grok 绘画模型

@@ -1,4 +1,4 @@
-import { isGemini25Flash, isGemini31FlashImage, isGemini3ProImage, isGeminiModel } from './modelConfig.js';
+import { isGemini25Flash, isGemini31FlashImage, isGemini3ProImage, isGeminiModel, isGPTImageModel, isGPTImageTierSelectable } from './modelConfig.js';
 import { GEMINI_25_FLASH_ASPECTS, GEMINI_3_PRO_ASPECTS } from '../config/constants.js';
 
 export class ModelSelector {
@@ -406,6 +406,7 @@ export class ModelSelector {
         
         if (!selectedType) {
             if (this.dom.geminiResolutionGroup) this.dom.geminiResolutionGroup.style.display = 'none';
+            if (this.dom.gptImageResolutionGroup) this.dom.gptImageResolutionGroup.style.display = 'none';
             if (this.dom.sizeParamGroup) this.dom.sizeParamGroup.style.display = 'none';
             if (this.dom.responseFormatGroup) this.dom.responseFormatGroup.style.display = 'none';
             if (this.dom.jimengVideoParamsGroup) this.dom.jimengVideoParamsGroup.style.display = 'none';
@@ -416,6 +417,7 @@ export class ModelSelector {
         
         if (selectedType === 'video') {
             if (this.dom.geminiResolutionGroup) this.dom.geminiResolutionGroup.style.display = 'none';
+            if (this.dom.gptImageResolutionGroup) this.dom.gptImageResolutionGroup.style.display = 'none';
             
             const hasJimeng15Model = models.some(m => m === 'doubao-seedance-1-5-pro-251215');
             const hasJimeng10Model = models.some(m => m === 'doubao-seedance-1-0-pro-250528');
@@ -451,6 +453,8 @@ export class ModelSelector {
         const hasGemini31Flash = models.some(m => isGemini31FlashImage(m));
         const hasGemini3Pro = models.some(m => isGemini3ProImage(m));
         const hasGeminiModel = hasGemini25Flash || hasGemini31Flash || hasGemini3Pro || models.some(m => isGeminiModel(m));
+        const hasGPTTierSelectable = models.some(m => isGPTImageTierSelectable(m));
+        const allGPTImage = models.length > 0 && models.every(m => isGPTImageModel(m));
 
         if (this.dom.jimengVideoParamsGroup) {
             this.dom.jimengVideoParamsGroup.style.display = 'none';
@@ -483,8 +487,18 @@ export class ModelSelector {
             this.updateAspectRatioOptions(models);
         }
 
+        // gpt-image-2.5-flare / gpt-image-2.5-sunburst 可通过参数选 1K/2K/4K
+        if (this.dom.gptImageResolutionGroup) {
+            this.dom.gptImageResolutionGroup.style.display = hasGPTTierSelectable ? 'block' : 'none';
+            if (hasGPTTierSelectable && this.dom.gptImageSize) {
+                const savedGptSize = localStorage.getItem('aiPaintingGptImageSize') || '1K';
+                this.dom.gptImageSize.value = savedGptSize;
+            }
+        }
+
         if (this.dom.responseFormatGroup) {
-            this.dom.responseFormatGroup.style.display = hasGeminiModel ? 'none' : 'block';
+            // Gemini 与 gpt-image（异步）都不使用 response_format
+            this.dom.responseFormatGroup.style.display = (hasGeminiModel || allGPTImage) ? 'none' : 'block';
         }
         
         const nGroup = document.querySelector('#n')?.closest('.input-group');

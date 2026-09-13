@@ -2596,7 +2596,7 @@
                                                 <option value="happyhorse-1.1-r2v">百炼 HappyHorse 参考生</option>
                                                 <option value="happyhorse-1.0-video-edit">百炼 HappyHorse 视频编辑</option>
                                                 <option value="wan3.0-video">百炼 万相 3.0</option>
-                                                <option value="wan3.0-video-prime">百炼 万相 3.0 Prime</option>
+                                                <!-- 隐藏：该模型不存在 <option value="wan3.0-video-prime">百炼 万相 3.0 Prime</option> -->
                                             </optgroup>
                                         </select>
                                     </div>
@@ -2673,28 +2673,40 @@
                                             <div class="input-row">
                                                 <div class="form-group">
                                                     <label>模型</label>
-                                                    <input type="text" value="gpt-image-2" readonly>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label>尺寸</label>
-                                                    <select id="imageSize" onchange="saveAllConfigs()">
-                                                        <option value="auto" selected>auto</option>
-                                                        <option value="1024x1024">1024x1024</option>
-                                                        <option value="1792x1024">1792x1024 (16:9)</option>
-                                                        <option value="1024x1792">1024x1792 (9:16)</option>
-                                                        <option value="1536x1024">1536x1024 (3:2)</option>
-                                                        <option value="1024x1536">1024x1536 (2:3)</option>
-                                                        <option value="1280x1024">1280x1024 (5:4)</option>
-                                                        <option value="1024x1280">1024x1280 (4:5)</option>
-                                                        <option value="2048x2048">2048x2048</option>
-                                                        <option value="2048x1536">2048x1536</option>
-                                                        <option value="1536x2048">1536x2048</option>
-                                                        <option value="1792x768">1792x768 (21:9)</option>
-                                                        <option value="768x1792">768x1792 (9:21)</option>
-                                                        <option value="4096x4096">4096x4096</option>
+                                                    <select id="imageModel" onchange="onImageModelChange()">
+                                                        <option value="gpt-image-2">gpt-image-2（1K）</option>
+                                                        <option value="gpt-image-2-2K">gpt-image-2-2K（2K）</option>
+                                                        <option value="gpt-image-2-4K">gpt-image-2-4K（4K）</option>
+                                                        <option value="gpt-image-2.5">gpt-image-2.5（1K）</option>
+                                                        <option value="gpt-image-2.5-flare">gpt-image-2.5-flare（1K/2K/4K）</option>
+                                                        <option value="gpt-image-2.5-sunburst">gpt-image-2.5-sunburst（1K/2K/4K）</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
+                                                    <label>宽高比</label>
+                                                    <select id="imageSize" onchange="saveAllConfigs()">
+                                                        <option value="auto" selected>auto（按提示词推断）</option>
+                                                        <option value="1:1">1:1 方形</option>
+                                                        <option value="16:9">16:9 横向</option>
+                                                        <option value="9:16">9:16 纵向</option>
+                                                        <option value="4:3">4:3 横向</option>
+                                                        <option value="3:4">3:4 纵向</option>
+                                                        <option value="3:2">3:2 横向</option>
+                                                        <option value="2:3">2:3 纵向</option>
+                                                        <option value="5:4">5:4 横向</option>
+                                                        <option value="4:5">4:5 纵向</option>
+                                                        <option value="21:9">21:9 超宽</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group" id="imageTierGroup" style="display: none;">
+                                                    <label>清晰度</label>
+                                                    <select id="imageTier" onchange="saveAllConfigs()">
+                                                        <option value="1K" selected>1K - 标准</option>
+                                                        <option value="2K">2K - 高清</option>
+                                                        <option value="4K">4K - 超清</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group" id="imageResponseFormatGroup" style="display: none;">
                                                     <label>返回格式</label>
                                                     <select id="imageResponseFormat" onchange="saveAllConfigs()">
                                                         <option value="url" selected>URL</option>
@@ -3087,6 +3099,36 @@
         let assets = { images: [], videos: [], audios: [] };
         let imageReferenceAssets = [];
         const IMAGE_MODEL_ID = 'gpt-image-2';
+        // gpt-image-2 异步接口（POST /v1/videos）支持的模型
+        const IMAGE_MODEL_OPTIONS = ['gpt-image-2', 'gpt-image-2-2K', 'gpt-image-2-4K', 'gpt-image-2.5', 'gpt-image-2.5-flare', 'gpt-image-2.5-sunburst'];
+
+        function getSelectedImageModel() {
+            const value = (document.getElementById('imageModel')?.value || '').trim();
+            return value || IMAGE_MODEL_ID;
+        }
+
+        // flare / sunburst 用 image_size 参数选 1K/2K/4K，其余模型档位写在模型名里
+        function isImageTierSelectable(modelName) {
+            const lower = String(modelName || '').toLowerCase();
+            return lower.includes('flare') || lower.includes('sunburst');
+        }
+
+        function getImageModelTier(modelName) {
+            if (isImageTierSelectable(modelName)) {
+                return document.getElementById('imageTier')?.value || '1K';
+            }
+            const lower = String(modelName || '').toLowerCase();
+            if (lower.includes('4k')) return '4K';
+            if (lower.includes('2k')) return '2K';
+            return '1K';
+        }
+
+        function onImageModelChange() {
+            const group = document.getElementById('imageTierGroup');
+            if (group) group.style.display = isImageTierSelectable(getSelectedImageModel()) ? '' : 'none';
+            saveAllConfigs();
+        }
+
         let activeTasks = new Map();
         let mentionSelectedIndex = 0;
         let savedRange = null;
@@ -4716,9 +4758,13 @@
             if (config.seed !== undefined) document.getElementById('seed').value = config.seed;
             document.getElementById('generateAudio').checked = false;
             if (config.imagePrompt) document.getElementById('imagePrompt').value = config.imagePrompt;
+            if (config.imageModel && IMAGE_MODEL_OPTIONS.includes(config.imageModel)) document.getElementById('imageModel').value = config.imageModel;
+            if (config.imageTier) document.getElementById('imageTier').value = config.imageTier;
             if (config.imageSize) document.getElementById('imageSize').value = config.imageSize;
             if (config.imageResponseFormat) document.getElementById('imageResponseFormat').value = config.imageResponseFormat;
             if (config.imageGenerationCount) document.getElementById('imageGenerationCount').value = config.imageGenerationCount;
+            const imageTierGroup = document.getElementById('imageTierGroup');
+            if (imageTierGroup) imageTierGroup.style.display = isImageTierSelectable(getSelectedImageModel()) ? '' : 'none';
             document.getElementById('autoDownload').value = normalizedAutoDownload;
             if (config.promptEditorHeight) promptEditor.style.height = config.promptEditorHeight;
 
@@ -4743,7 +4789,7 @@
         });
 
         function setupAutoSave() {
-            const configInputs = ['apiKey', 'baseUrl', 'themeMode', 'colorScheme', 'imageHostProvider', 'litterboxExpiry', 'pollInterval', 'taskRecordLimit', 'historyLimitConfig', 'model', 'seedance20Endpoint', 'seedance20FastEndpoint', 'resolution', 'ratio', 'duration', 'seed', 'generateAudio', 'imagePrompt', 'imageSize', 'imageResponseFormat', 'imageGenerationCount', 'qiniuAk', 'qiniuSk', 'qiniuRegion', 'qiniuBucket', 'qiniuPathPrefix', 'qiniuDomain', 'relayKey', 'relayUrl', 'relayCdnDomain'];
+            const configInputs = ['apiKey', 'baseUrl', 'themeMode', 'colorScheme', 'imageHostProvider', 'litterboxExpiry', 'pollInterval', 'taskRecordLimit', 'historyLimitConfig', 'model', 'seedance20Endpoint', 'seedance20FastEndpoint', 'resolution', 'ratio', 'duration', 'seed', 'generateAudio', 'imagePrompt', 'imageModel', 'imageTier', 'imageSize', 'imageResponseFormat', 'imageGenerationCount', 'qiniuAk', 'qiniuSk', 'qiniuRegion', 'qiniuBucket', 'qiniuPathPrefix', 'qiniuDomain', 'relayKey', 'relayUrl', 'relayCdnDomain'];
             configInputs.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -4784,6 +4830,8 @@
                 seed: document.getElementById('seed').value,
                 generateAudio: document.getElementById('generateAudio').checked,
                 imagePrompt: document.getElementById('imagePrompt')?.value || '',
+                imageModel: document.getElementById('imageModel')?.value || IMAGE_MODEL_ID,
+                imageTier: document.getElementById('imageTier')?.value || '1K',
                 imageSize: document.getElementById('imageSize')?.value || 'auto',
                 imageResponseFormat: document.getElementById('imageResponseFormat')?.value || 'url',
                 imageGenerationCount: document.getElementById('imageGenerationCount')?.value || '1',
@@ -5948,15 +5996,18 @@
         function buildImageCurlCommand(baseUrl, imageApiKey, body) {
             const escapedBody = escapeForCurlSingleQuotes(safeStringifyForLog(body));
             return [
-                `curl -X POST ${baseUrl}/v1/images/generations \\`,
+                `curl -X POST ${baseUrl}/v1/videos \\`,
                 `  -H "Content-Type: application/json" \\`,
                 `  -H "Authorization: Bearer ${imageApiKey}" \\`,
-                `  -d '${escapedBody}'`
+                `  -d '${escapedBody}'`,
+                ``,
+                `# 轮询任务状态: curl ${baseUrl}/v1/videos/<task_id> -H "Authorization: Bearer ${imageApiKey}"`
             ].join('\n');
         }
 
-        async function callImageGenerationApi(imageApiKey, baseUrl, body) {
-            const response = await fetch(`${baseUrl}/v1/images/generations`, {
+        // 提交异步图片任务（gpt-image-2 异步接口，复用 /v1/videos）
+        async function createImageTaskApi(imageApiKey, baseUrl, body) {
+            const response = await fetch(`${baseUrl}/v1/videos`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -5965,11 +6016,61 @@
                 },
                 body: JSON.stringify(body)
             });
-            const result = await response.json();
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(result.error?.message || result.message || `HTTP ${response.status}`);
+            }
+            if (!result.id) {
+                throw new Error('接口未返回任务 ID');
+            }
+            return { response, result };
+        }
+
+        // 查询异步图片任务状态
+        async function queryImageTaskApi(imageApiKey, baseUrl, taskId) {
+            const response = await fetch(`${baseUrl}/v1/videos/${encodeURIComponent(taskId)}`, {
+                headers: {
+                    'Authorization': `Bearer ${imageApiKey}`,
+                    'Accept': 'application/json'
+                }
+            });
+            const result = await response.json().catch(() => ({}));
             if (!response.ok) {
                 throw new Error(result.error?.message || result.message || `HTTP ${response.status}`);
             }
             return { response, result };
+        }
+
+        // 完成态图片地址：顶层 url，其次 metadata.image_url / metadata.image
+        function extractTaskImageUrl(result) {
+            if (!result) return '';
+            return result.url || result.metadata?.image_url || result.metadata?.image || result.output?.url || '';
+        }
+
+        // 轮询直到完成 / 失败 / 超时（文档建议 2~5 秒一次）
+        async function waitForImageTask(imageApiKey, baseUrl, taskId, { intervalMs = 3000, timeoutMs = 10 * 60 * 1000, onPoll } = {}) {
+            const start = Date.now();
+            let attempt = 0;
+
+            while (true) {
+                attempt += 1;
+                const { response, result } = await queryImageTaskApi(imageApiKey, baseUrl, taskId);
+                if (onPoll) onPoll({ attempt, response, result });
+
+                const status = result.status || '';
+                if (status === 'completed') {
+                    const url = extractTaskImageUrl(result);
+                    if (!url) throw new Error('任务已完成但未返回图片地址');
+                    return { response, result, url };
+                }
+                if (status === 'failed') {
+                    throw new Error(result.error?.message || '图片任务失败');
+                }
+                if (Date.now() - start > timeoutMs) {
+                    throw new Error('图片任务超时（10 分钟未完成）');
+                }
+                await new Promise((resolve) => setTimeout(resolve, intervalMs));
+            }
         }
 
         function getImageGenerationCount() {
@@ -6027,6 +6128,7 @@
             const size = document.getElementById('imageSize').value || 'auto';
             const responseFormat = document.getElementById('imageResponseFormat').value || 'url';
             const generationCount = getImageGenerationCount();
+            const selectedModelId = getSelectedImageModel();
 
             if (!imageApiKey) { alert('请输入 wanwuhuanxin API Key'); return; }
             if (!prompt) { alert('请输入图片提示词'); return; }
@@ -6053,39 +6155,61 @@
 
                 const runImageGenerationAttempt = async (attempt) => {
                     const startedAt = Date.now();
-                    let body = {
-                        model: IMAGE_MODEL_ID,
-                        prompt,
-                        size,
-                        response_format: responseFormat
-                    };
-                    if (referencePayload.length) body.image = referencePayload;
+                    const modelId = getSelectedImageModel();
+                    const tierSelectable = isImageTierSelectable(modelId);
+                    const tier = getImageModelTier(modelId);
 
-                    let requestLog = `第 ${attempt}/${generationCount} 次\nPOST ${baseUrl}/v1/images/generations\nHeaders:\n  Content-Type: application/json\n  Authorization: Bearer ${imageApiKey.substring(0, 10)}...\nBody:\n${safeStringifyForLog(body)}\n\n调试 curl（大字段已省略）：\n${buildImageCurlCommand(baseUrl, imageApiKey, body)}`;
-                    let apiResult;
+                    const buildImageBody = (refs) => {
+                        const nextBody = { model: modelId, prompt, aspect_ratio: size };
+                        if (tierSelectable) nextBody.image_size = tier;
+                        if (refs.length) nextBody.images = refs;
+                        return nextBody;
+                    };
+
+                    let body = buildImageBody(referencePayload);
+
+                    let requestLog = `第 ${attempt}/${generationCount} 次\nPOST ${baseUrl}/v1/videos（异步）\nHeaders:\n  Content-Type: application/json\n  Authorization: Bearer ${imageApiKey.substring(0, 10)}...\nBody:\n${safeStringifyForLog(body)}\n\n调试 curl（大字段已省略）：\n${buildImageCurlCommand(baseUrl, imageApiKey, body)}`;
 
                     try {
+                        let createdTask;
                         try {
-                            apiResult = await callImageGenerationApi(imageApiKey, baseUrl, body);
+                            createdTask = await createImageTaskApi(imageApiKey, baseUrl, body);
                         } catch (error) {
                             const hasLocalReference = imageReferenceAssets.some(ref => ref.source === 'file');
                             if (!hasLocalReference) throw error;
                             usedPublicFallback = true;
                             referencePayload = await getPublicFallbackPayload();
-                            body = { ...body, image: referencePayload };
+                            body = buildImageBody(referencePayload);
                             requestLog += `\n\n[自动重试] base64 参考图失败，已改用图床公网 URL。\n重试请求体:\n${safeStringifyForLog(body)}`;
                             addLog('warning', '图片生成已切换公网图床重试', error.message, {
                                 taskKind: 'image_generate',
                                 generationAttempt: attempt,
                                 generationCount
                             });
-                            apiResult = await callImageGenerationApi(imageApiKey, baseUrl, body);
+                            createdTask = await createImageTaskApi(imageApiKey, baseUrl, body);
                         }
 
-                        const responseLogText = `Status: ${apiResult.response.status}\nBody:\n${safeStringifyForLog(apiResult.result)}`;
-                        const imageResults = extractImageResults(apiResult.result);
+                        const remoteTaskId = createdTask.result?.id;
+                        requestLog += `\n\n任务已创建: ${remoteTaskId}（${createdTask.result?.status || 'queued'}），轮询 ${baseUrl}/v1/videos/${remoteTaskId}（参考图 ${referencePayload.length} 张，档位 ${tier}${tierSelectable ? '（参数选择）' : '（模型名固定）'}）`;
+
+                        const { response: pollResponse, result: finalResult, url: taskImageUrl } = await waitForImageTask(
+                            imageApiKey,
+                            baseUrl,
+                            remoteTaskId,
+                            {
+                                intervalMs: 3000,
+                                onPoll: ({ attempt: pollAttempt, result }) => {
+                                    requestLog += `\n\n[轮询 ${pollAttempt}] ${result.status || '未知'}${result.progress != null ? ` (${result.progress}%)` : ''}`;
+                                }
+                            }
+                        );
+
+                        const responseLogText = `Task: ${remoteTaskId}\nStatus: ${pollResponse.status}\nBody:\n${safeStringifyForLog(finalResult)}`;
+                        const imageResults = [{ url: taskImageUrl }]
+                            .map((candidate, index) => normalizeImageCandidate(candidate, index))
+                            .filter(Boolean);
                         if (!imageResults.length) {
-                            throw new Error('图片接口已返回，但未找到 url 或 b64_json 图片结果');
+                            throw new Error('图片任务已完成，但未找到图片地址');
                         }
 
                         for (const result of imageResults) {
@@ -6109,8 +6233,10 @@
                             responseLog: responseLogText,
                             prompt,
                             params: {
-                                model: IMAGE_MODEL_ID,
+                                model: modelId,
                                 size,
+                                aspectRatio: size,
+                                imageSize: tierSelectable ? tier : undefined,
                                 responseFormat,
                                 generationAttempt: attempt,
                                 generationCount,
@@ -6144,10 +6270,10 @@
                         });
 
                         completedCount += 1;
-                        addLog('success', `图片生成成功: ${taskId}`, `第 ${attempt}/${generationCount} 次\n模型: ${IMAGE_MODEL_ID}\n尺寸: ${size}\n提示词: ${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`, {
+                        addLog('success', `图片生成成功: ${taskId}`, `第 ${attempt}/${generationCount} 次\n模型: ${modelId}\n宽高比: ${size}\n档位: ${tier}\n提示词: ${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`, {
                             taskId,
                             taskKind: 'image_generate',
-                            modelId: IMAGE_MODEL_ID,
+                            modelId,
                             size,
                             generationAttempt: attempt,
                             generationCount,
@@ -6177,7 +6303,7 @@
                     const details = failedResults.map((result, index) => `失败 ${index + 1}: ${result.reason?.message || result.reason || '未知错误'}`).join('\n');
                     addLog('error', '部分图片生成失败', details, {
                         taskKind: 'image_generate',
-                        modelId: IMAGE_MODEL_ID,
+                        modelId: selectedModelId,
                         generationCount,
                         completedCount,
                         promptPreview: `${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`
@@ -6185,11 +6311,11 @@
                     alert(`图片生成完成 ${completedCount}/${generationCount} 次，失败 ${failedResults.length} 次。`);
                 }
             } catch (error) {
-                const errMsg = formatFetchError(error, `${baseUrl}/v1/images/generations`);
+                const errMsg = formatFetchError(error, `${baseUrl}/v1/videos`);
                 alert(`图片生成失败: ${errMsg}${completedCount > 0 ? `\n已完成 ${completedCount}/${generationCount} 次。` : ''}`);
                 addLog('error', '图片生成失败', errMsg, {
                     taskKind: 'image_generate',
-                    modelId: IMAGE_MODEL_ID,
+                    modelId: selectedModelId,
                     generationCount,
                     completedCount,
                     promptPreview: `${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`
@@ -7426,9 +7552,13 @@
             if (getHistoryMediaType(item) === 'image') {
                 switchWorkspaceMode('image');
                 document.getElementById('imagePrompt').value = item.prompt || '';
+                if (item.params?.model && IMAGE_MODEL_OPTIONS.includes(item.params.model)) document.getElementById('imageModel').value = item.params.model;
+                if (item.params?.imageSize) document.getElementById('imageTier').value = item.params.imageSize;
                 if (item.params?.size) document.getElementById('imageSize').value = item.params.size;
                 if (item.params?.responseFormat) document.getElementById('imageResponseFormat').value = item.params.responseFormat;
                 if (item.params?.generationCount) document.getElementById('imageGenerationCount').value = item.params.generationCount;
+                const tierGroup = document.getElementById('imageTierGroup');
+                if (tierGroup) tierGroup.style.display = isImageTierSelectable(getSelectedImageModel()) ? '' : 'none';
                 saveAllConfigs();
                 alert('已复用图片生成配置，可在此基础上修改后重新生成');
                 return;

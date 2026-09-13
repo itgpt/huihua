@@ -9,6 +9,16 @@
                 </select>
               </div>
 
+              <!-- GPT 图片模型分辨率（gpt-image-2.5-flare / gpt-image-2.5-sunburst 可选 1K/2K/4K） -->
+              <div class="input-group" id="gptImageResolutionGroup" style="display:none;">
+                <label for="gptImageSize">清晰度</label>
+                <select id="gptImageSize" class="glass-select">
+                  <option value="1K">1K - 标准</option>
+                  <option value="2K">2K - 高清</option>
+                  <option value="4K">4K - 超清</option>
+                </select>
+              </div>
+
               <!-- 尺寸/宽高比 - 第二位 -->
               <div class="input-group" id="size-param-group">
                 <label for="size">宽高比</label>

@@ -151,6 +151,12 @@ export class EventManager {
             });
         }
 
+        if (this.dom.gptImageSize) {
+            this.dom.gptImageSize.addEventListener('change', () => {
+                if (this.handlers.onGptSizeChange) this.handlers.onGptSizeChange();
+            });
+        }
+
         if (this.dom.jimengSeconds) {
             this.dom.jimengSeconds.addEventListener('change', () => { if (this.handlers.onJimengParamChange) this.handlers.onJimengParamChange(); });
         }

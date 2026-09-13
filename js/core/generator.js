@@ -1,11 +1,11 @@
-import { uploadToImageHost } from '../utils/file.js';
+import { uploadToImageHost, fileToBase64 } from '../utils/file.js';
 import { createCallLogger } from '../utils/logger.js';
 import { maskApiKey } from '../utils/format.js';
 import { showSuccess, showError, showVideoSuccessToast } from '../ui/components/toast.js';
 import { updateModeIndicator } from '../ui/status.js';
-import { isVideoModel, isGeminiModel, isGemini3ProImage, isGPTImageModel, isGPTImageModel2K, isGPTImageModel4K, isGrokImageModel, mapAspectRatioToPixelSize, mapAspectRatioToPixelSize2K, mapAspectRatioToPixelSize4K } from '../models/modelConfig.js';
+import { isVideoModel, isGeminiModel, isGemini3ProImage, isGPTImageModel, isGPTImageModel2K, isGPTImageModel4K, isGPTImageTierSelectable, gptImageModelTier, isGrokImageModel, mapAspectRatioToPixelSize, mapAspectRatioToPixelSize2K, mapAspectRatioToPixelSize4K } from '../models/modelConfig.js';
 import { optimizePrompt } from '../api/optimizer.js';
-import { generateImage, editImage } from '../api/image.js';
+import { generateImage, editImage, createImageTask, pollImageTask, extractImageUrlFromTask } from '../api/image.js';
 import { createVideoTask } from '../api/video.js';
 import { callGeminiNativeAPI, parseGeminiResponse } from '../api/gemini.js';
 import { displayImageResults, createImageGeneratingPlaceholder, removeImageGeneratingPlaceholder } from '../ui/display.js?v=scdn-image-host-20260428';
@@ -31,6 +31,27 @@ function imageResultToSrc(item) {
         return normalizeImageSrc(item.b64_json, item.mimeType || item.mime_type || 'image/png');
     }
     return normalizeImageSrc(item.url || item.image_url || '');
+}
+
+// 构造异步图片接口的 images 数组：公网 URL 直接透传，本地文件转 Data URL（含 data: 前缀）
+// 文档要求最多 8 张
+async function buildAsyncReferenceImages(imageFiles, log) {
+    const limited = imageFiles.slice(0, 8);
+    if (imageFiles.length > 8) {
+        log.add('info', `参考图最多 8 张，已截取前 8 张（共 ${imageFiles.length} 张）`);
+    }
+
+    const images = [];
+    for (const file of limited) {
+        if (file.isFromUrl) {
+            images.push(file.originalUrl);
+            continue;
+        }
+        const base64 = await fileToBase64(file);
+        const mime = file.type || 'image/png';
+        images.push(`data:${mime};base64,${base64}`);
+    }
+    return images;
 }
 
 export class Generator {
@@ -326,6 +347,71 @@ export class Generator {
                 return true;
             }
             
+            // ========== 处理 GPT 图片模型（异步 /v1/videos） ==========
+            if (isGPTImageModel(modelName)) {
+                const finalPrompt = optimizedPrompt;
+                const tierSelectable = isGPTImageTierSelectable(modelName);
+                const tier = gptImageModelTier(modelName)
+                    || (this.dom.gptImageSize ? this.dom.gptImageSize.value : '1K')
+                    || '1K';
+
+                const body = {
+                    model: modelName,
+                    prompt: finalPrompt,
+                    aspect_ratio: size
+                };
+                // 旧档（gpt-image-2 / -2K / -4K）与 gpt-image-2.5 档位写在模型名里；
+                // flare / sunburst 用 image_size 参数选档
+                if (tierSelectable) {
+                    body.image_size = tier;
+                }
+
+                if (imageFiles && imageFiles.length > 0) {
+                    const images = await buildAsyncReferenceImages(imageFiles, log);
+                    if (images.length > 0) body.images = images;
+                    log.add('info', `图生图模式：${images.length} 张参考图（base64 / 公网 URL）`);
+                }
+
+                log.add('info', `分辨率档位：${tier}${tierSelectable ? '（参数选择）' : '（模型名固定）'}`);
+
+                const created = await createImageTask(this.apiClient, body, log);
+                log.add('info', `任务已提交：${created.id}（${created.status || 'queued'}）`);
+                this.logger.append('info', `⏳ 图片任务 ${created.id} 处理中，每 2~5 秒轮询一次…`);
+
+                const finalResult = await pollImageTask(this.apiClient, created.id, log);
+                const imageUrl = extractImageUrlFromTask(finalResult);
+                if (!imageUrl) throw new Error('任务完成但未返回图片地址');
+
+                this.logger.append('success', `✅ 图片生成完成：${imageUrl}`);
+
+                const params = {
+                    model: modelName,
+                    aspect_ratio: size,
+                    image_size: tierSelectable ? tier : undefined,
+                    mode: modeTag
+                };
+                const result = {
+                    created: finalResult.completed_at || Math.floor(Date.now() / 1000),
+                    model: modelName,
+                    data: [{ url: imageUrl }]
+                };
+
+                displayImageResults(this.dom, result, originalPrompt, optimizedPrompt, params);
+
+                await this.historyManager.save(imageUrl, originalPrompt, optimizedPrompt, params, log.logs, {
+                    endpoint: '/v1/videos',
+                    model: modelName,
+                    mode: modeTag,
+                    aspect_ratio: size,
+                    image_size: tierSelectable ? tier : undefined,
+                    taskId: created.id
+                });
+
+                removeImageGeneratingPlaceholder(taskId);
+                this.logger.append('info', `模型完成: ${modelName}`);
+                return true;
+            }
+
             // ========== 处理普通绘画模型 ==========
             let result;
 

@@ -87,7 +87,7 @@ huihua/
 ## 🏷️ 支持的模型
 
 ### 图片生成
-`gemini-2.5-flash-image` · `gemini-3.1-flash-image` · `gemini-3-pro-image` · `gpt-image-2-2k` · `gpt-image-2-4k` · `qwen-image-edit`
+`gemini-2.5-flash-image` · `gemini-3.1-flash-image` · `gemini-3-pro-image` · `gpt-image-2` · `gpt-image-2-2K` · `gpt-image-2-4K` · `gpt-image-2.5` · `gpt-image-2.5-flare` · `gpt-image-2.5-sunburst` · `qwen-image-edit`
 
 ### 视频生成
 `doubao-seedance-1-5-pro-251215` · `doubao-seedance-1-0-pro-250528` · `grok-imagine-0.9` · `grok-imagine-1.0` · `veo3.1-landscape-4k` · `veo3.1-portrait-4k` · `veo3.1-landscape-hd` · `veo3.1-portrait-hd` · `veo3.1-landscape` · `veo3.1-portrait` · `veo3.1-landscape-fl-4k` · `veo3.1-portrait-fl-4k` · `veo3.1-landscape-fl-hd` · `veo3.1-portrait-fl-hd` · `veo3.1-landscape-fl` · `veo3.1-portrait-fl` · `veo3.1-landscape-gif` · `veo3.1-portrait-gif` · `veo3.1-landscape-fl-gif` · `veo3.1-portrait-fl-gif`
