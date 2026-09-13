@@ -6189,6 +6189,8 @@
                     const modelId = getSelectedImageModel();
                     const tierSelectable = isImageTierSelectable(modelId);
                     const tier = getImageModelTier(modelId);
+                    // 跟随设置页的「轮询间隔」（默认 10 秒）；下限 2 秒，避免异常配置打太多请求
+                    const pollIntervalMs = Math.max(2000, (parseInt(document.getElementById('pollInterval')?.value, 10) || 10) * 1000);
 
                     const buildImageBody = (refs) => {
                         const nextBody = { model: modelId, prompt, aspect_ratio: size };
@@ -6254,7 +6256,7 @@
                         taskSubmitted = true;
                         const remoteTaskId = createdTask.result?.id;
                         imageTaskRecord.params.remoteTaskId = remoteTaskId;
-                        imageTaskRecord.responseLog = `任务已创建: ${remoteTaskId}（${createdTask.result?.status || 'queued'}）`;
+                        imageTaskRecord.responseLog = `任务已创建: ${remoteTaskId}（${createdTask.result?.status || 'queued'}），每 ${pollIntervalMs / 1000} 秒轮询一次`;
                         updateTaskRecordElement(imageTaskId);
                             requestLog += `\n\n任务已创建: ${remoteTaskId}（${createdTask.result?.status || 'queued'}），轮询 ${baseUrl}/v1/videos/${remoteTaskId}（参考图 ${referencePayload.length} 张，档位 ${tier}${tierSelectable ? '（参数选择）' : '（模型名固定）'}）`;
 
@@ -6263,7 +6265,7 @@
                                 baseUrl,
                                 remoteTaskId,
                                 {
-                                    intervalMs: 3000,
+                                intervalMs: pollIntervalMs,
                                     onPoll: ({ attempt: pollAttempt, result }) => {
                                         const pollLine = `\n\n[轮询 ${pollAttempt}] ${result.status || '未知'}${result.progress != null ? ` (${result.progress}%)` : ''}`;
                                         requestLog += pollLine;
