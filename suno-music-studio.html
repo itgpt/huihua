@@ -876,7 +876,7 @@
           <strong style="color: var(--warning);">⚠️ 注意：</strong>翻唱功能建议使用 <strong>chirp-v3-5</strong> 或 <strong>chirp-v4</strong> 模型，<strong>chirp-fenix 等新模型可能不支持翻唱</strong>。音频参考度建议调高以保留原曲旋律特征。
         </div>
 
-        <button class="btn btn-primary" onclick="generateCover()" style="padding: 12px 32px; font-size: 15px;">
+        <button class="btn btn-primary" id="coverGenerateBtn" onclick="generateCover()" style="padding: 12px 32px; font-size: 15px;">
           🎤 开始翻唱
         </button>
       </div>
@@ -1031,6 +1031,15 @@ function parseBoolLike(v) {
 function isOkResult(result) {
   return !!(result && (result.code === 'success' || result.code === 200 || result.code === '1' || result.code === 0));
 }
+
+// 任务 ID 只接受字符串 / 数字：数组型响应里没有 task_id 时回退到 id / clip_id，
+// 避免把整个对象当成任务 ID 拼进请求地址
+function toTaskId(value) {
+  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return null;
+}
+
 function mapApiEndpoint(endpoint) {
   const base = config.apiBase || DEFAULT_API_BASE;
   const feedMatch = endpoint.match(/^\/api\/suno\/feed\?task_id=([^&]+)/);
@@ -1060,22 +1069,34 @@ function normalizeApiResponse(endpoint, result) {
   if (ok && result && result.data !== undefined && result.data !== null) {
     const d = result.data;
     let id = null;
-    if (typeof d === 'string' || typeof d === 'number') id = String(d);
-    else if (d && d.task_id) id = String(d.task_id);
-    else if (Array.isArray(d) && d[0]) id = d[0].task_id || d[0];
+    if (Array.isArray(d)) {
+      if (d[0]) id = toTaskId(d[0].task_id) || toTaskId(d[0].id) || toTaskId(d[0].clip_id);
+    } else if (d && typeof d === 'object') {
+      id = toTaskId(d.task_id) || toTaskId(d.id) || toTaskId(d.clip_id);
+    } else {
+      id = toTaskId(d);
+    }
     return { code: 200, msg: (result.message || result.msg) || '成功', data: id ? [{ task_id: id }] : (Array.isArray(d) ? d : []) };
   }
   return { code: ok ? 200 : (result && result.code) || 0, msg: (result && (result.message || result.msg)) || '未知错误', data: result && result.data };
 }
 function extractTaskIds(result) {
   const d = result && result.data;
-  if (Array.isArray(d)) return d.map(x => x && (x.task_id || x)).filter(Boolean);
+  if (Array.isArray(d)) {
+    return d.map(x => (x && typeof x === 'object')
+      ? (toTaskId(x.task_id) || toTaskId(x.id) || toTaskId(x.clip_id))
+      : toTaskId(x)).filter(Boolean);
+  }
   if (typeof d === 'string' || typeof d === 'number') return [String(d)];
-  if (d && d.task_id) return [String(d.task_id)];
+  if (d && typeof d === 'object') {
+    const id = toTaskId(d.task_id) || toTaskId(d.id) || toTaskId(d.clip_id);
+    return id ? [id] : [];
+  }
   return [];
 }
 
-async function apiRequest(endpoint, method = 'GET', data = null, isJson = true) {
+// 网关（New API sunoapi 插件）要求 JSON body，所有请求统一按 JSON 提交
+async function apiRequest(endpoint, method = 'GET', data = null) {
   if (!config.apiKey) {
     showToast('请先配置 API Key', 'error');
     openSettings();
@@ -1183,9 +1204,7 @@ async function generateMusic() {
       params.metadata = metadata;
     }
 
-    // 判断是否使用 JSON 格式（有高级参数或续写/翻唱参数时用JSON）
-    const useJson = hasAdvanced || !!(continue_at || continue_clip_id || cover_clip_id || gptDescription);
-    const result = await apiRequest('/api/suno/generate', 'POST', params, useJson);
+    const result = await apiRequest('/api/suno/generate', 'POST', params);
 
     if (result.code === 200 && result.data && result.data.length > 0) {
       showToast('生成任务已提交，共 ' + result.data.length + ' 个版本', 'success');
@@ -1193,13 +1212,12 @@ async function generateMusic() {
       const container = document.getElementById('generateResults');
       const retryInfo = {
         params: params,
-        useJson: useJson,
         attempt: 1,
         maxAttempt: 3
       };
       result.data.forEach((task, index) => {
         const cardId = 'gen-' + task.task_id;
-        container.insertAdjacentHTML('afterbegin', createResultCard(task.task_id, title || prompt, index + 1));
+        container.insertAdjacentHTML('afterbegin', createResultCard(task.task_id, title || prompt, index + 1, cardId));
         // 保存到历史
         saveToHistory(task.task_id, title || prompt, tags);
         // 开始轮询（失败自动重试）
@@ -1258,15 +1276,15 @@ async function generateStem() {
   if (callback_url) params.callback_url = callback_url;
 
   try {
-    const result = await apiRequest('/api/suno/generate', 'POST', params, true);
+    const result = await apiRequest('/api/suno/generate', 'POST', params);
 
     if (result.code === 200 && result.data && result.data.length > 0) {
       showToast('声曲分离任务已提交，共 ' + result.data.length + ' 个任务', 'success');
       const container = document.getElementById('stemResults');
-      const retryInfo = { params: params, useJson: true, attempt: 1, maxAttempt: 3 };
+      const retryInfo = { params: params, attempt: 1, maxAttempt: 3 };
       result.data.forEach((task, index) => {
         const cardId = 'stem-' + task.task_id;
-        container.insertAdjacentHTML('afterbegin', createResultCard(task.task_id, '声曲分离-' + (currentStemMode === 'two' ? '2组' : '12组') + ' (任务' + (index+1) + ')', null));
+        container.insertAdjacentHTML('afterbegin', createResultCard(task.task_id, '声曲分离-' + (currentStemMode === 'two' ? '2组' : '12组') + ' (任务' + (index+1) + ')', null, cardId));
         startPolling(task.task_id, cardId, retryInfo);
       });
     } else {
@@ -1326,12 +1344,12 @@ async function generateCover() {
     }
   }
 
-  const btn = event.target;
+  const btn = document.getElementById('coverGenerateBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="loading"><span class="spinner"></span> 翻唱中...</span>';
 
   try {
-    // 使用 form-data 格式（翻唱兼容性更好）
+    // 提交参数（网关要求 JSON body）
     const params = {
       custom_mode: currentCoverMode === 1,
       make_instrumental: false,
@@ -1354,19 +1372,18 @@ async function generateCover() {
         },
         can_control_sliders: ["style_weight", "weirdness_constraint", "audio_weight"]
       };
-      params.metadata = JSON.stringify(metadata);
+      params.metadata = metadata;
     }
 
-    // 使用 form-data 格式
-    const result = await apiRequest('/api/suno/generate', 'POST', params, false);
+    const result = await apiRequest('/api/suno/generate', 'POST', params);
 
     if (result.code === 200 && result.data && result.data.length > 0) {
       showToast('翻唱任务已提交，共 ' + result.data.length + ' 个版本', 'success');
       const container = document.getElementById('coverResults');
-      const retryInfo = { params: params, useJson: false, attempt: 1, maxAttempt: 3 };
+      const retryInfo = { params: params, attempt: 1, maxAttempt: 3 };
       result.data.forEach((task, index) => {
         const cardId = 'cover-' + task.task_id;
-        container.insertAdjacentHTML('afterbegin', createResultCard(task.task_id, '翻唱-' + (title || '版本') + ' (版本' + (index+1) + ')', null));
+        container.insertAdjacentHTML('afterbegin', createResultCard(task.task_id, '翻唱-' + (title || '版本') + ' (版本' + (index+1) + ')', null, cardId));
         saveToHistory(task.task_id, '翻唱: ' + (title || prompt), tags);
         startPolling(task.task_id, cardId, retryInfo);
       });
@@ -1439,7 +1456,7 @@ async function uploadLocalAudioForCover() {
     const uploadResult = await apiRequest('/api/suno/uploads/audio', 'POST', {
       file: fileUrl,
       extension: ext
-    }, true);
+    });
     
     console.log('API上传结果:', uploadResult);
     
@@ -1586,7 +1603,7 @@ async function generateLyrics() {
   resultDiv.innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span> 正在生成歌词...</div></div>';
 
   try {
-    const result = await apiRequest('/api/suno/lyrics', 'POST', { prompt }, true);
+    const result = await apiRequest('/api/suno/lyrics', 'POST', { prompt });
     const ids = extractTaskIds(result);
     if (result.code !== 200 || ids.length === 0) {
       resultDiv.innerHTML = '';
@@ -1662,7 +1679,7 @@ async function queryTask() {
   const resultDiv = document.getElementById('queryResult');
   const cardId = 'query-' + taskId;
 
-  resultDiv.innerHTML = createResultCard(taskId, taskId, null);
+  resultDiv.innerHTML = createResultCard(taskId, taskId, null, cardId);
   const autoPoll = document.getElementById('autoPoll').checked;
   if (autoPoll) {
     startPolling(taskId, cardId);
@@ -1681,8 +1698,7 @@ async function fetchTaskStatus(taskId, cardId) {
       return result.data;
     } else {
       // 显示详细错误信息
-      const safeId = taskId.replace(/[^a-zA-Z0-9]/g, '');
-      const bodyEl = document.getElementById('body-' + safeId);
+      const bodyEl = cardElement(cardId, 'body');
       if (bodyEl) {
         bodyEl.innerHTML = `<div style="color: var(--danger);">❌ 查询失败</div>
           <div style="margin-top:8px;font-size:12px;color:var(--text-muted);white-space:pre-wrap;">${escapeHtml(JSON.stringify(result, null, 2))}</div>`;
@@ -1789,9 +1805,8 @@ function isFailedStatus(status, state) {
 // 失败自动重试：重新提交任务并继续轮询
 async function handleRetry(cardId, retryInfo) {
   const retryNum = retryInfo.attempt + 1;
-  const safeId = cardId.replace(/[^a-zA-Z0-9]/g, '');
-  const statusEl = document.getElementById('status-' + safeId);
-  const bodyEl = document.getElementById('body-' + safeId);
+  const statusEl = cardElement(cardId, 'status');
+  const bodyEl = cardElement(cardId, 'body');
 
   // 更新卡片显示重试中
   if (statusEl) {
@@ -1806,7 +1821,7 @@ async function handleRetry(cardId, retryInfo) {
   }
 
   try {
-    const result = await apiRequest('/api/suno/generate', 'POST', retryInfo.params, retryInfo.useJson);
+    const result = await apiRequest('/api/suno/generate', 'POST', retryInfo.params);
     if (result.code === 200 && result.data && result.data.length > 0) {
       const task = result.data[0];
       if (bodyEl) {
@@ -1875,14 +1890,25 @@ function getStatusClass(status) {
 }
 
 // ==================== 结果卡片 ====================
-function createResultCard(taskId, title, version) {
+// 卡片元素统一以 cardId 为键（cardId 形如 gen-<task_id>）。
+// 这样自动重试换到新的 task_id 后，仍然更新同一张卡片
+function cardKey(cardId) {
+  return String(cardId === null || cardId === undefined ? '' : cardId).replace(/[^a-zA-Z0-9]/g, '');
+}
+
+function cardElement(cardId, kind) {
+  return document.getElementById(kind + '-' + cardKey(cardId));
+}
+
+function createResultCard(taskId, title, version, cardId = taskId) {
+  const key = cardKey(cardId);
   return `
-    <div class="result-card" id="${'card-' + taskId.replace(/[^a-zA-Z0-9]/g, '')}">
+    <div class="result-card" id="card-${key}">
       <div class="result-header">
         <div class="result-title">${escapeHtml(title)}${version ? ` (版本${version})` : ''}</div>
-        <span class="result-status status-pending" id="status-${taskId.replace(/[^a-zA-Z0-9]/g, '')}">等待中</span>
+        <span class="result-status status-pending" id="status-${key}">等待中</span>
       </div>
-      <div class="result-body" id="body-${taskId.replace(/[^a-zA-Z0-9]/g, '')}">
+      <div class="result-body" id="body-${key}">
         <div class="loading"><span class="spinner"></span> 任务已提交，正在查询状态...</div>
         <div style="margin-top: 10px; font-size: 12px; color: var(--text-muted);">Task ID: ${taskId}</div>
       </div>
@@ -1894,9 +1920,8 @@ function updateResultCard(cardId, data) {
   // 标准化数据（兼容 fenix 嵌套结构）
   const norm = normalizeTaskData(data);
   const taskId = norm.task_id || cardId;
-  const safeId = taskId.replace(/[^a-zA-Z0-9]/g, '');
-  const statusEl = document.getElementById('status-' + safeId);
-  const bodyEl = document.getElementById('body-' + safeId);
+  const statusEl = cardElement(cardId, 'status');
+  const bodyEl = cardElement(cardId, 'body');
 
   if (!statusEl || !bodyEl) return;
 
@@ -2014,8 +2039,7 @@ function updateResultCard(cardId, data) {
 
 function updateCardStatus(cardId, status, text) {
   // 简化的状态更新
-  const safeId = cardId.replace(/[^a-zA-Z0-9]/g, '');
-  const statusEl = document.getElementById('status-' + safeId);
+  const statusEl = cardElement(cardId, 'status');
   if (statusEl) {
     statusEl.className = 'result-status status-' + status;
     statusEl.textContent = text;
@@ -2066,15 +2090,16 @@ async function toolAction(action) {
         break;
     }
 
-    const result = await apiRequest(endpoint, 'POST', data, true);
+    const result = await apiRequest(endpoint, 'POST', data);
     resultDiv.innerHTML = `<div class="card"><pre style="color:var(--text-secondary);font-size:13px;white-space:pre-wrap;">${escapeHtml(JSON.stringify(result, null, 2))}</pre></div>`;
 
     if (result.code === 200) {
       showToast('操作成功', 'success');
       const ids = extractTaskIds(result);
       if (ids.length > 0) {
-        resultDiv.innerHTML += createResultCard(ids[0], action + ' 结果', null);
-        startPolling(ids[0], 'tool-' + ids[0]);
+        const cardId = 'tool-' + ids[0];
+        resultDiv.innerHTML += createResultCard(ids[0], action + ' 结果', null, cardId);
+        startPolling(ids[0], cardId);
       }
     } else {
       showToast('操作失败: ' + (result.msg || ''), 'error');
@@ -2099,12 +2124,13 @@ async function adjustSpeed() {
   resultDiv.innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span> 变速处理中...</div></div>';
 
   try {
-    const result = await apiRequest('/api/suno/speed', 'POST', data, true);
+    const result = await apiRequest('/api/suno/speed', 'POST', data);
     const ids = extractTaskIds(result);
     if (result.code === 200 && ids.length > 0) {
       showToast('变速任务已提交', 'success');
-      resultDiv.innerHTML = createResultCard(ids[0], '变速结果', null);
-      startPolling(ids[0], 'speed-' + ids[0]);
+      const cardId = 'speed-' + ids[0];
+      resultDiv.innerHTML = createResultCard(ids[0], '变速结果', null, cardId);
+      startPolling(ids[0], cardId);
     } else {
       resultDiv.innerHTML = `<div class="card"><pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre></div>`;
       showToast('操作失败', 'error');
@@ -2129,7 +2155,7 @@ async function cropMusic() {
   resultDiv.innerHTML = '<div class="card"><div class="loading"><span class="spinner"></span> 裁剪中...</div></div>';
 
   try {
-    const result = await apiRequest('/api/suno/crop', 'POST', data, true);
+    const result = await apiRequest('/api/suno/crop', 'POST', data);
     const ids = extractTaskIds(result);
     if (result.code === 200 && ids.length > 0) {
       showToast('裁剪任务已提交', 'success');
@@ -2158,7 +2184,7 @@ async function uploadAudio() {
     const result = await apiRequest('/api/suno/uploads/audio', 'POST', {
       file: fileUrl,
       extension: extension
-    }, true);
+    });
 
     const uploadIds = extractTaskIds(result);
     if (result.code === 200 && uploadIds.length > 0) {

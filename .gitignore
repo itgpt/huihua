@@ -142,7 +142,7 @@ dist
 # Temporary folders
 tmp/
 temp/
-test*/
+test-results/
 
 # macOS
 .DS_Store
