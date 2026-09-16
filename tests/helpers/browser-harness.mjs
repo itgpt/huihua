@@ -1,4 +1,4 @@
-// 测试脚手架：把真实的 suno-music-studio.html 加载进无头 Chrome。
+// 测试脚手架：把项目里的真实页面加载进无头 Chrome。
 // 只在网络边界（window.fetch）和定时器上打桩，DOM / 渲染 / 业务逻辑都是真实执行。
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
@@ -85,6 +85,65 @@ function startStaticServer(root) {
   });
 }
 
+// 注入页面的测试替身源码。既用于当前文档，也可通过
+// Page.addScriptToEvaluateOnNewDocument 在后续导航（刷新）时自动生效。
+function pageStubSource(fakeIntervals) {
+  window.__requests = [];
+  window.__responses = [];
+  window.__route = null;
+  window.__intervals = new Map();
+  window.__intervalSeq = 0;
+  if (fakeIntervals) {
+    window.setInterval = (fn, ms) => {
+      const id = ++window.__intervalSeq;
+      window.__intervals.set(id, { fn, ms });
+      return id;
+    };
+    window.clearInterval = (id) => window.__intervals.delete(id);
+  }
+  window.__tick = async () => {
+    const fns = [...window.__intervals.values()].map((v) => v.fn);
+    for (const fn of fns) await fn();
+    return fns.length;
+  };
+  window.fetch = async (url, options = {}) => {
+    const target = String(url);
+    window.__requests.push({
+      url: target,
+      method: options.method || 'GET',
+      headers: options.headers || {},
+      body: options.body ? String(options.body) : null
+    });
+    let next = null;
+    if (typeof window.__route === 'function') {
+      try {
+        next = window.__route(target, options) || null;
+      } catch {
+        next = null;
+      }
+    }
+    if (!next) {
+      next = window.__responses.length
+        ? window.__responses.shift()
+        : { ok: true, status: 200, body: { code: 200, data: [] } };
+    }
+    const text = typeof next.body === 'string' ? next.body : JSON.stringify(next.body);
+    // 真实 Response 支持 clone()，页面自己的网络日志包装会调用它
+    const buildResponse = () => ({
+      ok: next.ok !== false,
+      status: next.status || 200,
+      statusText: next.statusText || '',
+      headers: new Map(),
+      json: async () => JSON.parse(text),
+      text: async () => text,
+      clone: () => buildResponse()
+    });
+    return buildResponse();
+  };
+}
+
+const stubSource = (fakeIntervals) => `(${pageStubSource.toString()})(${fakeIntervals});`;
+
 async function waitForFile(filePath, timeoutMs) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -115,7 +174,7 @@ async function waitForPageTarget(port, timeoutMs) {
   throw new Error('未找到可用的页面调试目标');
 }
 
-export class SunoPage {
+export class PageHarness {
   constructor({ cdp, chrome, server, userDataDir, baseUrl }) {
     this.cdp = cdp;
     this.chrome = chrome;
@@ -124,6 +183,7 @@ export class SunoPage {
     this.baseUrl = baseUrl;
     this.consoleErrors = [];
     this.pageErrors = [];
+    this.fakeIntervals = true;
     cdp.on('Runtime.consoleAPICalled', (params) => {
       if (params.type === 'error') {
         this.consoleErrors.push(params.args.map((a) => a.value ?? a.description ?? '').join(' '));
@@ -170,11 +230,7 @@ export class SunoPage {
 
     const { server, port: httpPort } = await startStaticServer(root);
     const baseUrl = `http://127.0.0.1:${httpPort}`;
-    return new SunoPage({ cdp, chrome, server, userDataDir, baseUrl });
-  }
-
-  get url() {
-    return `${this.baseUrl}/suno-music-studio.html`;
+    return new PageHarness({ cdp, chrome, server, userDataDir, baseUrl });
   }
 
   async open(pagePath = '/suno-music-studio.html') {
@@ -204,43 +260,14 @@ export class SunoPage {
 
   // 在页面里安装测试替身：fetch 队列 + 可控定时器。
   // 只替换网络与时钟这两处外部依赖，其余逻辑保持真实。
-  async installStubs() {
-    await this.eval(() => {
-      window.__requests = [];
-      window.__responses = [];
-      window.__intervals = new Map();
-      window.__intervalSeq = 0;
-      window.setInterval = (fn, ms) => {
-        const id = ++window.__intervalSeq;
-        window.__intervals.set(id, { fn, ms });
-        return id;
-      };
-      window.clearInterval = (id) => window.__intervals.delete(id);
-      window.__tick = async () => {
-        const fns = [...window.__intervals.values()].map((v) => v.fn);
-        for (const fn of fns) await fn();
-        return fns.length;
-      };
-      window.fetch = async (url, options = {}) => {
-        window.__requests.push({
-          url: String(url),
-          method: options.method || 'GET',
-          headers: options.headers || {},
-          body: options.body ? String(options.body) : null
-        });
-        const next = window.__responses.length
-          ? window.__responses.shift()
-          : { ok: true, status: 200, body: { code: 200, data: [] } };
-        const text = typeof next.body === 'string' ? next.body : JSON.stringify(next.body);
-        return {
-          ok: next.ok !== false,
-          status: next.status || 200,
-          statusText: next.statusText || '',
-          json: async () => JSON.parse(text),
-          text: async () => text
-        };
-      };
-    });
+  async installStubs({ fakeIntervals = this.fakeIntervals } = {}) {
+    this.fakeIntervals = fakeIntervals;
+    await this.eval(stubSource(fakeIntervals));
+  }
+
+  // 让替身在后续导航（刷新页面）时自动生效，用于测试「刷新后继续轮询」
+  async useStubsOnNewDocument() {
+    await this.cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: stubSource(this.fakeIntervals) });
   }
 
   async setResponses(responses) {
@@ -277,6 +304,6 @@ export class SunoPage {
   }
 }
 
-export async function startSunoPage(root) {
-  return SunoPage.launch({ root: root || path.resolve(process.cwd()) });
+export async function startPage(root) {
+  return PageHarness.launch({ root: root || path.resolve(process.cwd()) });
 }
