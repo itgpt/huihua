@@ -2678,6 +2678,8 @@
                                                         <option value="gpt-image-2-2K">gpt-image-2-2K（2K）</option>
                                                         <option value="gpt-image-2-4K">gpt-image-2-4K（4K）</option>
                                                         <option value="gpt-image-2.5">gpt-image-2.5（1K）</option>
+                                                        <option value="gpt-image-2.5-flare">gpt-image-2.5-flare（1K/2K/4K）</option>
+                                                        <option value="gpt-image-2.5-sunburst">gpt-image-2.5-sunburst（1K/2K/4K）</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
@@ -3098,7 +3100,7 @@
         let imageReferenceAssets = [];
         const IMAGE_MODEL_ID = 'gpt-image-2';
         // gpt-image-2 异步接口（POST /v1/videos）支持的模型
-        const IMAGE_MODEL_OPTIONS = ['gpt-image-2', 'gpt-image-2-2K', 'gpt-image-2-4K', 'gpt-image-2.5'];
+        const IMAGE_MODEL_OPTIONS = ['gpt-image-2', 'gpt-image-2-2K', 'gpt-image-2-4K', 'gpt-image-2.5', 'gpt-image-2.5-flare', 'gpt-image-2.5-sunburst'];
 
         function getSelectedImageModel() {
             const value = (document.getElementById('imageModel')?.value || '').trim();
@@ -6078,32 +6080,6 @@
             return result.url || result.metadata?.image_url || result.metadata?.image || result.output?.url || '';
         }
 
-        // 轮询直到完成 / 失败 / 超时（文档建议 2~5 秒一次）
-        async function waitForImageTask(imageApiKey, baseUrl, taskId, { intervalMs = 3000, timeoutMs = 10 * 60 * 1000, onPoll } = {}) {
-            const start = Date.now();
-            let attempt = 0;
-
-            while (true) {
-                attempt += 1;
-                const { response, result } = await queryImageTaskApi(imageApiKey, baseUrl, taskId);
-                if (onPoll) onPoll({ attempt, response, result });
-
-                const status = result.status || '';
-                if (status === 'completed') {
-                    const url = extractTaskImageUrl(result);
-                    if (!url) throw new Error('任务已完成但未返回图片地址');
-                    return { response, result, url };
-                }
-                if (status === 'failed') {
-                    throw new Error(result.error?.message || '图片任务失败');
-                }
-                if (Date.now() - start > timeoutMs) {
-                    throw new Error('图片任务超时（10 分钟未完成）');
-                }
-                await new Promise((resolve) => setTimeout(resolve, intervalMs));
-            }
-        }
-
         function getImageGenerationCount() {
             const input = document.getElementById('imageGenerationCount');
             const value = parseInt(input?.value, 10);
@@ -6150,6 +6126,172 @@
             const file = new File([blob], `${result.name}.${extension}`, { type: blob.type || 'image/png' });
             result.publicUrl = await uploadToHostedUrl(file);
             return result.publicUrl;
+        }
+
+        // ==================== 图片任务后台轮询 ====================
+        // 提交成功后由这里的定时器继续跟踪任务，页面刷新后由 loadTaskRecords 重新挂起
+        function stopImageTaskPolling(taskId) {
+            const task = activeTasks.get(taskId);
+            if (!task) return;
+            if (task.timer) { clearInterval(task.timer); task.timer = null; }
+            if (task.displayTimer) { clearInterval(task.displayTimer); task.displayTimer = null; }
+        }
+
+        // 失败收尾：卡片标红 + 写日志（后台任务不弹 alert 打断用户）
+        function markImageTaskFailed(taskId, error) {
+            const task = activeTasks.get(taskId);
+            if (!task) return;
+            stopImageTaskPolling(taskId);
+            const endedAt = new Date();
+            task.status = 'failed';
+            task.endTime = endedAt.toISOString();
+            task.duration = Math.max(1, Math.round((endedAt - new Date(task.startTime)) / 1000));
+            task.responseLog = `${task.responseLog || ''}\n\n[失败] ${error?.message || error}`.trim();
+            updateTaskRecordElement(taskId);
+            updateTaskRecordMeta(taskId);
+            saveTaskRecords();
+            addLog('error', `图片任务失败: ${taskId}`, error?.message || String(error), {
+                taskId,
+                taskKind: 'image_generate'
+            });
+        }
+
+        // 结果落地：转存公网地址、更新任务卡片、写历史、打开预览
+        async function finalizeImageTaskResults({ taskId, requestLog, responseLogText, imageResults, startedAt }) {
+            const taskRecord = activeTasks.get(taskId);
+            if (!taskRecord || !imageResults || !imageResults.length) return null;
+            stopImageTaskPolling(taskId);
+
+            for (const result of imageResults) {
+                try {
+                    await ensureGeneratedResultPublicUrl(result);
+                } catch (uploadError) {
+                    addLog('warning', '图片结果转存图床失败', uploadError.message, {
+                        taskId,
+                        taskKind: 'image_generate'
+                    });
+                }
+            }
+
+            const primaryResult = imageResults[0];
+            const endedAt = new Date();
+            const beganAt = startedAt || Date.parse(taskRecord.startTime) || Date.now();
+            taskRecord.requestLog = requestLog;
+            // 保留轮询过程日志，再补上最终响应体
+            taskRecord.responseLog = `${taskRecord.responseLog ? `${taskRecord.responseLog}\n\n` : ''}${responseLogText}`;
+            taskRecord.status = 'succeeded';
+            taskRecord.progress = 100;
+            taskRecord.endTime = endedAt.toISOString();
+            taskRecord.duration = Math.max(1, Math.round((endedAt - beganAt) / 1000));
+            taskRecord.imageUrl = getPersistableMediaUrl(primaryResult.publicUrl || primaryResult.previewUrl);
+            trimTaskRecords();
+            renderTaskRecords();
+            saveTaskRecords();
+
+            openPreviewWindow('image', primaryResult.publicUrl || primaryResult.previewUrl, `任务 ID: ${taskId}`, '图片生成结果预览');
+
+            imageResults.slice().reverse().forEach((result, indexFromEnd) => {
+                const originalIndex = imageResults.length - indexFromEnd;
+                const imageUrl = getPersistableMediaUrl(result.publicUrl || result.previewUrl);
+                addToHistory({
+                    id: imageResults.length === 1 ? taskId : `${taskId}-${originalIndex}`,
+                    kind: 'image_generate',
+                    imageUrl,
+                    publicUrl: getPersistableMediaUrl(result.publicUrl || ''),
+                    prompt: taskRecord.prompt,
+                    params: taskRecord.params,
+                    requestLog,
+                    responseLog: responseLogText,
+                    time: taskRecord.time
+                });
+            });
+
+            const promptPreview = `${(taskRecord.prompt || '').substring(0, 200)}${(taskRecord.prompt || '').length > 200 ? '...' : ''}`;
+            addLog('success', `图片生成成功: ${taskId}`, `模型: ${taskRecord.params?.model || ''}\n宽高比: ${taskRecord.params?.size || ''}\n档位: ${taskRecord.params?.imageSize || ''}\n提示词: ${promptPreview}`, {
+                taskId,
+                taskKind: 'image_generate',
+                modelId: taskRecord.params?.model,
+                size: taskRecord.params?.size,
+                promptPreview
+            });
+            return primaryResult;
+        }
+
+        function startImageTaskPolling(taskId) {
+            const task = activeTasks.get(taskId);
+            if (!task) return;
+            const remoteTaskId = task.params?.remoteTaskId;
+            if (!remoteTaskId) return;
+            if (task.timer) clearInterval(task.timer);
+
+            // 跟随设置页的「轮询间隔」（默认 10 秒）；下限 2 秒，避免异常配置打太多请求
+            const interval = Math.max(2000, (parseInt(document.getElementById('pollInterval')?.value, 10) || 10) * 1000);
+            const startedAt = Date.now();
+            const timeoutMs = 10 * 60 * 1000;
+
+            const doPoll = async () => {
+                const current = activeTasks.get(taskId);
+                if (!current || current.status !== 'running') {
+                    stopImageTaskPolling(taskId);
+                    return;
+                }
+                if (Date.now() - startedAt > timeoutMs) {
+                    markImageTaskFailed(taskId, new Error('图片任务超时（10 分钟未完成）'));
+                    return;
+                }
+
+                try {
+                    const apiKey = document.getElementById('apiKey').value.trim();
+                    const baseUrl = getEffectiveImageBaseUrl();
+                    const { response, result } = await queryImageTaskApi(apiKey, baseUrl, remoteTaskId);
+
+                    const pollLine = `\n\n[轮询 ${new Date().toLocaleTimeString()}] ${result.status || '未知'}${result.progress != null ? ` (${result.progress}%)` : ''}`;
+                    current.requestLog = `${current.requestLog || ''}${pollLine}`;
+                    current.responseLog = `${current.responseLog || ''}${pollLine}`;
+                    if (typeof result.progress === 'number') current.progress = result.progress;
+                    updateTaskRecordElement(taskId);
+                    saveTaskRecords();
+
+                    if (result.status === 'completed') {
+                        const imageUrl = extractTaskImageUrl(result);
+                        if (!imageUrl) {
+                            markImageTaskFailed(taskId, new Error('任务已完成但未返回图片地址'));
+                            return;
+                        }
+                        const imageResults = [{ url: imageUrl }]
+                            .map((candidate, index) => normalizeImageCandidate(candidate, index))
+                            .filter(Boolean);
+                        await finalizeImageTaskResults({
+                            taskId,
+                            requestLog: current.requestLog,
+                            responseLogText: `Task: ${remoteTaskId}\nStatus: ${response.status}\nBody:\n${safeStringifyForLog(result)}`,
+                            imageResults,
+                            startedAt
+                        });
+                        return;
+                    }
+
+                    if (result.status === 'failed') {
+                        markImageTaskFailed(taskId, new Error(result.error?.message || '图片任务失败'));
+                    }
+                } catch (error) {
+                    const latest = activeTasks.get(taskId);
+                    if (latest) {
+                        latest.responseLog = `${latest.responseLog || ''}\n\n[轮询失败] ${error?.message || error}`;
+                        saveTaskRecords();
+                    }
+                    addLog('warning', '图片任务轮询失败，稍后重试', error?.message || String(error), {
+                        taskId,
+                        taskKind: 'image_generate'
+                    });
+                }
+            };
+
+            task.timer = setInterval(doPoll, interval);
+            task.displayTimer = setInterval(() => {
+                if (activeTasks.get(taskId)?.status === 'running') updateTaskDuration(taskId);
+            }, 1000);
+            doPoll();
         }
 
         async function submitImageTask() {
@@ -6231,10 +6373,8 @@
                     try {
                         let responseLogText = '';
                         let imageResults = [];
-                        let taskSubmitted = false;
-
                         try {
-                            // ① 优先走文档的异步接口：POST /v1/videos 提交 + 轮询取图
+                            // ① 优先走文档的异步接口：POST /v1/videos 提交（提交成功后交给后台轮询）
                             let createdTask;
                             try {
                                 createdTask = await createImageTaskApi(imageApiKey, baseUrl, body);
@@ -6253,41 +6393,26 @@
                             createdTask = await createImageTaskApi(imageApiKey, baseUrl, body);
                         }
 
-                        taskSubmitted = true;
                         const remoteTaskId = createdTask.result?.id;
                         imageTaskRecord.params.remoteTaskId = remoteTaskId;
+                        imageTaskRecord.requestLog = requestLog;
                         imageTaskRecord.responseLog = `任务已创建: ${remoteTaskId}（${createdTask.result?.status || 'queued'}），每 ${pollIntervalMs / 1000} 秒轮询一次`;
+                        requestLog += `\n\n任务已创建: ${remoteTaskId}（${createdTask.result?.status || 'queued'}），轮询 ${baseUrl}/v1/videos/${remoteTaskId}（参考图 ${referencePayload.length} 张，档位 ${tier}${tierSelectable ? '（参数选择）' : '（模型名固定）'}）`;
                         updateTaskRecordElement(imageTaskId);
-                            requestLog += `\n\n任务已创建: ${remoteTaskId}（${createdTask.result?.status || 'queued'}），轮询 ${baseUrl}/v1/videos/${remoteTaskId}（参考图 ${referencePayload.length} 张，档位 ${tier}${tierSelectable ? '（参数选择）' : '（模型名固定）'}）`;
+                        saveTaskRecords();
+                        addLog('info', `图片任务已提交: ${remoteTaskId}`, `第 ${attempt}/${generationCount} 次\n模型: ${modelId}\n宽高比: ${size}\n档位: ${tier}`, {
+                            taskId: imageTaskId,
+                            taskKind: 'image_generate',
+                            modelId,
+                            size
+                        });
 
-                            const { response: pollResponse, result: finalResult, url: taskImageUrl } = await waitForImageTask(
-                                imageApiKey,
-                                baseUrl,
-                                remoteTaskId,
-                                {
-                                intervalMs: pollIntervalMs,
-                                    onPoll: ({ attempt: pollAttempt, result }) => {
-                                        const pollLine = `\n\n[轮询 ${pollAttempt}] ${result.status || '未知'}${result.progress != null ? ` (${result.progress}%)` : ''}`;
-                                        requestLog += pollLine;
-                                        imageTaskRecord.responseLog += pollLine;
-                                        if (typeof result.progress === 'number') imageTaskRecord.progress = result.progress;
-                                        updateTaskRecordElement(imageTaskId);
-                                        saveTaskRecords();
-                                    }
-                                }
-                            );
-
-                            responseLogText = `Task: ${remoteTaskId}\nStatus: ${pollResponse.status}\nBody:\n${safeStringifyForLog(finalResult)}`;
-                            imageResults = [{ url: taskImageUrl }]
-                                .map((candidate, index) => normalizeImageCandidate(candidate, index))
-                                .filter(Boolean);
-                            if (!imageResults.length) {
-                                throw new Error('图片任务已完成，但未找到图片地址');
-                            }
+                        // 提交成功即交给后台轮询，按钮立刻恢复；任务在右侧「任务」栏继续跑
+                        startImageTaskPolling(imageTaskId);
+                        return { taskId: imageTaskId, primaryResult: null, attempt, mode: 'async' };
                         } catch (asyncError) {
                             // ② 异步接口不可用（如网关该路由/模型返回 503）时，回退到同步接口，保证仍能出图
-                            // 任务已提交（可能是轮询失败）时不再回退，避免重复生成/重复计费
-                            if (taskSubmitted) throw asyncError;
+                            //    这里只处理提交阶段失败；已提交的任务由后台轮询负责收尾
                             addLog('warning', '异步图片接口不可用，已回退到同步接口', asyncError.message, {
                                 taskKind: 'image_generate',
                                 generationAttempt: attempt,
@@ -6331,80 +6456,19 @@
                             }
                         }
 
-                        for (const result of imageResults) {
-                            try {
-                                await ensureGeneratedResultPublicUrl(result);
-                            } catch (uploadError) {
-                                addLog('warning', '图片结果转存图床失败', uploadError.message, {
-                                    taskKind: 'image_generate',
-                                    generationAttempt: attempt,
-                                    generationCount
-                                });
-                            }
-                        }
-
-                        const primaryResult = imageResults[0];
-                        const taskId = imageTaskId;
-                        const taskRecord = imageTaskRecord;
-                        taskRecord.requestLog = requestLog;
-                        // 保留轮询过程日志，再补上最终响应体
-                        taskRecord.responseLog = `${taskRecord.responseLog ? `${taskRecord.responseLog}\n\n` : ''}${responseLogText}`;
-                        taskRecord.params = {
-                            model: modelId,
-                            size,
-                            aspectRatio: size,
-                            imageSize: tierSelectable ? tier : undefined,
-                            responseFormat,
-                            generationAttempt: attempt,
-                            generationCount,
-                            referenceCount: imageReferenceAssets.length,
-                            usedPublicFallback
-                        };
-                        taskRecord.status = 'succeeded';
-                        taskRecord.progress = 100;
-                        taskRecord.endTime = new Date().toISOString();
-                        taskRecord.duration = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
-                        taskRecord.imageUrl = getPersistableMediaUrl(primaryResult.publicUrl || primaryResult.previewUrl);
-                        trimTaskRecords();
-                        renderTaskRecords();
-                        saveTaskRecords();
-
-                        imageResults.slice().reverse().forEach((result, indexFromEnd) => {
-                            const originalIndex = imageResults.length - indexFromEnd;
-                            const imageUrl = getPersistableMediaUrl(result.publicUrl || result.previewUrl);
-                            addToHistory({
-                                id: imageResults.length === 1 ? taskId : `${taskId}-${originalIndex}`,
-                                kind: 'image_generate',
-                                imageUrl,
-                                publicUrl: getPersistableMediaUrl(result.publicUrl || ''),
-                                prompt,
-                                params: taskRecord.params,
-                                requestLog,
-                                responseLog: responseLogText,
-                                time: taskRecord.time
-                            });
+                        // 同步回退是"当场出图"，结果直接落地
+                        const primaryResult = await finalizeImageTaskResults({
+                            taskId: imageTaskId,
+                            requestLog,
+                            responseLogText,
+                            imageResults,
+                            startedAt
                         });
-
                         completedCount += 1;
-                        addLog('success', `图片生成成功: ${taskId}`, `第 ${attempt}/${generationCount} 次\n模型: ${modelId}\n宽高比: ${size}\n档位: ${tier}\n提示词: ${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`, {
-                            taskId,
-                            taskKind: 'image_generate',
-                            modelId,
-                            size,
-                            generationAttempt: attempt,
-                            generationCount,
-                            promptPreview: `${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`
-                        });
-                        return { taskId, primaryResult, attempt };
+                        return { taskId: imageTaskId, primaryResult, attempt, mode: 'sync' };
                     } catch (attemptError) {
                         // 失败也要把右侧那张「运行中」的卡片收尾，避免一直挂着
-                        imageTaskRecord.status = 'failed';
-                        imageTaskRecord.endTime = new Date().toISOString();
-                        imageTaskRecord.duration = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
-                        imageTaskRecord.requestLog = requestLog;
-                        imageTaskRecord.responseLog = `${imageTaskRecord.responseLog || ''}\n\n[失败] ${attemptError?.message || attemptError}`.trim();
-                        updateTaskRecordElement(imageTaskId);
-                        saveTaskRecords();
+                        markImageTaskFailed(imageTaskId, attemptError);
                         throw attemptError;
                     } finally {
                         finishedCount += 1;
@@ -6415,31 +6479,23 @@
                 submitBtn.innerHTML = `⏳ 并发生成中... 0/${generationCount}`;
                 const attempts = Array.from({ length: generationCount }, (_, index) => runImageGenerationAttempt(index + 1));
                 const settledResults = await Promise.allSettled(attempts);
-                const fulfilledResults = settledResults
-                    .filter(result => result.status === 'fulfilled')
-                    .map(result => result.value);
                 const failedResults = settledResults.filter(result => result.status === 'rejected');
-
-                const lastResult = fulfilledResults[fulfilledResults.length - 1];
-                if (lastResult) {
-                    openPreviewWindow('image', lastResult.primaryResult.publicUrl || lastResult.primaryResult.previewUrl, `任务 ID: ${lastResult.taskId}`, '图片生成结果预览');
-                }
 
                 if (failedResults.length > 0) {
                     const details = failedResults.map((result, index) => `失败 ${index + 1}: ${result.reason?.message || result.reason || '未知错误'}`).join('\n');
-                    addLog('error', '部分图片生成失败', details, {
+                    addLog('error', '部分图片任务提交失败', details, {
                         taskKind: 'image_generate',
                         modelId: selectedModelId,
                         generationCount,
                         completedCount,
                         promptPreview: `${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}`
                     });
-                    alert(`图片生成完成 ${completedCount}/${generationCount} 次，失败 ${failedResults.length} 次。`);
+                    alert(`图片任务提交失败 ${failedResults.length}/${generationCount} 次${completedCount > 0 ? `，已即时出图 ${completedCount} 次` : ''}。\n其余任务在右侧「任务」栏继续。`);
                 }
             } catch (error) {
                 const errMsg = formatFetchError(error, `${baseUrl}/v1/videos`);
-                alert(`图片生成失败: ${errMsg}${completedCount > 0 ? `\n已完成 ${completedCount}/${generationCount} 次。` : ''}`);
-                addLog('error', '图片生成失败', errMsg, {
+                alert(`图片生成提交失败: ${errMsg}${completedCount > 0 ? `\n已即时出图 ${completedCount}/${generationCount} 次。` : ''}`);
+                addLog('error', '图片生成提交失败', errMsg, {
                     taskKind: 'image_generate',
                     modelId: selectedModelId,
                     generationCount,
@@ -7563,9 +7619,14 @@
                     activeTasks.set(compactRecord.id, compactRecord);
                     if (compactRecord.status === 'running') {
                         if (getTaskKind(compactRecord) === 'image_generate') {
-                            // 图片任务由提交时的那次轮询更新，页面刷新后无法续接，标记为中断避免一直挂着
-                            compactRecord.status = 'failed';
-                            compactRecord.responseLog = `${compactRecord.responseLog || ''}\n\n[中断] 页面已刷新，未继续跟踪该图片任务`;
+                            if (compactRecord.params?.remoteTaskId) {
+                                // 已提交到上游的图片任务：刷新后继续轮询
+                                startImageTaskPolling(compactRecord.id);
+                            } else {
+                                // 没有上游任务 ID 的是提交中的中间态，无法续接，标记为中断避免一直挂着
+                                compactRecord.status = 'failed';
+                                compactRecord.responseLog = `${compactRecord.responseLog || ''}\n\n[中断] 页面已刷新，未继续跟踪该图片任务`;
+                            }
                         } else {
                             startPollingForTask(compactRecord.id);
                         }

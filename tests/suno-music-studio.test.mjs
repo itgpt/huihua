@@ -5,14 +5,14 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { startSunoPage } from './helpers/suno-harness.mjs';
+import { startPage } from './helpers/browser-harness.mjs';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 let page;
 
 before(async () => {
-  page = await startSunoPage(projectRoot);
+  page = await startPage(projectRoot);
 });
 
 after(async () => {
